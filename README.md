@@ -7,9 +7,12 @@ A customizable, plugin-based chatbot widget for React — like tawk.to but fully
 ## Features
 
 - **JSON-driven flows** — Build conversational UIs with step-based JSON configuration
+- **Async actions** — Run API calls on step entry with real-time loading/progress/error states
+- **Custom step components** — Render your own React widgets inside flow steps
+- **Dynamic routing** — Route to different steps based on API results, status codes, or custom logic
 - **Plugin architecture** — Extend with analytics, webhooks, persistence, or custom plugins
 - **Slash commands** — `/help`, `/back`, `/cancel`, `/restart` built-in
-- **Custom components** — Swap the header or input with your own React components
+- **Custom header/input** — Swap the header or input with your own React components
 - **Forms** — Text, select, radio, checkbox, file upload, with validation
 - **Theming** — Light/dark mode, CSS variables, glassmorphism design
 - **File uploads** — Drag & drop, preview, size/count limits
@@ -82,6 +85,8 @@ function App() {
 | `fileUpload` | `FileUploadConfig` | File upload settings |
 | `renderHeader` | `(ctx, defaultHeader) => ReactNode` | Custom header renderer |
 | `renderInput` | `(ctx, defaultInput) => ReactNode` | Custom input renderer |
+| `components` | `Record<string, ComponentType<StepComponentProps>>` | Custom React components for flow steps |
+| `actionHandlers` | `Record<string, (data, ctx) => Promise<FlowActionResult>>` | Async action handlers for flow steps |
 | `defaultOpen` | `boolean` | Start with chat open |
 | `showLauncher` | `boolean` | Show/hide launcher button |
 | `launcherIcon` | `ReactNode` | Custom launcher icon |
@@ -143,6 +148,8 @@ const flow: FlowConfig = {
 | `next` | `string` | Next step ID (auto-advance) |
 | `delay` | `number` | Typing delay in ms (default: 500) |
 | `condition` | `FlowCondition` | Conditional branching |
+| `component` | `string` | Key into `components` map — renders a custom React widget |
+| `asyncAction` | `FlowAsyncAction` | Async action to run when the step is entered |
 
 ### Conditional Branching
 
@@ -160,6 +167,172 @@ const flow: FlowConfig = {
 }
 ```
 
+## Async Actions
+
+Run API calls, validations, or any async work when a step is entered. The chat shows real-time progress messages and routes based on the result.
+
+```tsx
+import type { FlowConfig, FlowActionResult, ActionContext } from '@enjoys/react-chatbot-plugin';
+
+const flow: FlowConfig = {
+  startStep: 'collect_email',
+  steps: [
+    {
+      id: 'collect_email',
+      message: 'Enter your email to verify:',
+      form: {
+        id: 'email-form',
+        title: 'Email Verification',
+        fields: [{ name: 'email', type: 'email', label: 'Email', required: true }],
+        submitLabel: 'Verify',
+      },
+      next: 'verify',
+    },
+    {
+      id: 'verify',
+      message: 'Starting verification...',
+      asyncAction: {
+        handler: 'verify-email',        // key into actionHandlers
+        loadingMessage: '🔄 Verifying...', // shown while running
+        successMessage: '✅ Verified!',    // shown on success
+        errorMessage: '❌ Failed.',        // shown on error/throw
+        onSuccess: 'done',                // next step on success
+        onError: 'retry',                 // next step on error
+      },
+    },
+    { id: 'done', message: 'Your email is verified! 🎉' },
+    {
+      id: 'retry',
+      message: 'Verification failed. Try again?',
+      quickReplies: [
+        { label: 'Retry', value: 'retry', next: 'collect_email' },
+      ],
+    },
+  ],
+};
+
+<ChatBot
+  flow={flow}
+  actionHandlers={{
+    'verify-email': async (data, ctx) => {
+      ctx.updateMessage('📡 Contacting server...');   // update status message in real-time
+      await fetch('/api/verify', { method: 'POST', body: JSON.stringify(data) });
+      ctx.updateMessage('🔐 Validating...');
+      // return result — status determines routing
+      return { status: 'success', data: { verified: true } };
+    },
+  }}
+/>
+```
+
+### FlowAsyncAction Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `handler` | `string` | Key into `actionHandlers` prop |
+| `loadingMessage` | `string` | Message shown while running (default: "Processing...") |
+| `successMessage` | `string` | Message shown on success |
+| `errorMessage` | `string` | Message shown on error or exception |
+| `onSuccess` | `string` | Next step ID on success |
+| `onError` | `string` | Next step ID on error |
+| `routes` | `Record<string, string>` | Map of `result.status` → step ID for custom routing |
+
+### ActionContext
+
+| Method | Description |
+|--------|-------------|
+| `updateMessage(text)` | Update the loading/status message text in real-time |
+
+### FlowActionResult
+
+Returned by action handlers to control routing and data:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `status` | `string` | `'success'`, `'error'`, or any custom string for route matching |
+| `data` | `Record<string, unknown>` | Data to merge into collected data |
+| `message` | `string` | Override the success/error message |
+| `next` | `string` | Override all routing — go directly to this step |
+
+**Routing priority:** `result.next` → `routes[status]` → `onSuccess/onError` → `step.next`
+
+## Custom Step Components
+
+Render your own interactive React widgets inside flow steps. Components receive collected data and an `onComplete` callback to continue the flow.
+
+```tsx
+import type { StepComponentProps } from '@enjoys/react-chatbot-plugin';
+
+const PlanSelector: React.FC<StepComponentProps> = ({ data, onComplete }) => (
+  <div>
+    <p>Hi {data.name as string}! Choose a plan:</p>
+    <button onClick={() => onComplete({ status: 'success', data: { plan: 'basic' }, next: 'basic_info' })}>
+      Basic — $9/mo
+    </button>
+    <button onClick={() => onComplete({ status: 'success', data: { plan: 'pro' }, next: 'pro_info' })}>
+      Pro — $29/mo
+    </button>
+  </div>
+);
+
+const flow: FlowConfig = {
+  startStep: 'choose_plan',
+  steps: [
+    {
+      id: 'choose_plan',
+      message: 'Select your plan:',
+      component: 'PlanSelector',   // key into components map
+    },
+    { id: 'basic_info', message: 'Basic plan selected!' },
+    { id: 'pro_info', message: 'Pro plan selected!' },
+  ],
+};
+
+<ChatBot
+  flow={flow}
+  components={{ PlanSelector }}   // register your components here
+/>
+```
+
+### StepComponentProps
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `stepId` | `string` | The step ID that owns this component |
+| `data` | `Record<string, unknown>` | All collected flow/form data |
+| `onComplete` | `(result?: FlowActionResult) => void` | Call to complete the step and route to the next |
+
+## Dynamic Routing
+
+Use `asyncAction.routes` to map API result statuses to different steps:
+
+```tsx
+{
+  id: 'check_account',
+  message: 'Looking up your account...',
+  asyncAction: {
+    handler: 'check-account',
+    loadingMessage: '🔍 Searching...',
+    routes: {
+      admin: 'admin_panel',    // result.status === 'admin'
+      vip: 'vip_welcome',      // result.status === 'vip'
+      active: 'dashboard',     // result.status === 'active'
+      not_found: 'register',   // result.status === 'not_found'
+    },
+  },
+}
+```
+
+The action handler returns the status that determines which route to take:
+
+```ts
+'check-account': async (data, ctx) => {
+  const user = await api.lookup(data.username);
+  if (!user) return { status: 'not_found' };
+  return { status: user.role, data: { userId: user.id } };
+}
+```
+
 ## Slash Commands
 
 Users can type these commands in the chat input:
@@ -171,7 +344,7 @@ Users can type these commands in the chat input:
 | `/cancel` | Same as /back — cancel current step |
 | `/restart` | Restart the conversation from the beginning |
 
-## Custom Components
+## Custom Header & Input
 
 Use `renderHeader` and `renderInput` to replace the default header or input with your own components. Both receive a `ChatRenderContext` object and the default element:
 
