@@ -47,7 +47,6 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ config, onSubmit, prim
     for (const field of config.fields) {
       const val = values[field.name];
 
-      // Required check
       if (field.required) {
         if (
           val === '' ||
@@ -60,7 +59,6 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ config, onSubmit, prim
         }
       }
 
-      // Pattern check
       if (field.validation?.pattern && typeof val === 'string' && val) {
         try {
           const regex = new RegExp(field.validation.pattern);
@@ -68,7 +66,6 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ config, onSubmit, prim
             newErrors[field.name] = field.validation.message ?? 'Invalid format';
           }
         } catch {
-          // Invalid regex pattern in config — skip validation
         }
       }
     }
@@ -173,7 +170,6 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ config, onSubmit, prim
   );
 };
 
-// ─── Field Router ────────────────────────────────────────────────
 
 interface FormFieldProps {
   field: FormFieldConfig;

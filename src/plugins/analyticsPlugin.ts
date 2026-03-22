@@ -1,8 +1,5 @@
 import type { ChatPlugin } from '../types/plugin';
 
-/**
- * Analytics Plugin — tracks message counts, form completions, drop-offs
- */
 export function analyticsPlugin(options?: {
   onTrack?: (event: string, data?: unknown) => void;
 }): ChatPlugin {

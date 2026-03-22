@@ -1,10 +1,6 @@
 import type { ChatPlugin, PluginContext, ChatPluginEvent } from '../types/plugin';
 import type { ChatMessage } from '../types/message';
 
-/**
- * PluginManager — Manages plugin lifecycle (Open/Closed Principle)
- * Core is closed for modification, open for extension via plugins.
- */
 export class PluginManager {
   private plugins: ChatPlugin[] = [];
   private context: PluginContext | null = null;
@@ -41,8 +37,7 @@ export class PluginManager {
     for (const plugin of this.plugins) {
       try {
         await plugin.onInit?.(this.context);
-      } catch (err) {
-        console.error(`[Plugin:${plugin.name}] onInit error:`, err);
+      } catch {
       }
     }
   }
@@ -56,8 +51,7 @@ export class PluginManager {
         if (result && typeof result === 'object' && 'id' in result) {
           msg = result;
         }
-      } catch (err) {
-        console.error(`[Plugin:${plugin.name}] onMessage error:`, err);
+      } catch {
       }
     }
     this.dispatchEvent({ type: 'message', payload: msg, timestamp: Date.now() });
@@ -69,8 +63,7 @@ export class PluginManager {
     for (const plugin of this.plugins) {
       try {
         await plugin.onSubmit?.(data, this.context);
-      } catch (err) {
-        console.error(`[Plugin:${plugin.name}] onSubmit error:`, err);
+      } catch {
       }
     }
     this.dispatchEvent({ type: 'submit', payload: data, timestamp: Date.now() });
@@ -81,8 +74,7 @@ export class PluginManager {
     for (const plugin of this.plugins) {
       try {
         await plugin.onDestroy?.(this.context);
-      } catch (err) {
-        console.error(`[Plugin:${plugin.name}] onDestroy error:`, err);
+      } catch {
       }
     }
     this.eventHandlers.clear();
@@ -94,8 +86,7 @@ export class PluginManager {
     for (const plugin of this.plugins) {
       try {
         plugin.onEvent?.(event, this.context);
-      } catch (err) {
-        console.error(`[Plugin:${plugin.name}] onEvent error:`, err);
+      } catch {
       }
     }
   }

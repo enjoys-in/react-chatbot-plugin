@@ -52,7 +52,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, styles })
   );
 };
 
-// ─── Attachment Preview ──────────────────────────────────────────
 
 interface AttachmentPreviewProps {
   attachment: MessageAttachment;

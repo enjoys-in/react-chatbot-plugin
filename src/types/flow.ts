@@ -11,27 +11,17 @@ export interface FlowStep {
   next?: string;
   action?: string;
   condition?: FlowCondition;
-  /** Key into ChatBotProps.components — renders a custom React component in this step */
   component?: string;
-  /** Async action to run when this step is entered (API calls, verification, etc.) */
   asyncAction?: FlowAsyncAction;
 }
 
-/** Configuration for an async action that runs when a step is entered */
 export interface FlowAsyncAction {
-  /** Key into ChatBotProps.actionHandlers */
   handler: string;
-  /** Message shown while the action is running (default: "Processing...") */
   loadingMessage?: string;
-  /** Message shown on success */
   successMessage?: string;
-  /** Message shown on error */
   errorMessage?: string;
-  /** Next step ID on success */
   onSuccess?: string;
-  /** Next step ID on error */
   onError?: string;
-  /** Custom routes: maps result.status string to step IDs */
   routes?: Record<string, string>;
 }
 

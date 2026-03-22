@@ -1,7 +1,7 @@
 {
   "name": "@enjoys/react-chatbot-plugin",
   "version": "1.2.0",
-  "description": "A customizable, plugin-based chatbot widget for React — like tawk.to",
+  "description": "A customizable, plugin-based chatbot widget for React — like tawk.to but fully programmable. JSON-driven flows, async actions, custom components, theming, file uploads, and more.",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -20,6 +20,19 @@
     "dev": "vite --config vite.demo.config.ts",
     "build": "vite build",
     "build:demo": "vite build --config vite.demo.config.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/enjoys-in/react-chatbot-plugin.git"
+  },
+  "homepage": "https://github.com/enjoys-in/react-chatbot-plugin#readme",
+  "bugs": {
+    "url": "https://github.com/enjoys-in/react-chatbot-plugin/issues"
+  },
+  "author": "Enjoys <https://github.com/enjoys-in>",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/enjoys-in"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
@@ -40,5 +53,22 @@
     "react-dom": "^19.2.4"
   },
   "license": "MIT",
-  "keywords": ["chatbot", "react", "widget", "tawk", "chat", "plugin"]
+  "keywords": [
+    "chatbot",
+    "react",
+    "widget",
+    "tawk",
+    "chat",
+    "plugin",
+    "conversational-ui",
+    "chat-widget",
+    "react-chatbot",
+    "flow-builder",
+    "customer-support",
+    "live-chat",
+    "bot",
+    "form-builder",
+    "glassmorphism",
+    "typescript"
+  ]
 }

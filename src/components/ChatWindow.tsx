@@ -82,7 +82,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ styles, position, zIndex
     [sendMessage, dispatch, props.callbacks],
   );
 
-  // Build render context for custom components
   const renderCtx: ChatRenderContext = useMemo(
     () => ({
       currentStepId: state.currentStepId,
@@ -96,7 +95,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ styles, position, zIndex
     [state.currentStepId, state.isOpen, state.messages, state.collectedData, toggleChat, restartSession, sendMessage],
   );
 
-  // Default header element
   const defaultHeader = (
     <ChatHeader
       config={props.header ?? { title: 'Chat with us' }}
@@ -108,7 +106,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ styles, position, zIndex
     />
   );
 
-  // Default input element
   const defaultInput = (
     <ChatInput
       onSend={handleSendWithFiles}
@@ -122,7 +119,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ styles, position, zIndex
   );
 
   if (hidden) {
-    // Keep component mounted (hooks alive) but invisible
     return <div style={{ display: 'none' }} />;
   }
 

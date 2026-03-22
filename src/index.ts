@@ -1,7 +1,5 @@
-// ─── Main Component ──────────────────────────────────────────────
 export { ChatBot } from './components/ChatBot';
 
-// ─── UI Components ───────────────────────────────────────────────
 export { ChatHeader } from './components/ChatHeader';
 export { ChatInput } from './components/ChatInput';
 export { ChatWindow } from './components/ChatWindow';
@@ -16,7 +14,6 @@ export { Branding } from './components/Branding';
 export { EmojiPicker } from './components/EmojiPicker';
 export { FileUploadButton, FilePreviewList } from './components/FileUpload';
 
-// ─── Icons ───────────────────────────────────────────────────────
 export {
   SendIcon,
   ChatBubbleIcon,
@@ -30,28 +27,21 @@ export {
   RestartIcon,
 } from './components/icons';
 
-// ─── Forms ───────────────────────────────────────────────────────
 export { DynamicForm, TextField, SelectField, RadioField, CheckboxField, FileUploadField } from './components/forms';
 
-// ─── Core Engine ─────────────────────────────────────────────────
 export { FlowEngine } from './engine/FlowEngine';
 export { PluginManager } from './core/PluginManager';
 
-// ─── Plugins (built-in) ─────────────────────────────────────────
 export { analyticsPlugin } from './plugins/analyticsPlugin';
 export { webhookPlugin } from './plugins/webhookPlugin';
 export { persistencePlugin } from './plugins/persistencePlugin';
 
-// ─── Hooks ───────────────────────────────────────────────────────
 export { useChat } from './hooks/useChat';
 
-// ─── Context ─────────────────────────────────────────────────────
 export { ChatContext, useChatContext } from './context/ChatContext';
 
-// ─── Theme Utilities ─────────────────────────────────────────────
 export { resolveTheme, buildStyles, buildCSSVariables } from './styles/theme';
 
-// ─── Types ───────────────────────────────────────────────────────
 export type {
   ChatBotProps,
   ChatCallbacks,
