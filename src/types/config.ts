@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type { ChatTheme, ChatStyle } from './theme';
 import type { ChatMessage } from './message';
 import type { FlowConfig } from './flow';
@@ -112,4 +112,40 @@ export interface ChatBotProps {
   renderHeader?: (ctx: ChatRenderContext, defaultHeader: ReactNode) => ReactNode;
   /** Custom input component — receives ChatRenderContext as props */
   renderInput?: (ctx: ChatRenderContext, defaultInput: ReactNode) => ReactNode;
+  /** Map of custom components that can be rendered in flow steps (key = step.component) */
+  components?: Record<string, ComponentType<StepComponentProps>>;
+  /** Map of async action handlers (key = step.asyncAction.handler) */
+  actionHandlers?: Record<string, (data: Record<string, unknown>, ctx: ActionContext) => Promise<FlowActionResult>>;
+}
+
+// ─── Custom Step Component Props ─────────────────────────────────
+
+/** Props passed to custom components rendered in flow steps */
+export interface StepComponentProps {
+  /** The step ID that owns this component */
+  stepId: string;
+  /** All collected flow/form data */
+  data: Record<string, unknown>;
+  /** Call when the component interaction is complete — routes to next step */
+  onComplete: (result?: FlowActionResult) => void;
+}
+
+// ─── Async Action Types ──────────────────────────────────────────
+
+/** Result returned by an async action handler */
+export interface FlowActionResult {
+  /** Status key — 'success', 'error', or any custom string for route matching */
+  status: string;
+  /** Additional data to merge into collected data */
+  data?: Record<string, unknown>;
+  /** Optional message to display (overrides successMessage/errorMessage) */
+  message?: string;
+  /** Optional explicit next step ID (overrides all routing) */
+  next?: string;
+}
+
+/** Context object passed to async action handlers */
+export interface ActionContext {
+  /** Update the loading/status message text in real-time */
+  updateMessage: (text: string) => void;
 }

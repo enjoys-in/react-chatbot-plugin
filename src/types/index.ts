@@ -3,7 +3,7 @@
 
 export type { ChatMessage, MessageSender, MessageAttachment, FlowQuickReply } from './message';
 export type { FormConfig, FormFieldConfig, FormFieldType, FormFieldOption, FormFieldValidation } from './form';
-export type { FlowConfig, FlowStep, FlowCondition } from './flow';
+export type { FlowConfig, FlowStep, FlowCondition, FlowAsyncAction } from './flow';
 export type { ChatTheme, ChatStyle } from './theme';
 export type { ChatPlugin, PluginContext, ChatPluginEvent } from './plugin';
 export type {
@@ -13,5 +13,8 @@ export type {
   BrandingConfig,
   FileUploadConfig,
   ChatRenderContext,
+  StepComponentProps,
+  FlowActionResult,
+  ActionContext,
 } from './config';
 

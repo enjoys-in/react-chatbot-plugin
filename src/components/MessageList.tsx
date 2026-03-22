@@ -1,5 +1,7 @@
 import React, { useRef, useEffect } from 'react';
+import type { ComponentType } from 'react';
 import type { ChatMessage } from '../types';
+import type { StepComponentProps, FlowActionResult } from '../types/config';
 import type { ChatStyles } from '../styles/theme';
 import { MessageBubble } from './MessageBubble';
 import { QuickReplies } from './QuickReplies';
@@ -13,6 +15,14 @@ interface MessageListProps {
   primaryColor: string;
   onQuickReply: (value: string, label: string) => void;
   onFormSubmit: (formId: string, data: Record<string, unknown>) => void;
+  /** Map of custom step components */
+  components?: Record<string, ComponentType<StepComponentProps>>;
+  /** Called when a custom component completes */
+  onComponentComplete?: (result?: FlowActionResult) => void;
+  /** Collected flow data — passed to custom components */
+  collectedData?: Record<string, unknown>;
+  /** Current step ID */
+  currentStepId?: string | null;
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -22,6 +32,10 @@ export const MessageList: React.FC<MessageListProps> = ({
   primaryColor,
   onQuickReply,
   onFormSubmit,
+  components,
+  onComponentComplete,
+  collectedData,
+  currentStepId,
 }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -48,6 +62,15 @@ export const MessageList: React.FC<MessageListProps> = ({
                 onSubmit={(data) => onFormSubmit(msg.form!.id, data)}
                 primaryColor={primaryColor}
               />
+            </div>
+          )}
+          {msg.component && components?.[msg.component] && (
+            <div style={{ alignSelf: 'flex-start', width: '92%', animation: 'cb-slide-up 0.35s ease-out' }}>
+              {React.createElement(components[msg.component], {
+                stepId: currentStepId ?? '',
+                data: collectedData ?? {},
+                onComplete: (result?: FlowActionResult) => onComponentComplete?.(result),
+              })}
             </div>
           )}
         </React.Fragment>

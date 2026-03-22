@@ -22,7 +22,8 @@ export type ChatAction =
   | { type: 'SET_DATA'; payload: Record<string, unknown> }
   | { type: 'SET_LOGGED_IN'; payload: boolean }
   | { type: 'CLEAR_QUICK_REPLIES' }
-  | { type: 'RESET_CHAT' };
+  | { type: 'RESET_CHAT' }
+  | { type: 'UPDATE_MESSAGE'; payload: { id: string; updates: Partial<ChatMessage> } };
 
 export function chatReducer(state: ChatState, action: ChatAction): ChatState {
   switch (action.type) {
@@ -62,6 +63,13 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
         isTyping: false,
         currentStepId: null,
         collectedData: {},
+      };
+    case 'UPDATE_MESSAGE':
+      return {
+        ...state,
+        messages: state.messages.map((m) =>
+          m.id === action.payload.id ? { ...m, ...action.payload.updates } : m,
+        ),
       };
     default:
       return state;

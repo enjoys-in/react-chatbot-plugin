@@ -128,6 +128,16 @@ export class FlowEngine {
       });
     }
 
+    // If step has a custom component, create a component message
+    if (step.component) {
+      messages.push({
+        id: this.uid(),
+        sender: 'bot',
+        timestamp: Date.now(),
+        component: step.component,
+      });
+    }
+
     return messages;
   }
 

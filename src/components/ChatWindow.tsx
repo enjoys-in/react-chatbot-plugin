@@ -34,6 +34,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ styles, position, zIndex
     toggleChat,
     dismissWelcome,
     restartSession,
+    handleComponentComplete,
   } = useChat();
 
   const posStyle: CSSProperties =
@@ -159,6 +160,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ styles, position, zIndex
             primaryColor={theme.primaryColor}
             onQuickReply={handleQuickReply}
             onFormSubmit={handleFormSubmit}
+            components={props.components}
+            onComponentComplete={handleComponentComplete}
+            collectedData={state.collectedData}
+            currentStepId={state.currentStepId}
           />
           <div style={styles.inputArea}>
             {props.renderInput ? props.renderInput(renderCtx, defaultInput) : defaultInput}

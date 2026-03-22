@@ -3,6 +3,7 @@ import { useChatContext } from '../context/ChatContext';
 import { FlowEngine } from '../engine/FlowEngine';
 import { uid, delay } from '../utils/helpers';
 import type { ChatMessage } from '../types';
+import type { FlowActionResult, ActionContext } from '../types/config';
 
 /** Slash commands the user can type */
 const COMMANDS: Record<string, string> = {
@@ -81,12 +82,92 @@ export function useChat() {
 
     messages.forEach((m) => propsRef.current.callbacks?.onMessageReceive?.(m));
 
+    // Handle async action (API calls, verification, etc.)
+    if (step.asyncAction) {
+      const handler = propsRef.current.actionHandlers?.[step.asyncAction.handler];
+      if (handler) {
+        const statusMsgId = uid();
+        // Show loading/status message
+        dispatch({
+          type: 'ADD_MESSAGE',
+          payload: {
+            id: statusMsgId,
+            sender: 'bot',
+            text: step.asyncAction.loadingMessage ?? 'Processing...',
+            timestamp: Date.now(),
+          },
+        });
+
+        const ctx: ActionContext = {
+          updateMessage: (text: string) => {
+            dispatch({ type: 'UPDATE_MESSAGE', payload: { id: statusMsgId, updates: { text } } });
+          },
+        };
+
+        try {
+          const result = await handler(engine.getData(), ctx);
+
+          // Merge result data into collected data
+          if (result.data) {
+            engine.mergeData(result.data);
+            dispatch({ type: 'SET_DATA', payload: result.data });
+          }
+
+          // Update status message with final text
+          const finalMsg =
+            result.message ??
+            (result.status === 'success'
+              ? (step.asyncAction.successMessage ?? 'Done!')
+              : (step.asyncAction.errorMessage ?? 'Something went wrong.'));
+          dispatch({ type: 'UPDATE_MESSAGE', payload: { id: statusMsgId, updates: { text: finalMsg } } });
+
+          // Route based on result
+          const nextStepId = resolveAsyncRoute(step, result);
+          if (nextStepId) {
+            await delay(600);
+            processFlowStepRef.current(nextStepId);
+          }
+        } catch {
+          dispatch({
+            type: 'UPDATE_MESSAGE',
+            payload: { id: statusMsgId, updates: { text: step.asyncAction.errorMessage ?? '❌ Something went wrong.' } },
+          });
+          if (step.asyncAction.onError) {
+            await delay(600);
+            processFlowStepRef.current(step.asyncAction.onError);
+          }
+        }
+        return; // async action handles routing — don't auto-advance
+      }
+    }
+
+    // If step has a custom component, wait for onComplete — don't auto-advance
+    if (step.component && propsRef.current.components?.[step.component]) {
+      return;
+    }
+
     // Auto-advance if no user input required
     if (!step.quickReplies && !step.form && step.next) {
       await delay(300);
       processFlowStepRef.current(step.next);
     }
   };
+
+  /** Determine next step from async action result */
+  function resolveAsyncRoute(
+    step: { asyncAction?: { onSuccess?: string; onError?: string; routes?: Record<string, string> }; next?: string },
+    result: FlowActionResult,
+  ): string | undefined {
+    // 1. Explicit next from result
+    if (result.next) return result.next;
+    // 2. Routes map
+    if (step.asyncAction?.routes?.[result.status]) return step.asyncAction.routes[result.status];
+    // 3. Success/error defaults
+    if (result.status === 'success' && step.asyncAction?.onSuccess) return step.asyncAction.onSuccess;
+    if (result.status === 'error' && step.asyncAction?.onError) return step.asyncAction.onError;
+    // 4. Fallback
+    return step.next;
+  }
 
   const processFlowStep = useCallback(
     (stepId: string) => processFlowStepRef.current(stepId),
@@ -153,6 +234,42 @@ export function useChat() {
     }
   };
 
+  /** Handle completion from a custom component rendered in a step */
+  const handleComponentComplete = useCallback(
+    (result?: FlowActionResult) => {
+      const engine = flowRef.current;
+      const currentStepId = stateRef.current.currentStepId;
+      if (!engine || !currentStepId) return;
+
+      const step = engine.getStep(currentStepId);
+      if (!step) return;
+
+      // Merge result data
+      if (result?.data) {
+        engine.mergeData(result.data);
+        dispatch({ type: 'SET_DATA', payload: result.data });
+      }
+
+      // Show optional message
+      if (result?.message) {
+        dispatch({
+          type: 'ADD_MESSAGE',
+          payload: { id: uid(), sender: 'bot', text: result.message, timestamp: Date.now() },
+        });
+      }
+
+      // Determine next step
+      const nextStepId = result?.next ?? step.next;
+      if (nextStepId) {
+        processFlowStep(nextStepId);
+      } else {
+        propsRef.current.callbacks?.onFlowEnd?.(engine.getData());
+        dispatch({ type: 'SET_STEP', payload: null });
+      }
+    },
+    [dispatch, processFlowStep],
+  );
+
   const sendMessage = useCallback(
     (text: string) => {
       // Check for slash commands first
@@ -172,6 +289,11 @@ export function useChat() {
       if (flowRef.current && currentStepId) {
         const step = flowRef.current.getStep(currentStepId);
         if (step) {
+          // Block text input during async action or component steps
+          if (step.asyncAction || step.component) {
+            addBotMessage("Please wait, I'm still processing. You can type /back to go back.");
+            return;
+          }
           // If this step has quick replies, try to match user text
           if (flowRef.current.stepExpectsQuickReply(step)) {
             const matched = flowRef.current.matchQuickReply(step, text);
@@ -344,5 +466,6 @@ export function useChat() {
     processFlowStep,
     goBack,
     restartSession,
+    handleComponentComplete,
   };
 }
