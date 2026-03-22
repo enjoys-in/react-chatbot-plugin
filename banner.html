@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Banner — @enjoys/react-chatbot-plugin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Raleway', sans-serif;
+      background: #08060f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .banner {
+      width: 1280px;
+      height: 640px;
+      background: linear-gradient(160deg, #08060f 0%, #110d21 25%, #1a1040 50%, #2d1b69 75%, #6C5CE7 100%);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      padding: 0 72px;
+    }
+
+    .banner::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(108, 92, 231, 0.25) 0%, rgba(162, 155, 254, 0.08) 40%, transparent 70%);
+      top: -200px;
+      right: -50px;
+      border-radius: 50%;
+    }
+
+    .banner::after {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(253, 121, 168, 0.12) 0%, transparent 60%);
+      bottom: -150px;
+      left: 50px;
+      border-radius: 50%;
+    }
+
+    .orb-1 {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(0, 184, 148, 0.1) 0%, transparent 60%);
+      top: 50%;
+      left: 40%;
+      border-radius: 50%;
+    }
+
+    .grid-bg {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(108, 92, 231, 0.12) 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+    }
+
+    .line-decor {
+      position: absolute;
+      top: 0;
+      right: 380px;
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(to bottom, transparent, rgba(108, 92, 231, 0.2) 30%, rgba(108, 92, 231, 0.2) 70%, transparent);
+      z-index: 1;
+    }
+
+    .line-decor-2 {
+      position: absolute;
+      bottom: 120px;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(108, 92, 231, 0.12) 20%, rgba(108, 92, 231, 0.12) 80%, transparent);
+      z-index: 1;
+    }
+
+    .content {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      padding-right: 40px;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(108, 92, 231, 0.15);
+      border: 1px solid rgba(108, 92, 231, 0.3);
+      border-radius: 100px;
+      padding: 7px 18px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #A29BFE;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .badge .dot {
+      width: 7px;
+      height: 7px;
+      background: #00b894;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(0, 184, 148, 0.6);
+    }
+
+    .badge-new {
+      background: linear-gradient(135deg, rgba(253, 121, 168, 0.2), rgba(108, 92, 231, 0.2));
+      border: 1px solid rgba(253, 121, 168, 0.35);
+      color: #fd79a8;
+    }
+
+    .title {
+      font-size: 54px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.05;
+      margin-bottom: 18px;
+      letter-spacing: -2px;
+    }
+
+    .title .gradient {
+      background: linear-gradient(135deg, #A29BFE 0%, #6C5CE7 40%, #fd79a8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .title .thin {
+      font-weight: 300;
+      letter-spacing: -1px;
+    }
+
+    .subtitle {
+      font-size: 17px;
+      color: rgba(255, 255, 255, 0.5);
+      line-height: 1.6;
+      max-width: 460px;
+      margin-bottom: 28px;
+      font-weight: 400;
+    }
+
+    .cta-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .cta-install {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .cta-install .prompt { color: #00b894; font-weight: 600; }
+    .cta-install .pkg { color: #A29BFE; }
+
+    .cta-btn {
+      background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+      border: none;
+      border-radius: 12px;
+      padding: 13px 28px;
+      font-family: 'Raleway', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.3px;
+      box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
+    }
+
+    .stats {
+      display: flex;
+      gap: 32px;
+    }
+
+    .stat-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+
+    .stat-value .accent { color: #A29BFE; }
+
+    .stat-label {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.35);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 2px;
+    }
+
+    .chat-mockup {
+      position: relative;
+      z-index: 2;
+      width: 320px;
+      flex-shrink: 0;
+    }
+
+    .chat-window {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow:
+        0 24px 80px rgba(0, 0, 0, 0.5),
+        0 0 60px rgba(108, 92, 231, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .chat-header {
+      background: linear-gradient(135deg, rgba(108, 92, 231, 0.9), rgba(162, 155, 254, 0.8));
+      backdrop-filter: blur(10px);
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chat-avatar {
+      width: 34px;
+      height: 34px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .chat-header-text h3 {
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .chat-header-text p {
+      color: rgba(255, 255, 255, 0.65);
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .online-dot {
+      width: 6px;
+      height: 6px;
+      background: #00b894;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .chat-dots {
+      margin-left: auto;
+      display: flex;
+      gap: 6px;
+    }
+
+    .chat-dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .chat-dots span:nth-child(1) { background: #ff6b6b; }
+    .chat-dots span:nth-child(2) { background: #feca57; }
+    .chat-dots span:nth-child(3) { background: #00b894; }
+
+    .chat-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 180px;
+    }
+
+    .msg {
+      max-width: 82%;
+      padding: 9px 13px;
+      border-radius: 14px;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .msg.bot {
+      background: rgba(108, 92, 231, 0.15);
+      border: 1px solid rgba(108, 92, 231, 0.12);
+      color: rgba(255, 255, 255, 0.8);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+
+    .msg.user {
+      background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+      font-weight: 500;
+    }
+
+    .quick-replies {
+      display: flex;
+      gap: 5px;
+      align-self: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .qr {
+      background: rgba(108, 92, 231, 0.12);
+      border: 1px solid rgba(108, 92, 231, 0.25);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 11px;
+      color: #A29BFE;
+      font-weight: 600;
+    }
+
+    .chat-input {
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chat-input-field {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.25);
+    }
+
+    .send-btn {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 12px rgba(108, 92, 231, 0.4);
+    }
+
+    .send-btn svg {
+      width: 14px;
+      height: 14px;
+      fill: #fff;
+    }
+
+    .float-pill {
+      position: absolute;
+      z-index: 3;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(10px);
+      letter-spacing: 0.3px;
+    }
+
+    .float-pill.p1 { top: 20px; right: -30px; color: #A29BFE; border-color: rgba(108, 92, 231, 0.2); }
+    .float-pill.p2 { bottom: 80px; right: -20px; color: #00b894; border-color: rgba(0, 184, 148, 0.2); }
+    .float-pill.p3 { top: 60px; left: -40px; color: #fd79a8; border-color: rgba(253, 121, 168, 0.2); }
+
+    .bottom-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 72px;
+      background: linear-gradient(to top, rgba(8, 6, 15, 0.95), transparent);
+    }
+
+    .made-by {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.35);
+      letter-spacing: 0.5px;
+    }
+
+    .made-by span {
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 800;
+    }
+
+    .bottom-badges {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .b-badge {
+      border-radius: 8px;
+      padding: 5px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .b-npm { background: rgba(203, 56, 55, 0.12); border: 1px solid rgba(203, 56, 55, 0.25); color: #e74c3c; }
+    .b-version { background: rgba(0, 184, 148, 0.12); border: 1px solid rgba(0, 184, 148, 0.25); color: #00b894; }
+    .b-ts { background: rgba(49, 120, 198, 0.12); border: 1px solid rgba(49, 120, 198, 0.25); color: #3178c6; }
+    .b-react { background: rgba(97, 218, 251, 0.1); border: 1px solid rgba(97, 218, 251, 0.2); color: #61dafb; }
+    .b-mit { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.5); }
+  </style>
+</head>
+<body>
+  <div class="banner" id="banner">
+    <div class="grid-bg"></div>
+    <div class="orb-1"></div>
+    <div class="line-decor"></div>
+    <div class="line-decor-2"></div>
+
+    <div class="content">
+      <div class="top-bar">
+        <div class="badge">
+          <span class="dot"></span>
+          Open Source
+        </div>
+        <div class="badge badge-new">
+          🚀 v1.3.0 — Just Launched
+        </div>
+      </div>
+
+      <h1 class="title">
+        <span class="thin">Build</span> <span class="gradient">Conversational</span><br/>
+        <span class="gradient">Chatbots</span> <span class="thin">in React</span>
+      </h1>
+
+      <p class="subtitle">
+        Drop-in chatbot widget with JSON-driven flows, 15+ form fields,
+        async actions, plugins, custom components & glassmorphism UI.
+      </p>
+
+      <div class="cta-row">
+        <div class="cta-install">
+          <span class="prompt">$</span>
+          <span>npm i</span>
+          <span class="pkg">@enjoys/react-chatbot-plugin</span>
+        </div>
+        <div class="cta-btn">Get Started →</div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value"><span class="accent">~50</span>KB</div>
+          <div class="stat-label">Bundle Size</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value"><span class="accent">15+</span></div>
+          <div class="stat-label">Form Fields</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value"><span class="accent">14</span></div>
+          <div class="stat-label">Live Demos</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value"><span class="accent">0</span></div>
+          <div class="stat-label">Dependencies</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-mockup">
+      <div class="float-pill p1">⚡ Async Actions</div>
+      <div class="float-pill p2">🔌 Plugins</div>
+      <div class="float-pill p3">🎨 Theming</div>
+
+      <div class="chat-window">
+        <div class="chat-header">
+          <div class="chat-avatar">🤖</div>
+          <div class="chat-header-text">
+            <h3>Acme Support</h3>
+            <p><span class="online-dot"></span> Online · Instant replies</p>
+          </div>
+          <div class="chat-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+        <div class="chat-body">
+          <div class="msg bot">Hey! 👋 Welcome to Acme. How can I help?</div>
+          <div class="quick-replies">
+            <span class="qr">💰 Pricing</span>
+            <span class="qr">🛠 Support</span>
+            <span class="qr">📖 Docs</span>
+          </div>
+          <div class="msg user">Show me a demo!</div>
+          <div class="msg bot">Sure! Check out our 14 interactive demos 🎮</div>
+        </div>
+        <div class="chat-input">
+          <div class="chat-input-field">Type a message…</div>
+          <div class="send-btn">
+            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="made-by">Made with ❤️ by <span>Enjoys</span></div>
+      <div class="bottom-badges">
+        <span class="b-badge b-npm">npm</span>
+        <span class="b-badge b-version">v1.3.0</span>
+        <span class="b-badge b-ts">TypeScript</span>
+        <span class="b-badge b-react">React 19</span>
+        <span class="b-badge b-mit">MIT</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Auto-screenshot via canvas
+    async function captureAndDownload() {
+      const banner = document.getElementById('banner');
+      const canvas = document.createElement('canvas');
+      canvas.width = 1280;
+      canvas.height = 640;
+      const ctx = canvas.getContext('2d');
+
+      const svgData = new XMLSerializer().serializeToString(
+        await htmlToSvg(banner)
+      );
+
+      // Fallback: use html2canvas-style approach
+      // For best results, right-click the banner → Inspect → Capture node screenshot
+      alert('Banner loaded! Right-click the banner → Inspect Element → right-click the .banner node → "Capture node screenshot" for pixel-perfect 1280x640 PNG.');
+    }
+
+    // Simple auto-download via window.print for quick capture
+    window.addEventListener('load', () => {
+      document.title = 'react-chatbot-plugin-banner';
+    });
+  </script>
+</body>
+</html>

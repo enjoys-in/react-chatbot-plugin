@@ -1,3 +1,8 @@
+ 
+
+<p align="center">
+  <img src="https://opengraph.githubassets.com/1/enjoys-in/react-chatbot-plugin" alt="Npm Version" />
+</p>
 <p align="center">
   <img src="https://img.shields.io/npm/v/@enjoys/react-chatbot-plugin?color=6C5CE7&style=for-the-badge" alt="npm version" />
   <img src="https://img.shields.io/npm/dm/@enjoys/react-chatbot-plugin?color=A29BFE&style=for-the-badge" alt="npm downloads" />
@@ -20,7 +25,7 @@
 </p>
 
 ---
-[image](https://opengraph.githubassets.com/1/enjoys-in/react-chatbot-plugin)
+
 
 ## Features
 
