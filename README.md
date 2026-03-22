@@ -20,6 +20,7 @@
 </p>
 
 ---
+[image](https://opengraph.githubassets.com/1/enjoys-in/react-chatbot-plugin)
 
 ## Features
 
