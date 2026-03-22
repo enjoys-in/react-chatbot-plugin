@@ -1,8 +1,13 @@
- 
+<p align="center">
+  <img src="./image.png" alt="React ChatBot Plugin — Customizable Chat Widget for React" width="100%" />
+</p>
 
 <p align="center">
-  <img src="https://opengraph.githubassets.com/1/enjoys-in/react-chatbot-plugin" alt="Npm Version" />
+  <a href="https://github.com/enjoys-in/react-chatbot-plugin">
+    <img src="https://opengraph.githubassets.com/1/enjoys-in/react-chatbot-plugin" alt="GitHub Social Preview" width="100%" />
+  </a>
 </p>
+
 <p align="center">
   <img src="https://img.shields.io/npm/v/@enjoys/react-chatbot-plugin?color=6C5CE7&style=for-the-badge" alt="npm version" />
   <img src="https://img.shields.io/npm/dm/@enjoys/react-chatbot-plugin?color=A29BFE&style=for-the-badge" alt="npm downloads" />
@@ -14,12 +19,14 @@
 <h1 align="center">@enjoys/react-chatbot-plugin</h1>
 
 <p align="center">
-  A customizable, plugin-based chatbot widget for React — like tawk.to but fully programmable.
+  <strong>A fully customizable, plugin-based chatbot widget for React.</strong><br/>
+  Like tawk.to — but open-source and fully programmable.
 </p>
 
 <p align="center">
-  <a href="https://github.com/enjoys-in/react-chatbot-plugin">GitHub</a> ·
-  <a href="https://www.npmjs.com/package/@enjoys/react-chatbot-plugin">npm</a> ·
+  <a href="https://www.npmjs.com/package/@enjoys/react-chatbot-plugin"><b>npm</b></a> ·
+  <a href="#quick-start"><b>Quick Start</b></a> ·
+  <a href="#documentation"><b>Docs</b></a> ·
   <a href="https://github.com/enjoys-in/react-chatbot-plugin/issues">Report Bug</a> ·
   <a href="https://github.com/enjoys-in/react-chatbot-plugin/issues">Request Feature</a>
 </p>
