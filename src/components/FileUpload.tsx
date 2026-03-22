@@ -25,6 +25,7 @@ export const FileUploadButton: React.FC<FileUploadButtonProps> = ({
 
     const fileArr = Array.from(files);
 
+    // Validate file size
     if (config.maxSize) {
       const oversized = fileArr.filter((f) => f.size > config.maxSize!);
       if (oversized.length > 0) {
@@ -33,6 +34,7 @@ export const FileUploadButton: React.FC<FileUploadButtonProps> = ({
       }
     }
 
+    // Validate max count
     const maxFiles = config.maxFiles ?? 5;
     if (selectedFiles.length + fileArr.length > maxFiles) {
       alert(`Maximum ${maxFiles} files allowed`);
@@ -40,6 +42,7 @@ export const FileUploadButton: React.FC<FileUploadButtonProps> = ({
     }
 
     onFiles(fileArr);
+    // Reset input to allow re-selecting same file
     if (inputRef.current) inputRef.current.value = '';
   };
 
@@ -78,6 +81,7 @@ export const FileUploadButton: React.FC<FileUploadButtonProps> = ({
   );
 };
 
+// ─── File Preview List ───────────────────────────────────────────
 
 interface FilePreviewListProps {
   files: File[];
@@ -113,6 +117,7 @@ export const FilePreviewList: React.FC<FilePreviewListProps> = ({
   );
 };
 
+// ─── Single File Chip ────────────────────────────────────────────
 
 interface FilePreviewChipProps {
   file: File;
@@ -170,6 +175,7 @@ const FilePreviewChip: React.FC<FilePreviewChipProps> = ({ file, onRemove, prima
   );
 };
 
+// ─── Utils ───────────────────────────────────────────────────────
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes}B`;

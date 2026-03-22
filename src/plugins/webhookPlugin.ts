@@ -1,5 +1,8 @@
 import type { ChatPlugin } from '../types/plugin';
 
+/**
+ * Webhook Plugin — sends messages/submissions to an external endpoint
+ */
 export function webhookPlugin(options: {
   url: string;
   headers?: Record<string, string>;
@@ -17,7 +20,8 @@ export function webhookPlugin(options: {
         },
         body: JSON.stringify({ type, payload, timestamp: Date.now() }),
       });
-    } catch {
+    } catch (err) {
+      console.error(`[webhook] Failed to send ${type}:`, err);
     }
   };
 

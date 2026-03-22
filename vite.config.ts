@@ -27,6 +27,18 @@ export default defineConfig({
           'react-dom': 'ReactDOM',
           'react/jsx-runtime': 'jsxRuntime',
         },
+        comments: {
+          jsdoc: false,
+          annotation: false,
+          legal: false,
+        },
+        minify: {
+          compress: {
+            dropConsole: true,
+            dropDebugger: true,
+          },
+          mangle: true,
+        },
       },
     },
     sourcemap: true,

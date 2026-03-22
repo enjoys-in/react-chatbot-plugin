@@ -50,6 +50,7 @@ const GLOBAL_STYLES = `
 }
 `;
 
+// Inject styles globally once per document, not per component instance
 let globalStyleInjected = false;
 function ensureGlobalStyles() {
   if (globalStyleInjected) return;
@@ -74,13 +75,16 @@ export const ChatBot: React.FC<ChatBotProps> = (props) => {
   const showLauncher = props.showLauncher !== false;
   const pluginManagerRef = useRef<PluginManager | null>(null);
 
+  // Use refs so plugin context always reads fresh state
   const stateRef = useRef(state);
   stateRef.current = state;
 
+  // Inject global styles once
   useEffect(() => {
     ensureGlobalStyles();
   }, []);
 
+  // Initialize plugins
   useEffect(() => {
     if (props.plugins && props.plugins.length > 0) {
       const pm = new PluginManager();

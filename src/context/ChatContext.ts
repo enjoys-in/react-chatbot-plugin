@@ -46,6 +46,7 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
     case 'SET_LOGGED_IN':
       return { ...state, isLoggedIn: action.payload };
     case 'CLEAR_QUICK_REPLIES': {
+      // Only clear quick replies from the last message that has them
       let lastIdx = -1;
       for (let i = state.messages.length - 1; i >= 0; i--) {
         if (state.messages[i].quickReplies) { lastIdx = i; break; }

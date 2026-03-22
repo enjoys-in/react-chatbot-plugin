@@ -15,9 +15,13 @@ interface MessageListProps {
   primaryColor: string;
   onQuickReply: (value: string, label: string) => void;
   onFormSubmit: (formId: string, data: Record<string, unknown>) => void;
+  /** Map of custom step components */
   components?: Record<string, ComponentType<StepComponentProps>>;
+  /** Called when a custom component completes */
   onComponentComplete?: (result?: FlowActionResult) => void;
+  /** Collected flow data — passed to custom components */
   collectedData?: Record<string, unknown>;
+  /** Current step ID */
   currentStepId?: string | null;
 }
 

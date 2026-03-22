@@ -1,6 +1,7 @@
 import type { ChatTheme, ChatStyle } from '../types';
 import type { CSSProperties } from 'react';
 
+// ─── Light Mode Defaults ─────────────────────────────────────────
 
 const lightDefaults: Required<ChatTheme> = {
   primaryColor: '#6C5CE7',
@@ -18,6 +19,7 @@ const lightDefaults: Required<ChatTheme> = {
   mode: 'light',
 };
 
+// ─── Dark Mode Overrides ─────────────────────────────────────────
 
 const darkOverrides: Partial<ChatTheme> = {
   headerBg: 'linear-gradient(135deg, #2D1B69 0%, #4A3298 100%)',
@@ -36,6 +38,7 @@ export function resolveTheme(theme?: ChatTheme): Required<ChatTheme> {
   return base;
 }
 
+// ─── CSS Custom Properties ───────────────────────────────────────
 
 export function buildCSSVariables(theme: Required<ChatTheme>): Record<string, string> {
   return {
@@ -60,6 +63,7 @@ export function buildCSSVariables(theme: Required<ChatTheme>): Record<string, st
   };
 }
 
+// ─── Inline Styles Builder ───────────────────────────────────────
 
 export function buildStyles(
   theme: Required<ChatTheme>,

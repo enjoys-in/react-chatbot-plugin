@@ -5,6 +5,7 @@ import { uid, delay } from '../utils/helpers';
 import type { ChatMessage } from '../types';
 import type { FlowActionResult, ActionContext } from '../types/config';
 
+/** Slash commands the user can type */
 const COMMANDS: Record<string, string> = {
   '/help': 'Show available commands',
   '/cancel': 'Cancel current step and go back',
@@ -17,11 +18,13 @@ export function useChat() {
   const flowRef = useRef<FlowEngine | null>(null);
   const flowStartedRef = useRef(false);
 
+  // Keep fresh references for use inside async callbacks (avoids stale closures)
   const stateRef = useRef(state);
   stateRef.current = state;
   const propsRef = useRef(props);
   propsRef.current = props;
 
+  // Initialize flow engine
   useEffect(() => {
     if (props.flow) {
       flowRef.current = new FlowEngine(props.flow);
@@ -57,6 +60,7 @@ export function useChat() {
     [dispatch],
   );
 
+  // Use a ref so processFlowStep can call itself recursively without stale closure
   const processFlowStepRef = useRef<(stepId: string) => Promise<void>>(async () => {});
   processFlowStepRef.current = async (stepId: string) => {
     const engine = flowRef.current;
@@ -65,6 +69,7 @@ export function useChat() {
     const step = engine.getStep(stepId);
     if (!step) return;
 
+    // Track step history for /back navigation
     engine.pushHistory(stepId);
 
     dispatch({ type: 'SET_STEP', payload: stepId });
@@ -77,10 +82,12 @@ export function useChat() {
 
     messages.forEach((m) => propsRef.current.callbacks?.onMessageReceive?.(m));
 
+    // Handle async action (API calls, verification, etc.)
     if (step.asyncAction) {
       const handler = propsRef.current.actionHandlers?.[step.asyncAction.handler];
       if (handler) {
         const statusMsgId = uid();
+        // Show loading/status message
         dispatch({
           type: 'ADD_MESSAGE',
           payload: {
@@ -100,11 +107,13 @@ export function useChat() {
         try {
           const result = await handler(engine.getData(), ctx);
 
+          // Merge result data into collected data
           if (result.data) {
             engine.mergeData(result.data);
             dispatch({ type: 'SET_DATA', payload: result.data });
           }
 
+          // Update status message with final text
           const finalMsg =
             result.message ??
             (result.status === 'success'
@@ -112,6 +121,7 @@ export function useChat() {
               : (step.asyncAction.errorMessage ?? 'Something went wrong.'));
           dispatch({ type: 'UPDATE_MESSAGE', payload: { id: statusMsgId, updates: { text: finalMsg } } });
 
+          // Route based on result
           const nextStepId = resolveAsyncRoute(step, result);
           if (nextStepId) {
             await delay(600);
@@ -131,24 +141,31 @@ export function useChat() {
       }
     }
 
+    // If step has a custom component, wait for onComplete — don't auto-advance
     if (step.component && propsRef.current.components?.[step.component]) {
       return;
     }
 
+    // Auto-advance if no user input required
     if (!step.quickReplies && !step.form && step.next) {
       await delay(300);
       processFlowStepRef.current(step.next);
     }
   };
 
+  /** Determine next step from async action result */
   function resolveAsyncRoute(
     step: { asyncAction?: { onSuccess?: string; onError?: string; routes?: Record<string, string> }; next?: string },
     result: FlowActionResult,
   ): string | undefined {
+    // 1. Explicit next from result
     if (result.next) return result.next;
+    // 2. Routes map
     if (step.asyncAction?.routes?.[result.status]) return step.asyncAction.routes[result.status];
+    // 3. Success/error defaults
     if (result.status === 'success' && step.asyncAction?.onSuccess) return step.asyncAction.onSuccess;
     if (result.status === 'error' && step.asyncAction?.onError) return step.asyncAction.onError;
+    // 4. Fallback
     return step.next;
   }
 
@@ -157,6 +174,7 @@ export function useChat() {
     [],
   );
 
+  /** Go back to the previous step */
   const goBack = useCallback(() => {
     const engine = flowRef.current;
     if (!engine || !engine.canGoBack()) {
@@ -172,6 +190,7 @@ export function useChat() {
     }
   }, [dispatch, processFlowStep, addSystemMessage]);
 
+  /** Restart the entire conversation */
   const restartSession = useCallback(() => {
     const engine = flowRef.current;
     if (engine) {
@@ -179,12 +198,14 @@ export function useChat() {
     }
     flowStartedRef.current = false;
     dispatch({ type: 'RESET_CHAT' });
+    // Re-start the flow after reset
     if (engine) {
       flowStartedRef.current = true;
       processFlowStep(engine.getStartStepId());
     }
   }, [dispatch, processFlowStep]);
 
+  /** Handle slash commands. Returns true if the text was a command. */
   const handleCommandRef = useRef<(text: string) => boolean>(() => false);
   handleCommandRef.current = (text: string): boolean => {
     const cmd = text.trim().toLowerCase();
@@ -213,6 +234,7 @@ export function useChat() {
     }
   };
 
+  /** Handle completion from a custom component rendered in a step */
   const handleComponentComplete = useCallback(
     (result?: FlowActionResult) => {
       const engine = flowRef.current;
@@ -222,11 +244,13 @@ export function useChat() {
       const step = engine.getStep(currentStepId);
       if (!step) return;
 
+      // Merge result data
       if (result?.data) {
         engine.mergeData(result.data);
         dispatch({ type: 'SET_DATA', payload: result.data });
       }
 
+      // Show optional message
       if (result?.message) {
         dispatch({
           type: 'ADD_MESSAGE',
@@ -234,6 +258,7 @@ export function useChat() {
         });
       }
 
+      // Determine next step
       const nextStepId = result?.next ?? step.next;
       if (nextStepId) {
         processFlowStep(nextStepId);
@@ -247,6 +272,7 @@ export function useChat() {
 
   const sendMessage = useCallback(
     (text: string) => {
+      // Check for slash commands first
       if (handleCommandRef.current(text)) return;
 
       const msg: ChatMessage = {
@@ -263,13 +289,16 @@ export function useChat() {
       if (flowRef.current && currentStepId) {
         const step = flowRef.current.getStep(currentStepId);
         if (step) {
+          // Block text input during async action or component steps
           if (step.asyncAction || step.component) {
             addBotMessage("Please wait, I'm still processing. You can type /back to go back.");
             return;
           }
+          // If this step has quick replies, try to match user text
           if (flowRef.current.stepExpectsQuickReply(step)) {
             const matched = flowRef.current.matchQuickReply(step, text);
             if (matched) {
+              // User typed something matching a quick reply — handle it
               dispatch({ type: 'CLEAR_QUICK_REPLIES' });
               flowRef.current.setData(step.id, matched.value);
               const nextId = flowRef.current.resolveNext(step, matched.value);
@@ -280,6 +309,7 @@ export function useChat() {
                 dispatch({ type: 'SET_STEP', payload: null });
               }
             } else {
+              // User typed something that doesn't match — re-show options
               addBotMessage(
                 "I didn't quite get that. Please choose one of the options below:",
                 {
@@ -288,13 +318,16 @@ export function useChat() {
               );
             }
           } else if (flowRef.current.stepExpectsForm(step)) {
+            // Step has a form, nudge user
             addBotMessage("Please fill out the form above to continue.");
           } else {
+            // Normal text input step
             flowRef.current.setData(step.id, text);
             const nextId = flowRef.current.resolveNext(step, text);
             if (nextId) {
               processFlowStep(nextId);
             } else {
+              // End of flow — acknowledge
               addBotMessage("Thanks for your message! Our team will get back to you soon. 🙌");
               propsRef.current.callbacks?.onFlowEnd?.(flowRef.current.getData());
               dispatch({ type: 'SET_STEP', payload: null });
@@ -313,6 +346,7 @@ export function useChat() {
     processFlowStep(engine.getStartStepId());
   }, [processFlowStep]);
 
+  // Auto-start flow when all conditions are met
   useEffect(() => {
     if (
       props.flow &&
@@ -327,6 +361,7 @@ export function useChat() {
   const handleQuickReply = useCallback(
     (value: string, label: string) => {
       dispatch({ type: 'CLEAR_QUICK_REPLIES' });
+      // Add user message
       const msg: ChatMessage = {
         id: uid(),
         sender: 'user',
@@ -336,6 +371,7 @@ export function useChat() {
       dispatch({ type: 'ADD_MESSAGE', payload: msg });
       propsRef.current.callbacks?.onQuickReply?.(value, label);
 
+      // Continue flow
       const currentStepId = stateRef.current.currentStepId;
       if (flowRef.current && currentStepId) {
         const step = flowRef.current.getStep(currentStepId);
@@ -361,6 +397,7 @@ export function useChat() {
         flowRef.current.mergeData(data);
       }
 
+      // Summary message
       const summaryLines = Object.entries(data)
         .filter(([, v]) => v !== undefined && v !== '')
         .map(([k, v]) => `${k}: ${String(v)}`)
@@ -376,6 +413,7 @@ export function useChat() {
 
       await propsRef.current.callbacks?.onFormSubmit?.(formId, data);
 
+      // Advance flow
       const currentStepId = stateRef.current.currentStepId;
       if (flowRef.current && currentStepId) {
         const step = flowRef.current.getStep(currentStepId);

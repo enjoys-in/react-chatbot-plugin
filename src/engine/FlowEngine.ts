@@ -33,25 +33,32 @@ export class FlowEngine {
     Object.assign(this.collectedData, data);
   }
 
+  /** Push a step onto the history stack (called when entering a step) */
   pushHistory(stepId: string): void {
     this.stepHistory.push(stepId);
   }
 
+  /** Pop and return the previous step (go back) */
   popHistory(): string | undefined {
+    // Remove current step
     this.stepHistory.pop();
+    // Return previous step
     return this.stepHistory.pop();
   }
 
+  /** Check if there's a previous step to go back to */
   canGoBack(): boolean {
     return this.stepHistory.length > 1;
   }
 
+  /** Reset the engine to initial state */
   reset(): void {
     this.collectedData = {};
     this.stepHistory = [];
   }
 
   resolveNext(step: FlowStep, userValue?: string): string | undefined {
+    // Conditional branching
     if (step.condition) {
       const { field, operator, value, then: thenStep, else: elseStep } = step.condition;
       const fieldVal = this.collectedData[field];
@@ -59,6 +66,7 @@ export class FlowEngine {
       return match ? thenStep : elseStep;
     }
 
+    // Quick-reply selected → find the reply's next
     if (userValue && step.quickReplies) {
       const reply = step.quickReplies.find((r) => r.value === userValue);
       if (reply?.next) return reply.next;
@@ -67,21 +75,27 @@ export class FlowEngine {
     return step.next;
   }
 
+  /** Returns true if the step expects a quick reply (not free text) */
   stepExpectsQuickReply(step: FlowStep): boolean {
     return !!(step.quickReplies && step.quickReplies.length > 0);
   }
 
+  /** Returns true if the step expects a form submission */
   stepExpectsForm(step: FlowStep): boolean {
     return !!step.form;
   }
 
+  /** Try to fuzzy-match user text against quick reply labels */
   matchQuickReply(step: FlowStep, text: string): FlowQuickReply | undefined {
     if (!step.quickReplies) return undefined;
     const lower = text.toLowerCase().trim();
+    // Exact value match
     const exact = step.quickReplies.find((r) => r.value.toLowerCase() === lower);
     if (exact) return exact;
+    // Exact label match  
     const labelMatch = step.quickReplies.find((r) => r.label.toLowerCase().replace(/[^\w\s]/g, '').trim() === lower);
     if (labelMatch) return labelMatch;
+    // Contains match
     const contains = step.quickReplies.find((r) => lower.includes(r.value.toLowerCase()) || r.label.toLowerCase().includes(lower));
     return contains;
   }
@@ -99,10 +113,12 @@ export class FlowEngine {
       });
     }
 
+    // Attach quick replies to the last message
     if (step.quickReplies && messages.length > 0) {
       messages[messages.length - 1]!.quickReplies = step.quickReplies;
     }
 
+    // If step has a form, create a form message
     if (step.form) {
       messages.push({
         id: this.uid(),
@@ -112,6 +128,7 @@ export class FlowEngine {
       });
     }
 
+    // If step has a custom component, create a component message
     if (step.component) {
       messages.push({
         id: this.uid(),

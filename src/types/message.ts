@@ -25,5 +25,6 @@ export interface ChatMessage {
   formData?: Record<string, unknown>;
   attachments?: MessageAttachment[];
   metadata?: Record<string, unknown>;
+  /** Key into components map — renders a custom component for this message */
   component?: string;
 }

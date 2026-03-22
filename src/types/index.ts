@@ -1,3 +1,5 @@
+// ─── Domain Type Modules ─────────────────────────────────────────
+// Each domain has its own type file (Single Responsibility Principle)
 
 export type { ChatMessage, MessageSender, MessageAttachment, FlowQuickReply } from './message';
 export type { FormConfig, FormFieldConfig, FormFieldType, FormFieldOption, FormFieldValidation } from './form';
