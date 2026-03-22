@@ -149,6 +149,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ styles, position, zIndex
           config={props.loginForm}
           onLogin={handleLogin}
           primaryColor={theme.primaryColor}
+          renderFormField={props.renderFormField}
         />
       ) : (
         /* Chat Area */
@@ -164,6 +165,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ styles, position, zIndex
             onComponentComplete={handleComponentComplete}
             collectedData={state.collectedData}
             currentStepId={state.currentStepId}
+            renderFormField={props.renderFormField}
           />
           <div style={styles.inputArea}>
             {props.renderInput ? props.renderInput(renderCtx, defaultInput) : defaultInput}

@@ -2,7 +2,7 @@
 // Each domain has its own type file (Single Responsibility Principle)
 
 export type { ChatMessage, MessageSender, MessageAttachment, FlowQuickReply } from './message';
-export type { FormConfig, FormFieldConfig, FormFieldType, FormFieldOption, FormFieldValidation } from './form';
+export type { FormConfig, FormFieldConfig, FormFieldType, FormFieldOption, FormFieldValidation, FormFieldRenderProps, TextFieldRenderProps, SelectFieldRenderProps, RadioFieldRenderProps, CheckboxFieldRenderProps, FileFieldRenderProps, FormFieldRenderMap } from './form';
 export type { FlowConfig, FlowStep, FlowCondition, FlowAsyncAction } from './flow';
 export type { ChatTheme, ChatStyle } from './theme';
 export type { ChatPlugin, PluginContext, ChatPluginEvent } from './plugin';

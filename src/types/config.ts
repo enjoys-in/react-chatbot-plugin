@@ -2,7 +2,7 @@ import type { ComponentType, ReactNode } from 'react';
 import type { ChatTheme, ChatStyle } from './theme';
 import type { ChatMessage } from './message';
 import type { FlowConfig } from './flow';
-import type { FormConfig } from './form';
+import type { FormConfig, FormFieldRenderMap } from './form';
 import type { ChatPlugin } from './plugin';
 
 // ─── Branding ────────────────────────────────────────────────────
@@ -116,6 +116,8 @@ export interface ChatBotProps {
   components?: Record<string, ComponentType<StepComponentProps>>;
   /** Map of async action handlers (key = step.asyncAction.handler) */
   actionHandlers?: Record<string, (data: Record<string, unknown>, ctx: ActionContext) => Promise<FlowActionResult>>;
+  /** Override built-in form field renderers per field type. Each renderer receives strongly-typed props + the default element. */
+  renderFormField?: FormFieldRenderMap;
 }
 
 // ─── Custom Step Component Props ─────────────────────────────────

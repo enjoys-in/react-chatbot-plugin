@@ -67,7 +67,7 @@ export const App: React.FC = () => {
           {/* Category Filter */}
           <div className="filter-bar">
             <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>
-              í¾¯ All
+              ï¿½ï¿½ï¿½ All
             </button>
             {categories.map((cat) => (
               <button
@@ -100,6 +100,7 @@ export const App: React.FC = () => {
               {activeDemo.components && <span className="badge badge--teal">custom components</span>}
               {activeDemo.loginForm && <span className="badge badge--orange">login form</span>}
               {activeDemo.fileUpload?.enabled && <span className="badge badge--pink">file upload</span>}
+              {activeDemo.renderFormField && <span className="badge badge--teal">custom fields</span>}
             </div>
           </div>
         </main>
@@ -135,6 +136,7 @@ export const App: React.FC = () => {
           position="bottom-right"
           enableEmoji={activeDemo.enableEmoji ?? true}
           fileUpload={activeDemo.fileUpload ?? { enabled: false }}
+          renderFormField={activeDemo.renderFormField}
           plugins={[
             analyticsPlugin({
               onTrack: (event, data) => console.log(`[${activeDemo.id}] ${event}:`, data),

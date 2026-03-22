@@ -101,6 +101,7 @@ interface ChatBotProps {
   renderInput?: (ctx: ChatRenderContext, defaultInput: ReactNode) => ReactNode;
   components?: Record<string, ComponentType<StepComponentProps>>;
   actionHandlers?: Record<string, (data: Record<string, unknown>, ctx: ActionContext) => Promise<FlowActionResult>>;
+  renderFormField?: FormFieldRenderMap;
 }
 ```
 
@@ -284,5 +285,81 @@ interface ChatPlugin {
   onMessage?: (message: ChatMessage, ctx: PluginContext) => void;
   onSubmit?: (data: Record<string, unknown>, ctx: PluginContext) => void;
   onDestroy?: (ctx: PluginContext) => void;
+}
+```
+
+### FormFieldRenderMap
+
+```ts
+type FormFieldRenderMap = Partial<{
+  text: (props: TextFieldRenderProps, defaultElement: ReactNode) => ReactNode;
+  email: (props: TextFieldRenderProps, defaultElement: ReactNode) => ReactNode;
+  password: (props: TextFieldRenderProps, defaultElement: ReactNode) => ReactNode;
+  number: (props: TextFieldRenderProps, defaultElement: ReactNode) => ReactNode;
+  tel: (props: TextFieldRenderProps, defaultElement: ReactNode) => ReactNode;
+  url: (props: TextFieldRenderProps, defaultElement: ReactNode) => ReactNode;
+  textarea: (props: TextFieldRenderProps, defaultElement: ReactNode) => ReactNode;
+  date: (props: TextFieldRenderProps, defaultElement: ReactNode) => ReactNode;
+  time: (props: TextFieldRenderProps, defaultElement: ReactNode) => ReactNode;
+  select: (props: SelectFieldRenderProps, defaultElement: ReactNode) => ReactNode;
+  multiselect: (props: SelectFieldRenderProps, defaultElement: ReactNode) => ReactNode;
+  radio: (props: RadioFieldRenderProps, defaultElement: ReactNode) => ReactNode;
+  checkbox: (props: CheckboxFieldRenderProps, defaultElement: ReactNode) => ReactNode;
+  file: (props: FileFieldRenderProps, defaultElement: ReactNode) => ReactNode;
+}>;
+```
+
+### TextFieldRenderProps
+
+```ts
+interface TextFieldRenderProps {
+  field: FormFieldConfig;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+}
+```
+
+### SelectFieldRenderProps
+
+```ts
+interface SelectFieldRenderProps {
+  field: FormFieldConfig;
+  value: string | string[];
+  onChange: (value: string | string[]) => void;
+  error?: string;
+}
+```
+
+### RadioFieldRenderProps
+
+```ts
+interface RadioFieldRenderProps {
+  field: FormFieldConfig;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+}
+```
+
+### CheckboxFieldRenderProps
+
+```ts
+interface CheckboxFieldRenderProps {
+  field: FormFieldConfig;
+  value: string[];
+  onChange: (value: string[]) => void;
+  error?: string;
+}
+```
+
+### FileFieldRenderProps
+
+```ts
+interface FileFieldRenderProps {
+  field: FormFieldConfig;
+  files: File[];
+  onFileSelect: (files: File[]) => void;
+  error?: string;
 }
 ```

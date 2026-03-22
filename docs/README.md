@@ -31,7 +31,7 @@ bun install
 bun run dev
 ```
 
-The demo app at `http://localhost:3000` has **13 interactive demos** covering every feature, organized by category (Basic, Forms, Advanced, Components). Click any card to load that demo, then open the chat widget.
+The demo app at `http://localhost:3000` has **14 interactive demos** covering every feature, organized by category (Basic, Forms, Advanced, Components). Click any card to load that demo, then open the chat widget.
 
 ## Quick Links
 

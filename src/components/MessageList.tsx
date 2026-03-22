@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import type { ComponentType } from 'react';
 import type { ChatMessage } from '../types';
 import type { StepComponentProps, FlowActionResult } from '../types/config';
+import type { FormFieldRenderMap } from '../types/form';
 import type { ChatStyles } from '../styles/theme';
 import { MessageBubble } from './MessageBubble';
 import { QuickReplies } from './QuickReplies';
@@ -23,6 +24,8 @@ interface MessageListProps {
   collectedData?: Record<string, unknown>;
   /** Current step ID */
   currentStepId?: string | null;
+  /** Custom form field renderers per field type */
+  renderFormField?: FormFieldRenderMap;
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -36,6 +39,7 @@ export const MessageList: React.FC<MessageListProps> = ({
   onComponentComplete,
   collectedData,
   currentStepId,
+  renderFormField,
 }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -61,6 +65,7 @@ export const MessageList: React.FC<MessageListProps> = ({
                 config={msg.form}
                 onSubmit={(data) => onFormSubmit(msg.form!.id, data)}
                 primaryColor={primaryColor}
+                renderFormField={renderFormField}
               />
             </div>
           )}

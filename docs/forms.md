@@ -146,6 +146,68 @@ Form data is merged into `collectedData` and accessible in:
 | `fields` | `FormFieldConfig[]` | Array of field configs |
 | `submitLabel` | `string` | Submit button text |
 
+## Custom Form Field Renderers
+
+You can replace any built-in form field with your own React component using the `renderFormField` prop. This is a map of field type to a custom render function:
+
+```tsx
+import type { FormFieldRenderMap, TextFieldRenderProps } from '@enjoys/react-chatbot-plugin';
+
+const renderFormField: FormFieldRenderMap = {
+  text: (props: TextFieldRenderProps, defaultElement) => (
+    <div style={{ display: 'flex', gap: 8 }}>
+      <span>@</span>
+      <input
+        value={props.value}
+        onChange={(e) => props.onChange(e.target.value)}
+        placeholder={props.field.placeholder}
+        style={{ fontFamily: 'monospace', flex: 1, padding: 8, borderRadius: 6 }}
+      />
+    </div>
+  ),
+  select: (props, defaultElement) => (
+    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+      {props.field.options?.map((opt) => (
+        <button
+          key={opt.value}
+          onClick={() => props.onChange(opt.value)}
+          style={{
+            padding: '6px 14px',
+            borderRadius: 20,
+            border: 'none',
+            background: props.value === opt.value ? '#6C5CE7' : '#eee',
+            color: props.value === opt.value ? '#fff' : '#333',
+            cursor: 'pointer',
+          }}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  ),
+};
+
+<ChatBot flow={flow} renderFormField={renderFormField} />
+```
+
+### Render Function Signature
+
+Each renderer receives strongly-typed props and the default element:
+
+```ts
+(props: FieldRenderProps, defaultElement: ReactNode) => ReactNode
+```
+
+| Field Types | Props Type | Key Props |
+|-------------|------------|----------|
+| text, email, password, number, tel, url, textarea, date, time | `TextFieldRenderProps` | `value`, `onChange`, `field`, `error` |
+| select, multiselect | `SelectFieldRenderProps` | `value`, `onChange`, `field`, `error` |
+| radio | `RadioFieldRenderProps` | `value`, `onChange`, `field`, `error` |
+| checkbox | `CheckboxFieldRenderProps` | `value`, `onChange`, `field`, `error` |
+| file | `FileFieldRenderProps` | `files`, `onFileSelect`, `field`, `error` |
+
+Return `defaultElement` to fall back to the built-in renderer for specific fields.
+
 ## Demo
 
-See **Forms Showcase** and **Login Form** demos for interactive examples with all field types.
+See **Forms Showcase**, **Login Form**, and **Custom Fields** demos for interactive examples with all field types.

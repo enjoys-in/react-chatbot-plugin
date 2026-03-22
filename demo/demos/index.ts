@@ -13,6 +13,7 @@ import dynamicRouting from './dynamic-routing';
 import errorHandling from './error-handling';
 import ecommerceBot from './ecommerce-bot';
 import onboardingWizard from './onboarding-wizard';
+import customFields from './custom-fields';
 
 export const allDemos = [
   // Basic
@@ -32,6 +33,7 @@ export const allDemos = [
   onboardingWizard,
   // Components
   customComponents,
+  customFields,
 ];
 
 export const categories = [

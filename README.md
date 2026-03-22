@@ -31,6 +31,7 @@
 - **Slash commands** — `/help`, `/back`, `/cancel`, `/restart` built-in
 - **Custom header/input** — Swap the header or input with your own React components
 - **Forms** — Text, select, radio, checkbox, file upload, with validation
+- **Custom form fields** — Replace any form field type with your own React component
 - **Theming** — Light/dark mode, CSS variables, glassmorphism design
 - **File uploads** — Drag & drop, preview, size/count limits
 - **Emoji picker** — Built-in emoji selector
@@ -131,6 +132,7 @@ Full documentation is available in the [`docs/`](./docs/) folder:
 | `launcherIcon` | `ReactNode` | Custom launcher icon |
 | `closeIcon` | `ReactNode` | Custom close icon |
 | `zIndex` | `number` | CSS z-index |
+| `renderFormField` | `FormFieldRenderMap` | Custom renderers for form field types |
 | `className` | `string` | Root element class name |
 
 ## Exported Components
@@ -155,7 +157,7 @@ All internal components are exported for advanced use cases:
 # Install dependencies
 bun install
 
-# Run demo (13 interactive demos)
+# Run demo (14 interactive demos)
 bun run dev
 
 # Build library

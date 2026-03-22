@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import type { FormConfig, FormFieldConfig } from '../../types';
+import type { FormFieldRenderMap } from '../../types/form';
 import { TextField } from './TextField';
 import { SelectField } from './SelectField';
 import { RadioField } from './RadioField';
@@ -10,9 +11,10 @@ interface DynamicFormProps {
   config: FormConfig;
   onSubmit: (data: Record<string, unknown>) => void;
   primaryColor: string;
+  renderFormField?: FormFieldRenderMap;
 }
 
-export const DynamicForm: React.FC<DynamicFormProps> = ({ config, onSubmit, primaryColor }) => {
+export const DynamicForm: React.FC<DynamicFormProps> = ({ config, onSubmit, primaryColor, renderFormField }) => {
   const [values, setValues] = useState<Record<string, unknown>>(() => {
     const init: Record<string, unknown> = {};
     for (const field of config.fields) {
@@ -137,6 +139,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ config, onSubmit, prim
           onChange={(v) => setValue(field.name, v)}
           error={errors[field.name]}
           primaryColor={primaryColor}
+          renderFormField={renderFormField}
         />
       ))}
 
@@ -181,9 +184,13 @@ interface FormFieldProps {
   onChange: (value: unknown) => void;
   error?: string;
   primaryColor: string;
+  renderFormField?: FormFieldRenderMap;
 }
 
-const FormField: React.FC<FormFieldProps> = ({ field, value, onChange, error, primaryColor }) => {
+const FormField: React.FC<FormFieldProps> = ({ field, value, onChange, error, primaryColor, renderFormField }) => {
+  // Check for custom renderer override
+  const customRenderer = renderFormField?.[field.type as keyof FormFieldRenderMap];
+
   switch (field.type) {
     case 'text':
     case 'email':
@@ -193,53 +200,37 @@ const FormField: React.FC<FormFieldProps> = ({ field, value, onChange, error, pr
     case 'url':
     case 'textarea':
     case 'date':
-    case 'time':
-      return (
-        <TextField
-          field={field}
-          value={String(value ?? '')}
-          onChange={onChange as (v: string) => void}
-          error={error}
-        />
-      );
+    case 'time': {
+      const typedProps = { type: field.type as 'text', field, value: String(value ?? ''), onChange: onChange as (v: string) => void, error };
+      const defaultEl = <TextField field={field} value={String(value ?? '')} onChange={onChange as (v: string) => void} error={error} />;
+      if (customRenderer) return <>{(customRenderer as (p: typeof typedProps, d: React.ReactNode) => React.ReactNode)(typedProps, defaultEl)}</>;
+      return defaultEl;
+    }
     case 'select':
-    case 'multiselect':
-      return (
-        <SelectField
-          field={field}
-          value={value as string | string[]}
-          onChange={onChange as (v: string | string[]) => void}
-          error={error}
-        />
-      );
-    case 'radio':
-      return (
-        <RadioField
-          field={field}
-          value={String(value ?? '')}
-          onChange={onChange as (v: string) => void}
-          error={error}
-        />
-      );
-    case 'checkbox':
-      return (
-        <CheckboxField
-          field={field}
-          value={(value as string[]) ?? []}
-          onChange={onChange as (v: string[]) => void}
-          error={error}
-        />
-      );
-    case 'file':
-      return (
-        <FileUploadField
-          field={field}
-          value={value as FileList | null}
-          onChange={onChange as (v: FileList | null) => void}
-          error={error}
-          primaryColor={primaryColor}
-        />
-      );
+    case 'multiselect': {
+      const typedProps = { type: field.type as 'select', field, value: value as string | string[], onChange: onChange as (v: string | string[]) => void, error };
+      const defaultEl = <SelectField field={field} value={value as string | string[]} onChange={onChange as (v: string | string[]) => void} error={error} />;
+      if (customRenderer) return <>{(customRenderer as (p: typeof typedProps, d: React.ReactNode) => React.ReactNode)(typedProps, defaultEl)}</>;
+      return defaultEl;
+    }
+    case 'radio': {
+      const typedProps = { type: 'radio' as const, field, value: String(value ?? ''), onChange: onChange as (v: string) => void, error };
+      const defaultEl = <RadioField field={field} value={String(value ?? '')} onChange={onChange as (v: string) => void} error={error} />;
+      if (customRenderer) return <>{(customRenderer as (p: typeof typedProps, d: React.ReactNode) => React.ReactNode)(typedProps, defaultEl)}</>;
+      return defaultEl;
+    }
+    case 'checkbox': {
+      const typedProps = { type: 'checkbox' as const, field, value: ((value as string[]) ?? []), onChange: onChange as (v: string[]) => void, error };
+      const defaultEl = <CheckboxField field={field} value={(value as string[]) ?? []} onChange={onChange as (v: string[]) => void} error={error} />;
+      if (customRenderer) return <>{(customRenderer as (p: typeof typedProps, d: React.ReactNode) => React.ReactNode)(typedProps, defaultEl)}</>;
+      return defaultEl;
+    }
+    case 'file': {
+      const typedProps = { type: 'file' as const, field, value: value as FileList | null, onChange: onChange as (v: FileList | null) => void, error, primaryColor };
+      const defaultEl = <FileUploadField field={field} value={value as FileList | null} onChange={onChange as (v: FileList | null) => void} error={error} primaryColor={primaryColor} />;
+      if (customRenderer) return <>{(customRenderer as (p: typeof typedProps, d: React.ReactNode) => React.ReactNode)(typedProps, defaultEl)}</>;
+      return defaultEl;
+    }
     case 'hidden':
       return <input type="hidden" name={field.name} value={String(value ?? '')} />;
     default:
