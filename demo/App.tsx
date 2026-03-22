@@ -39,26 +39,54 @@ export const App: React.FC = () => {
     <div className="app">
       {/* Header */}
       <header className="app-header">
-        <div className="app-header__inner">
-          {activeDemo ? (
-            <>
-              <button onClick={goBack} className="back-btn">← Back</button>
-              <div>
-                <h1 className="app-header__title">
-                  <span>{activeDemo.icon}</span> {activeDemo.title}
-                </h1>
-                <p className="app-header__subtitle">{activeDemo.description}</p>
-              </div>
-            </>
-          ) : (
+        <div className="dot-grid" />
+        {activeDemo ? (
+          <div className="app-header__inner app-header__inner--detail">
+            <button onClick={goBack} className="back-btn">← Back</button>
             <div>
-              <h1 className="app-header__title">@enjoys/react-chatbot-plugin</h1>
-              <p className="app-header__subtitle">
-                {allDemos.length} interactive demos — click any card then open the chat bubble ↘
-              </p>
+              <h1 className="app-header__title">
+                <span>{activeDemo.icon}</span> {activeDemo.title}
+              </h1>
+              <p className="app-header__subtitle">{activeDemo.description}</p>
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="app-header__inner app-header__inner--hero">
+            <div className="hero-badge">
+              <span className="dot" />
+              Open Source · MIT
+            </div>
+            <h1 className="app-header__title">
+              <span className="gradient-text">React ChatBot</span> Plugin
+            </h1>
+            <p className="app-header__subtitle">
+              {allDemos.length} interactive demos — click any card then open the chat bubble ↘
+            </p>
+            <div className="hero-install">
+              <span className="prompt">$</span>
+              <span>npm i</span>
+              <span className="pkg">@enjoys/react-chatbot-plugin</span>
+            </div>
+            <div className="hero-stats">
+              <div>
+                <div className="hero-stat__value"><span className="accent">~50</span>KB</div>
+                <div className="hero-stat__label">Bundle</div>
+              </div>
+              <div>
+                <div className="hero-stat__value"><span className="accent">15+</span></div>
+                <div className="hero-stat__label">Form Fields</div>
+              </div>
+              <div>
+                <div className="hero-stat__value"><span className="accent">{allDemos.length}</span></div>
+                <div className="hero-stat__label">Demos</div>
+              </div>
+              <div>
+                <div className="hero-stat__value"><span className="accent">0</span></div>
+                <div className="hero-stat__label">Dependencies</div>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Demo Grid */}
@@ -67,7 +95,7 @@ export const App: React.FC = () => {
           {/* Category Filter */}
           <div className="filter-bar">
             <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>
-              ��� All
+                All
             </button>
             {categories.map((cat) => (
               <button
@@ -105,6 +133,11 @@ export const App: React.FC = () => {
           </div>
         </main>
       )}
+
+      {/* Footer */}
+      <footer className="demo-footer">
+        Made with ❤️ by <a href="https://github.com/enjoys-in" target="_blank" rel="noopener noreferrer">Enjoys</a> · <a href="https://www.npmjs.com/package/@enjoys/react-chatbot-plugin" target="_blank" rel="noopener noreferrer">npm</a> · <a href="https://github.com/enjoys-in/react-chatbot-plugin" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </footer>
 
       {/* ChatBot — only rendered when a demo is selected */}
       {activeDemo && (
