@@ -1,7 +1,7 @@
-// Main component
+// ─── Main Component ──────────────────────────────────────────────
 export { ChatBot } from './components/ChatBot';
 
-// Sub-components (for advanced usage)
+// ─── UI Components ───────────────────────────────────────────────
 export { ChatHeader } from './components/ChatHeader';
 export { ChatInput } from './components/ChatInput';
 export { ChatWindow } from './components/ChatWindow';
@@ -12,33 +12,68 @@ export { QuickReplies } from './components/QuickReplies';
 export { TypingIndicator } from './components/TypingIndicator';
 export { WelcomeScreen } from './components/WelcomeScreen';
 export { LoginScreen } from './components/LoginScreen';
+export { Branding } from './components/Branding';
+export { EmojiPicker } from './components/EmojiPicker';
+export { FileUploadButton, FilePreviewList } from './components/FileUpload';
 
-// Forms
+// ─── Icons ───────────────────────────────────────────────────────
+export {
+  SendIcon,
+  ChatBubbleIcon,
+  CloseIcon,
+  MinimizeIcon,
+  EmojiIcon,
+  AttachmentIcon,
+  FileIcon,
+  ImageIcon,
+  RemoveIcon,
+  RestartIcon,
+} from './components/icons';
+
+// ─── Forms ───────────────────────────────────────────────────────
 export { DynamicForm, TextField, SelectField, RadioField, CheckboxField, FileUploadField } from './components/forms';
 
-// Engine
+// ─── Core Engine ─────────────────────────────────────────────────
 export { FlowEngine } from './engine/FlowEngine';
+export { PluginManager } from './core/PluginManager';
 
-// Hooks
+// ─── Plugins (built-in) ─────────────────────────────────────────
+export { analyticsPlugin } from './plugins/analyticsPlugin';
+export { webhookPlugin } from './plugins/webhookPlugin';
+export { persistencePlugin } from './plugins/persistencePlugin';
+
+// ─── Hooks ───────────────────────────────────────────────────────
 export { useChat } from './hooks/useChat';
 
-// Context
+// ─── Context ─────────────────────────────────────────────────────
 export { ChatContext, useChatContext } from './context/ChatContext';
 
-// Types
+// ─── Theme Utilities ─────────────────────────────────────────────
+export { resolveTheme, buildStyles, buildCSSVariables } from './styles/theme';
+
+// ─── Types ───────────────────────────────────────────────────────
 export type {
   ChatBotProps,
+  ChatCallbacks,
+  HeaderConfig,
+  BrandingConfig,
+  FileUploadConfig,
+  ChatRenderContext,
   ChatTheme,
   ChatStyle,
-  ChatCallbacks,
   ChatMessage,
   MessageSender,
-  HeaderConfig,
+  MessageAttachment,
+  FlowQuickReply,
   FlowConfig,
   FlowStep,
-  FlowQuickReply,
+  FlowCondition,
   FormConfig,
   FormFieldConfig,
   FormFieldType,
   FormFieldOption,
+  FormFieldValidation,
+  ChatPlugin,
+  PluginContext,
+  ChatPluginEvent,
 } from './types';

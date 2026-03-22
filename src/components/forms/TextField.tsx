@@ -14,22 +14,25 @@ export const TextField: React.FC<TextFieldProps> = ({ field, value, onChange, er
 
   const baseStyle: React.CSSProperties = {
     width: '100%',
-    padding: '8px 12px',
-    border: `1px solid ${error ? '#E53E3E' : '#D1D5DB'}`,
-    borderRadius: '8px',
+    padding: '10px 14px',
+    border: `1.5px solid ${error ? 'rgba(229, 62, 62, 0.5)' : 'rgba(0,0,0,0.08)'}`,
+    borderRadius: '12px',
     fontSize: '13px',
     fontFamily: 'inherit',
     outline: 'none',
     boxSizing: 'border-box',
-    transition: 'border-color 0.15s ease',
+    transition: 'all 0.2s ease',
+    backgroundColor: 'rgba(245, 247, 252, 0.6)',
+    color: '#2D3436',
+    letterSpacing: '0.01em',
   };
 
   return (
-    <div style={{ marginBottom: '12px' }}>
+    <div style={{ marginBottom: '14px' }}>
       {field.label && (
-        <label style={{ display: 'block', marginBottom: '4px', fontSize: '13px', fontWeight: 500 }}>
+        <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 500, color: '#2D3436' }}>
           {field.label}
-          {field.required && <span style={{ color: '#E53E3E', marginLeft: '2px' }}>*</span>}
+          {field.required && <span style={{ color: '#E53E3E', marginLeft: '3px' }}>*</span>}
         </label>
       )}
       {isTextarea ? (

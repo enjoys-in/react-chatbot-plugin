@@ -1,6 +1,7 @@
 import React from 'react';
 import type { CSSProperties } from 'react';
 import type { ChatStyles } from '../styles/theme';
+import { ChatBubbleIcon, CloseIcon } from './icons';
 
 interface LauncherProps {
   onClick: () => void;
@@ -23,8 +24,8 @@ export const Launcher: React.FC<LauncherProps> = ({
 }) => {
   const posStyle: CSSProperties =
     position === 'bottom-left'
-      ? { bottom: '20px', left: '20px' }
-      : { bottom: '20px', right: '20px' };
+      ? { bottom: '24px', left: '24px' }
+      : { bottom: '24px', right: '24px' };
 
   return (
     <button
@@ -34,25 +35,13 @@ export const Launcher: React.FC<LauncherProps> = ({
         ...styles.launcher,
         ...posStyle,
         ...(zIndex != null ? { zIndex } : {}),
-        transform: isOpen ? 'scale(0.9)' : 'scale(1)',
+        transform: isOpen ? 'scale(0.92) rotate(90deg)' : 'scale(1)',
+        animation: isOpen ? 'none' : 'cb-launcher-pulse 3s ease-in-out infinite',
       }}
     >
       {isOpen
-        ? closeIcon ?? <CloseIcon />
-        : icon ?? <ChatIcon />}
+        ? closeIcon ?? <CloseIcon size={22} />
+        : icon ?? <ChatBubbleIcon size={26} />}
     </button>
   );
 };
-
-const ChatIcon: React.FC = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-  </svg>
-);
-
-const CloseIcon: React.FC = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);

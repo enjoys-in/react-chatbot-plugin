@@ -21,7 +21,8 @@ export type ChatAction =
   | { type: 'SET_STEP'; payload: string | null }
   | { type: 'SET_DATA'; payload: Record<string, unknown> }
   | { type: 'SET_LOGGED_IN'; payload: boolean }
-  | { type: 'CLEAR_QUICK_REPLIES' };
+  | { type: 'CLEAR_QUICK_REPLIES' }
+  | { type: 'RESET_CHAT' };
 
 export function chatReducer(state: ChatState, action: ChatAction): ChatState {
   switch (action.type) {
@@ -43,12 +44,24 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
       return { ...state, collectedData: { ...state.collectedData, ...action.payload } };
     case 'SET_LOGGED_IN':
       return { ...state, isLoggedIn: action.payload };
-    case 'CLEAR_QUICK_REPLIES':
+    case 'CLEAR_QUICK_REPLIES': {
+      // Only clear quick replies from the last message that has them
+      let lastIdx = -1;
+      for (let i = state.messages.length - 1; i >= 0; i--) {
+        if (state.messages[i].quickReplies) { lastIdx = i; break; }
+      }
+      if (lastIdx === -1) return state;
+      const updated = [...state.messages];
+      updated[lastIdx] = { ...updated[lastIdx], quickReplies: undefined };
+      return { ...state, messages: updated };
+    }
+    case 'RESET_CHAT':
       return {
         ...state,
-        messages: state.messages.map((m) =>
-          m.quickReplies ? { ...m, quickReplies: undefined } : m,
-        ),
+        messages: [],
+        isTyping: false,
+        currentStepId: null,
+        collectedData: {},
       };
     default:
       return state;

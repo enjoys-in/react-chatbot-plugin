@@ -1,6 +1,6 @@
 import React from 'react';
-import { ChatBot } from 'react-chatbot-plugin';
-import type { FlowConfig, FormConfig } from 'react-chatbot-plugin';
+import { ChatBot, analyticsPlugin } from '@enjoys/react-chatbot-plugin';
+import type { FlowConfig, FormConfig } from '@enjoys/react-chatbot-plugin';
 
 // ─── Sample Login Form ───────────────────────────────────────────
 
@@ -171,25 +171,44 @@ const sampleFlow: FlowConfig = {
 // ─── Custom Welcome Screen ───────────────────────────────────────
 
 const CustomWelcome = (
-  <div style={{ textAlign: 'center' }}>
-    <div style={{ fontSize: '48px', marginBottom: '16px' }}>💬</div>
-    <h2 style={{ fontSize: '20px', marginBottom: '8px', color: '#1a1a2e' }}>
+  <div style={{ textAlign: 'center', padding: '12px 0' }}>
+    <div style={{ 
+      fontSize: '52px', 
+      marginBottom: '20px',
+      filter: 'drop-shadow(0 4px 8px rgba(108, 92, 231, 0.2))',
+    }}>💬</div>
+    <h2 style={{ 
+      fontSize: '22px', 
+      fontWeight: 700, 
+      marginBottom: '10px', 
+      color: '#2D3436',
+      letterSpacing: '-0.02em',
+    }}>
       Welcome to Our Chat!
     </h2>
-    <p style={{ color: '#666', fontSize: '14px', lineHeight: '1.6', marginBottom: '16px' }}>
+    <p style={{ 
+      color: 'rgba(0,0,0,0.5)', 
+      fontSize: '14px', 
+      lineHeight: '1.7', 
+      marginBottom: '20px',
+      maxWidth: '280px',
+      margin: '0 auto 20px',
+    }}>
       We're here to help you with sales inquiries, technical support, or just to hear your feedback.
     </p>
-    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
       {['24/7 Support', 'Quick Response', 'Expert Team'].map((tag) => (
         <span
           key={tag}
           style={{
-            padding: '6px 14px',
-            backgroundColor: '#EBF5FF',
-            color: '#0066FF',
-            borderRadius: '20px',
+            padding: '8px 16px',
+            background: 'linear-gradient(135deg, rgba(108, 92, 231, 0.08), rgba(162, 155, 254, 0.08))',
+            color: '#6C5CE7',
+            borderRadius: '24px',
             fontSize: '12px',
-            fontWeight: 500,
+            fontWeight: 600,
+            border: '1px solid rgba(108, 92, 231, 0.12)',
+            letterSpacing: '0.02em',
           }}
         >
           {tag}
@@ -211,20 +230,40 @@ export const App: React.FC = () => {
 
       <ChatBot
         theme={{
-          primaryColor: '#0066FF',
-          headerBg: '#0066FF',
-          borderRadius: '16px',
+          primaryColor: '#6C5CE7',
+          headerBg: 'linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%)',
+          borderRadius: '20px',
         }}
         header={{
           title: 'Acme Support',
           subtitle: 'Usually replies instantly',
           showClose: true,
+          showMinimize: true,
+          showRestart: true,
+        }}
+        branding={{
+          poweredBy: 'Enjoys ChatBot',
+          poweredByUrl: 'https://github.com/enjoys',
+          showBranding: true,
         }}
         welcomeScreen={CustomWelcome}
         loginForm={loginForm}
         flow={sampleFlow}
         inputPlaceholder="Type your message..."
         position="bottom-right"
+        enableEmoji={true}
+        fileUpload={{
+          enabled: true,
+          accept: 'image/*,.pdf,.doc,.docx',
+          multiple: true,
+          maxSize: 5 * 1024 * 1024,
+          maxFiles: 3,
+        }}
+        plugins={[
+          analyticsPlugin({
+            onTrack: (event, data) => console.log(`[Analytics] ${event}:`, data),
+          }),
+        ]}
         callbacks={{
           onOpen: () => console.log('[ChatBot] opened'),
           onClose: () => console.log('[ChatBot] closed'),
@@ -233,6 +272,8 @@ export const App: React.FC = () => {
           onFormSubmit: (id, data) => console.log(`[ChatBot] form "${id}":`, data),
           onQuickReply: (val, label) => console.log(`[ChatBot] quick reply: ${label} (${val})`),
           onFlowEnd: (data) => console.log('[ChatBot] flow ended, collected:', data),
+          onFileUpload: (files) => console.log('[ChatBot] files uploaded:', files.map(f => f.name)),
+          onEvent: (event, payload) => console.log(`[ChatBot] event: ${event}`, payload),
         }}
       />
     </>

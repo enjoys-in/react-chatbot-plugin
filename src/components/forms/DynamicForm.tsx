@@ -62,9 +62,13 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ config, onSubmit, prim
 
       // Pattern check
       if (field.validation?.pattern && typeof val === 'string' && val) {
-        const regex = new RegExp(field.validation.pattern);
-        if (!regex.test(val)) {
-          newErrors[field.name] = field.validation.message ?? 'Invalid format';
+        try {
+          const regex = new RegExp(field.validation.pattern);
+          if (!regex.test(val)) {
+            newErrors[field.name] = field.validation.message ?? 'Invalid format';
+          }
+        } catch {
+          // Invalid regex pattern in config — skip validation
         }
       }
     }
@@ -84,15 +88,18 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ config, onSubmit, prim
     return (
       <div
         style={{
-          padding: '12px',
-          backgroundColor: '#F0FFF4',
-          borderRadius: '8px',
-          fontSize: '13px',
-          color: '#276749',
+          padding: '16px',
+          background: 'linear-gradient(135deg, rgba(46, 213, 115, 0.1), rgba(46, 213, 115, 0.05))',
+          borderRadius: '14px',
+          fontSize: '14px',
+          color: '#2ecc71',
           textAlign: 'center',
+          fontWeight: 500,
+          border: '1px solid rgba(46, 213, 115, 0.15)',
+          animation: 'cb-fade-in 0.3s ease-out',
         }}
       >
-        Submitted successfully
+        ✓ Submitted successfully
       </div>
     );
   }
@@ -101,19 +108,23 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ config, onSubmit, prim
     <form
       onSubmit={handleSubmit}
       style={{
-        backgroundColor: '#FAFAFA',
-        borderRadius: '10px',
-        padding: '16px',
-        border: '1px solid #E8E8E8',
+        background: 'rgba(255, 255, 255, 0.7)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderRadius: '16px',
+        padding: '20px',
+        border: '1px solid rgba(0,0,0,0.06)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+        animation: 'cb-slide-up 0.35s ease-out',
       }}
     >
       {config.title && (
-        <div style={{ fontWeight: 600, fontSize: '14px', marginBottom: '4px' }}>
+        <div style={{ fontWeight: 600, fontSize: '15px', marginBottom: '4px', color: '#2D3436', letterSpacing: '-0.01em' }}>
           {config.title}
         </div>
       )}
       {config.description && (
-        <div style={{ fontSize: '12px', color: '#888', marginBottom: '12px' }}>
+        <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.45)', marginBottom: '16px', lineHeight: '1.5' }}>
           {config.description}
         </div>
       )}
@@ -133,15 +144,27 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ config, onSubmit, prim
         type="submit"
         style={{
           width: '100%',
-          padding: '10px',
-          backgroundColor: primaryColor,
+          padding: '12px',
+          background: `linear-gradient(135deg, ${primaryColor} 0%, ${adjustColor(primaryColor, 30)} 100%)`,
           color: '#fff',
           border: 'none',
-          borderRadius: '8px',
+          borderRadius: '12px',
           fontSize: '14px',
           fontWeight: 600,
           cursor: 'pointer',
-          marginTop: '4px',
+          marginTop: '8px',
+          fontFamily: 'inherit',
+          letterSpacing: '0.02em',
+          boxShadow: `0 4px 14px ${primaryColor}33`,
+          transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-1px)';
+          e.currentTarget.style.boxShadow = `0 6px 20px ${primaryColor}44`;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = `0 4px 14px ${primaryColor}33`;
         }}
       >
         {config.submitLabel ?? 'Submit'}
@@ -223,3 +246,11 @@ const FormField: React.FC<FormFieldProps> = ({ field, value, onChange, error, pr
       return null;
   }
 };
+
+function adjustColor(hex: string, amount: number): string {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const r = Math.min(255, ((num >> 16) & 0xff) + amount);
+  const g = Math.min(255, ((num >> 8) & 0xff) + amount);
+  const b = Math.min(255, (num & 0xff) + amount);
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}

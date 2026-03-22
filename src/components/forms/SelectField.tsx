@@ -25,11 +25,11 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, value, onChange
     : typeof value === 'string' ? value : '';
 
   return (
-    <div style={{ marginBottom: '12px' }}>
+    <div style={{ marginBottom: '14px' }}>
       {field.label && (
-        <label style={{ display: 'block', marginBottom: '4px', fontSize: '13px', fontWeight: 500 }}>
+        <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 500, color: '#2D3436' }}>
           {field.label}
-          {field.required && <span style={{ color: '#E53E3E', marginLeft: '2px' }}>*</span>}
+          {field.required && <span style={{ color: '#E53E3E', marginLeft: '3px' }}>*</span>}
         </label>
       )}
       <select
@@ -39,14 +39,16 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, value, onChange
         required={field.required}
         style={{
           width: '100%',
-          padding: '8px 12px',
-          border: `1px solid ${error ? '#E53E3E' : '#D1D5DB'}`,
-          borderRadius: '8px',
+          padding: '10px 14px',
+          border: `1.5px solid ${error ? 'rgba(229, 62, 62, 0.5)' : 'rgba(0,0,0,0.08)'}`,
+          borderRadius: '12px',
           fontSize: '13px',
           fontFamily: 'inherit',
           outline: 'none',
-          backgroundColor: '#fff',
+          backgroundColor: 'rgba(245, 247, 252, 0.6)',
+          color: '#2D3436',
           boxSizing: 'border-box',
+          transition: 'all 0.2s ease',
           ...(isMulti ? { minHeight: '80px' } : {}),
         }}
       >

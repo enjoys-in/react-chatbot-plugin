@@ -30,7 +30,7 @@ export const MessageList: React.FC<MessageListProps> = ({
   }, [messages, isTyping]);
 
   return (
-    <div style={styles.messageList}>
+    <div style={styles.messageList} className="cb-scrollbar">
       {messages.map((msg) => (
         <React.Fragment key={msg.id}>
           <MessageBubble message={msg} styles={styles} />
@@ -42,7 +42,7 @@ export const MessageList: React.FC<MessageListProps> = ({
             />
           )}
           {msg.form && (
-            <div style={{ alignSelf: 'flex-start', width: '90%' }}>
+            <div style={{ alignSelf: 'flex-start', width: '92%', animation: 'cb-slide-up 0.35s ease-out' }}>
               <DynamicForm
                 config={msg.form}
                 onSubmit={(data) => onFormSubmit(msg.form!.id, data)}

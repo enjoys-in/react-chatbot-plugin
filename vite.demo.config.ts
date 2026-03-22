@@ -7,7 +7,7 @@ export default defineConfig({
   root: 'demo',
   resolve: {
     alias: {
-      'react-chatbot-plugin': resolve(__dirname, 'src/index.ts'),
+      '@enjoys/react-chatbot-plugin': resolve(__dirname, 'src/index.ts'),
     },
   },
   server: {

@@ -2,12 +2,26 @@ import { useCallback, useRef, useEffect } from 'react';
 import { useChatContext } from '../context/ChatContext';
 import { FlowEngine } from '../engine/FlowEngine';
 import { uid, delay } from '../utils/helpers';
-import type { ChatMessage, FormConfig } from '../types';
+import type { ChatMessage } from '../types';
+
+/** Slash commands the user can type */
+const COMMANDS: Record<string, string> = {
+  '/help': 'Show available commands',
+  '/cancel': 'Cancel current step and go back',
+  '/back': 'Go back to the previous step',
+  '/restart': 'Restart the conversation from the beginning',
+};
 
 export function useChat() {
   const { state, dispatch, props } = useChatContext();
   const flowRef = useRef<FlowEngine | null>(null);
   const flowStartedRef = useRef(false);
+
+  // Keep fresh references for use inside async callbacks (avoids stale closures)
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const propsRef = useRef(props);
+  propsRef.current = props;
 
   // Initialize flow engine
   useEffect(() => {
@@ -30,13 +44,120 @@ export function useChat() {
       };
       dispatch({ type: 'SET_TYPING', payload: false });
       dispatch({ type: 'ADD_MESSAGE', payload: msg });
-      props.callbacks?.onMessageReceive?.(msg);
+      propsRef.current.callbacks?.onMessageReceive?.(msg);
     },
-    [dispatch, props.callbacks],
+    [dispatch],
   );
+
+  const addSystemMessage = useCallback(
+    (text: string) => {
+      dispatch({
+        type: 'ADD_MESSAGE',
+        payload: { id: uid(), sender: 'system', text, timestamp: Date.now() },
+      });
+    },
+    [dispatch],
+  );
+
+  // Use a ref so processFlowStep can call itself recursively without stale closure
+  const processFlowStepRef = useRef<(stepId: string) => Promise<void>>(async () => {});
+  processFlowStepRef.current = async (stepId: string) => {
+    const engine = flowRef.current;
+    if (!engine) return;
+
+    const step = engine.getStep(stepId);
+    if (!step) return;
+
+    // Track step history for /back navigation
+    engine.pushHistory(stepId);
+
+    dispatch({ type: 'SET_STEP', payload: stepId });
+    dispatch({ type: 'SET_TYPING', payload: true });
+    await delay(step.delay ?? 500);
+
+    const messages = engine.buildMessages(step);
+    dispatch({ type: 'SET_TYPING', payload: false });
+    dispatch({ type: 'ADD_MESSAGES', payload: messages });
+
+    messages.forEach((m) => propsRef.current.callbacks?.onMessageReceive?.(m));
+
+    // Auto-advance if no user input required
+    if (!step.quickReplies && !step.form && step.next) {
+      await delay(300);
+      processFlowStepRef.current(step.next);
+    }
+  };
+
+  const processFlowStep = useCallback(
+    (stepId: string) => processFlowStepRef.current(stepId),
+    [],
+  );
+
+  /** Go back to the previous step */
+  const goBack = useCallback(() => {
+    const engine = flowRef.current;
+    if (!engine || !engine.canGoBack()) {
+      addSystemMessage('There is no previous step to go back to.');
+      return;
+    }
+    dispatch({ type: 'CLEAR_QUICK_REPLIES' });
+    const prevStepId = engine.popHistory();
+    if (prevStepId) {
+      processFlowStep(prevStepId);
+    } else {
+      addSystemMessage('There is no previous step to go back to.');
+    }
+  }, [dispatch, processFlowStep, addSystemMessage]);
+
+  /** Restart the entire conversation */
+  const restartSession = useCallback(() => {
+    const engine = flowRef.current;
+    if (engine) {
+      engine.reset();
+    }
+    flowStartedRef.current = false;
+    dispatch({ type: 'RESET_CHAT' });
+    // Re-start the flow after reset
+    if (engine) {
+      flowStartedRef.current = true;
+      processFlowStep(engine.getStartStepId());
+    }
+  }, [dispatch, processFlowStep]);
+
+  /** Handle slash commands. Returns true if the text was a command. */
+  const handleCommandRef = useRef<(text: string) => boolean>(() => false);
+  handleCommandRef.current = (text: string): boolean => {
+    const cmd = text.trim().toLowerCase();
+    if (!cmd.startsWith('/')) return false;
+
+    switch (cmd) {
+      case '/help': {
+        const lines = Object.entries(COMMANDS)
+          .map(([k, v]) => `**${k}** — ${v}`)
+          .join('\n');
+        addSystemMessage(`Available commands:\n${lines}`);
+        return true;
+      }
+      case '/cancel':
+      case '/back': {
+        goBack();
+        return true;
+      }
+      case '/restart': {
+        restartSession();
+        return true;
+      }
+      default:
+        addSystemMessage(`Unknown command: ${cmd}. Type /help for available commands.`);
+        return true;
+    }
+  };
 
   const sendMessage = useCallback(
     (text: string) => {
+      // Check for slash commands first
+      if (handleCommandRef.current(text)) return;
+
       const msg: ChatMessage = {
         id: uid(),
         sender: 'user',
@@ -44,52 +165,56 @@ export function useChat() {
         timestamp: Date.now(),
       };
       dispatch({ type: 'ADD_MESSAGE', payload: msg });
-      props.callbacks?.onMessageSend?.(msg);
-      props.callbacks?.onSubmit?.({ message: text });
+      propsRef.current.callbacks?.onMessageSend?.(msg);
+      propsRef.current.callbacks?.onSubmit?.({ message: text });
 
-      // Process flow
-      if (flowRef.current && state.currentStepId) {
-        const step = flowRef.current.getStep(state.currentStepId);
+      const currentStepId = stateRef.current.currentStepId;
+      if (flowRef.current && currentStepId) {
+        const step = flowRef.current.getStep(currentStepId);
         if (step) {
-          flowRef.current.setData(step.id, text);
-          const nextId = flowRef.current.resolveNext(step, text);
-          if (nextId) {
-            processFlowStep(nextId);
+          // If this step has quick replies, try to match user text
+          if (flowRef.current.stepExpectsQuickReply(step)) {
+            const matched = flowRef.current.matchQuickReply(step, text);
+            if (matched) {
+              // User typed something matching a quick reply — handle it
+              dispatch({ type: 'CLEAR_QUICK_REPLIES' });
+              flowRef.current.setData(step.id, matched.value);
+              const nextId = flowRef.current.resolveNext(step, matched.value);
+              if (nextId) {
+                processFlowStep(nextId);
+              } else {
+                propsRef.current.callbacks?.onFlowEnd?.(flowRef.current.getData());
+                dispatch({ type: 'SET_STEP', payload: null });
+              }
+            } else {
+              // User typed something that doesn't match — re-show options
+              addBotMessage(
+                "I didn't quite get that. Please choose one of the options below:",
+                {
+                  quickReplies: step.quickReplies,
+                },
+              );
+            }
+          } else if (flowRef.current.stepExpectsForm(step)) {
+            // Step has a form, nudge user
+            addBotMessage("Please fill out the form above to continue.");
           } else {
-            props.callbacks?.onFlowEnd?.(flowRef.current.getData());
-            dispatch({ type: 'SET_STEP', payload: null });
+            // Normal text input step
+            flowRef.current.setData(step.id, text);
+            const nextId = flowRef.current.resolveNext(step, text);
+            if (nextId) {
+              processFlowStep(nextId);
+            } else {
+              // End of flow — acknowledge
+              addBotMessage("Thanks for your message! Our team will get back to you soon. 🙌");
+              propsRef.current.callbacks?.onFlowEnd?.(flowRef.current.getData());
+              dispatch({ type: 'SET_STEP', payload: null });
+            }
           }
         }
       }
     },
-    [dispatch, props.callbacks, state.currentStepId],
-  );
-
-  const processFlowStep = useCallback(
-    async (stepId: string) => {
-      const engine = flowRef.current;
-      if (!engine) return;
-
-      const step = engine.getStep(stepId);
-      if (!step) return;
-
-      dispatch({ type: 'SET_STEP', payload: stepId });
-      dispatch({ type: 'SET_TYPING', payload: true });
-      await delay(step.delay ?? 500);
-
-      const messages = engine.buildMessages(step);
-      dispatch({ type: 'SET_TYPING', payload: false });
-      dispatch({ type: 'ADD_MESSAGES', payload: messages });
-
-      messages.forEach((m) => props.callbacks?.onMessageReceive?.(m));
-
-      // Auto-advance if no user input required
-      if (!step.quickReplies && !step.form && step.next) {
-        await delay(300);
-        processFlowStep(step.next);
-      }
-    },
-    [dispatch, props.callbacks],
+    [dispatch, addBotMessage, processFlowStep],
   );
 
   const startFlow = useCallback(() => {
@@ -122,24 +247,25 @@ export function useChat() {
         timestamp: Date.now(),
       };
       dispatch({ type: 'ADD_MESSAGE', payload: msg });
-      props.callbacks?.onQuickReply?.(value, label);
+      propsRef.current.callbacks?.onQuickReply?.(value, label);
 
       // Continue flow
-      if (flowRef.current && state.currentStepId) {
-        const step = flowRef.current.getStep(state.currentStepId);
+      const currentStepId = stateRef.current.currentStepId;
+      if (flowRef.current && currentStepId) {
+        const step = flowRef.current.getStep(currentStepId);
         if (step) {
           flowRef.current.setData(step.id, value);
           const nextId = flowRef.current.resolveNext(step, value);
           if (nextId) {
             processFlowStep(nextId);
           } else {
-            props.callbacks?.onFlowEnd?.(flowRef.current.getData());
+            propsRef.current.callbacks?.onFlowEnd?.(flowRef.current.getData());
             dispatch({ type: 'SET_STEP', payload: null });
           }
         }
       }
     },
-    [dispatch, props.callbacks, state.currentStepId, processFlowStep],
+    [dispatch, processFlowStep],
   );
 
   const handleFormSubmit = useCallback(
@@ -163,42 +289,43 @@ export function useChat() {
       };
       dispatch({ type: 'ADD_MESSAGE', payload: msg });
 
-      await props.callbacks?.onFormSubmit?.(formId, data);
+      await propsRef.current.callbacks?.onFormSubmit?.(formId, data);
 
       // Advance flow
-      if (flowRef.current && state.currentStepId) {
-        const step = flowRef.current.getStep(state.currentStepId);
+      const currentStepId = stateRef.current.currentStepId;
+      if (flowRef.current && currentStepId) {
+        const step = flowRef.current.getStep(currentStepId);
         if (step) {
           const nextId = flowRef.current.resolveNext(step);
           if (nextId) {
             processFlowStep(nextId);
           } else {
-            props.callbacks?.onFlowEnd?.(flowRef.current.getData());
+            propsRef.current.callbacks?.onFlowEnd?.(flowRef.current.getData());
             dispatch({ type: 'SET_STEP', payload: null });
           }
         }
       }
     },
-    [dispatch, props.callbacks, state.currentStepId, processFlowStep],
+    [dispatch, processFlowStep],
   );
 
   const handleLogin = useCallback(
     async (data: Record<string, unknown>) => {
-      await props.callbacks?.onLogin?.(data);
+      await propsRef.current.callbacks?.onLogin?.(data);
       dispatch({ type: 'SET_LOGGED_IN', payload: true });
     },
-    [dispatch, props.callbacks],
+    [dispatch],
   );
 
   const toggleChat = useCallback(() => {
-    const willOpen = !state.isOpen;
+    const willOpen = !stateRef.current.isOpen;
     dispatch({ type: 'TOGGLE_OPEN' });
     if (willOpen) {
-      props.callbacks?.onOpen?.();
+      propsRef.current.callbacks?.onOpen?.();
     } else {
-      props.callbacks?.onClose?.();
+      propsRef.current.callbacks?.onClose?.();
     }
-  }, [dispatch, state.isOpen, props.callbacks]);
+  }, [dispatch]);
 
   const dismissWelcome = useCallback(() => {
     dispatch({ type: 'DISMISS_WELCOME' });
@@ -215,5 +342,7 @@ export function useChat() {
     dismissWelcome,
     startFlow,
     processFlowStep,
+    goBack,
+    restartSession,
   };
 }
