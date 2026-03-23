@@ -62,9 +62,9 @@ const demo: DemoConfig = {
   plugins: [
     loggerPlugin({ level: 'debug', prefix: '[PluginDemo]' }),
     persistencePlugin({ storageKey: 'plugin_demo_chat', storage: 'local' }),
-    rateLimitPlugin({ maxMessages: 5, windowMs: 30000, warningMessage: '⚠️ Slow down! Max 5 messages per 30 seconds.' }),
-    validationPlugin({ profanityList: ['badword', 'spam'], sanitizeHtml: true }),
-    schedulerPlugin({ schedules: [{ delay: 10000, message: '💡 Tip: try typing /help for available commands!' }] }),
+    rateLimitPlugin({ limit: 5, window: 30000, warningMessage: '⚠️ Slow down! Max 5 messages per 30 seconds.' }),
+    validationPlugin({ profanityList: ['badword', 'spam'], sanitize: true }),
+    schedulerPlugin({ messages: [{ delay: 10000, message: '💡 Tip: try typing /help for available commands!' }] }),
   ],
 };
 

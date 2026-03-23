@@ -99,7 +99,7 @@ Push form/message data to a CRM endpoint.
 crmPlugin({
   endpoint: 'https://api.crm.com/leads',
   headers: { 'X-API-Key': 'xxx' },
-  fieldMap: { name: 'fullName', email: 'emailAddress' },
+  mapFields: (data) => ({ fullName: data.name, emailAddress: data.email }),
   events: ['submit', 'flowEnd'],
 })
 ```
@@ -112,8 +112,8 @@ Trigger emails via API on configurable events.
 emailPlugin({
   endpoint: 'https://api.example.com/send-email',
   headers: { Authorization: 'Bearer xxx' },
-  events: ['submit', 'flowEnd'],
-  templateData: { subject: 'New Chat Submission' },
+  triggers: ['submit', 'flowEnd'],
+  template: 'contact-form',
 })
 ```
 
@@ -144,8 +144,8 @@ aiPlugin({
   apiKey: 'sk-...',
   model: 'gpt-4',
   systemPrompt: 'You are a helpful assistant.',
-  maxHistory: 10,
   endpoint: 'https://custom-ai.example.com/chat', // for 'custom' provider
+  timeout: 30000,
 })
 ```
 
@@ -155,12 +155,13 @@ Rule-based intent detection with pattern matching.
 
 ```tsx
 intentPlugin({
-  intents: [
-    { name: 'greeting', patterns: ['hello', 'hi', 'hey'], type: 'contains', response: 'Hello! How can I help?' },
-    { name: 'pricing', patterns: [/pric(e|ing)/i], type: 'regex', response: 'Check our pricing page.' },
-    { name: 'bye', patterns: ['goodbye', 'bye'], type: 'exact', response: 'Goodbye!' },
+  rules: [
+    { intent: 'greeting', patterns: ['hello', 'hi', 'hey'], matchType: 'contains' },
+    { intent: 'pricing', patterns: ['price', 'pricing', 'cost'], matchType: 'contains' },
+    { intent: 'bye', patterns: ['goodbye', 'bye'], matchType: 'exact' },
   ],
-  fallback: "I didn't understand that.",
+  fallbackIntent: 'unknown',
+  onIntentDetected: (intent, text, ctx) => console.log('Intent:', intent),
 })
 ```
 
@@ -171,11 +172,12 @@ Profanity filter, HTML sanitizer, and custom validators.
 ```tsx
 validationPlugin({
   profanityList: ['badword1', 'badword2'],
-  sanitizeHtml: true,
-  validators: [
-    (text) => text.length > 500 ? 'Message too long (max 500 chars)' : null,
-  ],
-  onBlock: (reason) => console.log('Blocked:', reason),
+  sanitize: true,
+  blockProfanity: true,
+  validators: {
+    maxLength: (text) => text.length > 500 ? 'Message too long (max 500 chars)' : null,
+  },
+  onValidationFail: (text, error) => console.log('Blocked:', error),
 })
 ```
 
@@ -224,7 +226,8 @@ Configurable typing delay for realistic bot messages.
 ```tsx
 typingPlugin({
   delay: 1500,           // ms before bot message appears
-  perChar: 0,            // additional ms per character (0 = flat delay)
+  onTypingStart: () => {},
+  onTypingEnd: () => {},
 })
 ```
 
@@ -236,7 +239,8 @@ Send a message when user goes idle.
 autoReplyPlugin({
   timeout: 30000,         // 30s of inactivity
   message: 'Are you still there? Let me know if you need help!',
-  repeat: false,
+  maxReplies: 1,
+  onlyWhenOpen: true,
 })
 ```
 
@@ -246,10 +250,9 @@ Audio alerts for bot messages.
 
 ```tsx
 soundPlugin({
-  frequency: 800,        // beep frequency (default)
-  duration: 150,         // ms
-  src: '/notification.mp3',  // or use custom audio file
+  src: '/notification.mp3',
   volume: 0.5,
+  onlyWhenHidden: true,  // only play when tab is not visible
 })
 ```
 
@@ -271,13 +274,9 @@ Dynamic theme switching with persistence.
 
 ```tsx
 themePlugin({
-  themes: {
-    light: { '--chatbot-bg': '#fff', '--chatbot-text': '#333' },
-    dark: { '--chatbot-bg': '#1a1a1a', '--chatbot-text': '#fff' },
-    ocean: { '--chatbot-bg': '#0a3d62', '--chatbot-text': '#dfe6e9' },
-  },
-  defaultTheme: 'light',
-  persist: true,
+  defaultMode: 'light',  // 'light' | 'dark'
+  storageKey: 'chatbot_theme',
+  onThemeChange: (mode, ctx) => console.log('Theme:', mode),
 })
 ```
 
@@ -287,11 +286,9 @@ Programmatic component injection via events.
 
 ```tsx
 componentPlugin({
-  onInject: (type, props) => {
-    console.log('Component injected:', type, props);
-  },
+  components: { banner: 'BannerWidget' },
+  onRender: (componentKey, ctx) => console.log('Rendering:', componentKey),
 })
-// Trigger from other plugins: ctx.emit('inject-component', { type: 'banner', props: { text: 'Sale!' } })
 ```
 
 ---
@@ -304,11 +301,11 @@ JWT/session token auth with expiry detection.
 
 ```tsx
 authPlugin({
+  type: 'jwt',
   tokenKey: 'chat_token',
   storage: 'local',
-  validateEndpoint: 'https://api.example.com/validate',
-  headers: { 'X-App': 'chatbot' },
-  onExpired: () => console.log('Token expired'),
+  validateToken: (token) => !!token,
+  onAuthExpired: (ctx) => console.log('Token expired'),
 })
 ```
 
@@ -318,10 +315,10 @@ Sliding window rate limiting.
 
 ```tsx
 rateLimitPlugin({
-  maxMessages: 10,
-  windowMs: 60000,       // 10 messages per minute
+  limit: 10,
+  window: 60000,           // 10 messages per minute
   warningMessage: 'Slow down! Too many messages.',
-  onLimit: () => console.log('Rate limited'),
+  onLimited: (remaining) => console.log('Rate limited, retry in', remaining),
 })
 ```
 
@@ -335,11 +332,11 @@ WebSocket-based live agent handoff.
 
 ```tsx
 agentPlugin({
-  wsUrl: 'wss://agents.example.com/chat',
-  triggerKeyword: '/agent',
-  headers: { Authorization: 'Bearer xxx' },
-  onConnect: () => console.log('Connected to agent'),
-  onDisconnect: () => console.log('Agent disconnected'),
+  socketUrl: 'wss://agents.example.com/chat',
+  connectMessage: 'Connecting you to a live agent...',
+  disconnectMessage: 'Agent has disconnected.',
+  onAgentConnect: (ctx) => console.log('Connected to agent'),
+  onAgentDisconnect: (ctx) => console.log('Agent disconnected'),
 })
 ```
 
@@ -352,7 +349,7 @@ transferPlugin({
   endpoint: 'https://api.example.com/transfer',
   departments: ['sales', 'support', 'billing'],
   headers: { Authorization: 'Bearer xxx' },
-  triggerKeyword: '/transfer',
+  transferMessage: 'Transferring you now...',
 })
 ```
 
@@ -379,11 +376,9 @@ Behavioral triggers for marketing campaigns.
 
 ```tsx
 campaignPlugin({
-  triggers: [
+  campaigns: [
     { type: 'idle', delay: 15000, message: "Don't miss our special offer!" },
-    { type: 'exitIntent', message: 'Wait! Check out our deals.' },
     { type: 'pageLoad', delay: 5000, message: 'Welcome! Need help?' },
-    { type: 'scroll', threshold: 0.5, message: 'Enjoying the content?' },
   ],
 })
 ```
@@ -398,9 +393,9 @@ Timed or recurring bot messages.
 
 ```tsx
 schedulerPlugin({
-  schedules: [
+  messages: [
     { delay: 5000, message: 'Quick tip: try typing /help!' },
-    { interval: 60000, message: 'Remember, I am here to help!' },
+    { delay: 60000, message: 'Remember, I am here to help!', repeat: true, interval: 60000 },
   ],
 })
 ```
@@ -446,20 +441,22 @@ Exposes chatbot state on `window.__chatbotDebug`.
 
 ```tsx
 debugPlugin({
+  logState: true,
   logEvents: true,
+  logMessages: true,
+  groupName: 'ChatBot',
 })
-// Access in console: window.__chatbotDebug.messages, .data, .events
 ```
 
 ### devtoolsPlugin
 
-Visual overlay panel toggled by F2 key.
+Visual overlay panel toggled by keyboard shortcut.
 
 ```tsx
 devtoolsPlugin({
-  hotkey: 'F2',
+  position: 'bottom-right',
+  shortcutKey: 'F2',
 })
-// Shows: live state, events log, collected data
 ```
 
 ---
@@ -529,7 +526,7 @@ Combine plugins — they all run independently:
     webhookPlugin({ url: '/api/webhook', events: ['submit'] }),
     persistencePlugin({ storageKey: 'chat' }),
     loggerPlugin({ level: 'info' }),
-    rateLimitPlugin({ maxMessages: 10, windowMs: 60000 }),
+    rateLimitPlugin({ limit: 10, window: 60000 }),
     i18nPlugin({ defaultLocale: 'en', translations: { en: { welcome: 'Hi!' } } }),
   ]}
 />
