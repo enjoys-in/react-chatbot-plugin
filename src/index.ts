@@ -38,9 +38,38 @@ export { FlowEngine } from './engine/FlowEngine';
 export { PluginManager } from './core/PluginManager';
 
 // ─── Plugins (built-in) ─────────────────────────────────────────
-export { analyticsPlugin } from './plugins/analyticsPlugin';
-export { webhookPlugin } from './plugins/webhookPlugin';
-export { persistencePlugin } from './plugins/persistencePlugin';
+export {
+  analyticsPlugin,
+  loggerPlugin,
+  webhookPlugin,
+  crmPlugin,
+  emailPlugin,
+  aiPlugin,
+  intentPlugin,
+  typingPlugin,
+  autoReplyPlugin,
+  validationPlugin,
+  uploadPlugin,
+  persistencePlugin,
+  syncPlugin,
+  authPlugin,
+  rateLimitPlugin,
+  pushPlugin,
+  soundPlugin,
+  agentPlugin,
+  transferPlugin,
+  themePlugin,
+  componentPlugin,
+  leadPlugin,
+  campaignPlugin,
+  schedulerPlugin,
+  reminderPlugin,
+  i18nPlugin,
+  debugPlugin,
+  devtoolsPlugin,
+  mediaPlugin,
+  markdownPlugin,
+} from './plugins';
 
 // ─── Hooks ───────────────────────────────────────────────────────
 export { useChat } from './hooks/useChat';

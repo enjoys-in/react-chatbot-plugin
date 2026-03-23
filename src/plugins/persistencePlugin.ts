@@ -1,48 +1,59 @@
-import type { ChatPlugin } from '../types/plugin';
+import type { ChatPlugin, PluginContext } from '../types/plugin';
+import type { ChatMessage } from '../types/message';
+import { createStorageAdapter, safeJsonParse } from './utils/storage';
 
 /**
- * Persistence Plugin — saves/restores chat history via localStorage
+ * Persistence Plugin — saves/restores full chat history via browser storage
  */
 export function persistencePlugin(options?: {
   storageKey?: string;
   storage?: 'local' | 'session';
+  maxMessages?: number;
+  ttl?: number;
 }): ChatPlugin {
   const key = options?.storageKey ?? 'chatbot_history';
-  const store = options?.storage === 'session' ? sessionStorage : localStorage;
+  const store = createStorageAdapter(options?.storage ?? 'local');
+  const max = options?.maxMessages ?? 100;
+  const ttl = options?.ttl ?? 0;
+
+  interface Snapshot { messages: ChatMessage[]; savedAt: number }
+
+  const save = (ctx: PluginContext) => {
+    const messages = ctx.getMessages().slice(-max);
+    const snapshot: Snapshot = { messages, savedAt: Date.now() };
+    store.set(key, JSON.stringify(snapshot));
+  };
 
   return {
     name: 'persistence',
 
     onInit(ctx) {
-      try {
-        const saved = store.getItem(key);
-        if (saved) {
-          const messages = JSON.parse(saved);
-          if (Array.isArray(messages)) {
-            messages.forEach((msg) => {
-              if (msg.sender === 'bot') {
-                ctx.addBotMessage(msg.text);
-              }
-              // Skip non-bot messages — re-adding user messages as bot bubbles is incorrect
-            });
-          }
+      const raw = store.get(key);
+      const snapshot = safeJsonParse<Snapshot | null>(raw, null);
+      if (!snapshot?.messages?.length) return;
+
+      if (ttl > 0 && Date.now() - snapshot.savedAt > ttl) {
+        store.remove(key);
+        return;
+      }
+
+      for (const msg of snapshot.messages) {
+        if (msg.sender === 'bot' && msg.text) {
+          ctx.addBotMessage(msg.text);
         }
-      } catch {
-        // ignore parse errors
       }
     },
 
-    onMessage(message, ctx) {
-      try {
-        const messages = ctx.getMessages();
-        store.setItem(key, JSON.stringify(messages.slice(-50)));
-      } catch {
-        // storage full or unavailable
-      }
+    onMessage(_message, ctx) {
+      save(ctx);
     },
 
-    onDestroy() {
-      // Optionally clear on destroy
+    onSubmit(_data, ctx) {
+      save(ctx);
+    },
+
+    onDestroy(ctx) {
+      save(ctx);
     },
   };
 }

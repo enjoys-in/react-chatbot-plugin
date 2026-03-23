@@ -65,9 +65,36 @@ All exported types, components, and utilities.
 
 | Export | Description |
 |--------|-------------|
-| `analyticsPlugin` | Event tracking plugin |
-| `webhookPlugin` | Server webhook plugin |
-| `persistencePlugin` | Local/session storage plugin |
+| `analyticsPlugin` | Event tracking with session analytics |
+| `webhookPlugin` | Server webhook for all event types |
+| `persistencePlugin` | Local/session storage with TTL |
+| `loggerPlugin` | Configurable console logging |
+| `crmPlugin` | CRM endpoint integration |
+| `emailPlugin` | Email triggers via API |
+| `syncPlugin` | Bidirectional backend sync |
+| `aiPlugin` | AI responses (OpenAI/Anthropic/custom) |
+| `intentPlugin` | Rule-based intent detection |
+| `validationPlugin` | Profanity filter, HTML sanitizer |
+| `markdownPlugin` | Markdown-to-HTML for bot messages |
+| `mediaPlugin` | Rich media tags (`[image:url]`, etc.) |
+| `i18nPlugin` | Multi-language with `{{t:key}}` syntax |
+| `typingPlugin` | Configurable typing delay |
+| `autoReplyPlugin` | Idle user auto-reply |
+| `soundPlugin` | Audio alerts |
+| `pushPlugin` | Browser push notifications |
+| `themePlugin` | Dynamic theme switching |
+| `componentPlugin` | Programmatic component injection |
+| `authPlugin` | JWT/session token auth |
+| `rateLimitPlugin` | Sliding window rate limiting |
+| `agentPlugin` | WebSocket live agent handoff |
+| `transferPlugin` | Department transfer via API |
+| `leadPlugin` | Lead capture from forms/flows |
+| `campaignPlugin` | Behavioral triggers (exit intent, idle, scroll) |
+| `schedulerPlugin` | Timed/recurring bot messages |
+| `reminderPlugin` | Delayed reminder messages |
+| `uploadPlugin` | File upload to external storage |
+| `debugPlugin` | Debug state on `window.__chatbotDebug` |
+| `devtoolsPlugin` | Visual overlay panel (F2) |
 
 ## Types
 
@@ -287,10 +314,17 @@ interface FormFieldConfig {
 ```ts
 interface ChatPlugin {
   name: string;
-  onInit?: (ctx: PluginContext) => void;
-  onMessage?: (message: ChatMessage, ctx: PluginContext) => void;
-  onSubmit?: (data: Record<string, unknown>, ctx: PluginContext) => void;
-  onDestroy?: (ctx: PluginContext) => void;
+  onInit?: (ctx: PluginContext) => void | Promise<void>;
+  onMessage?: (message: ChatMessage, ctx: PluginContext) => void | ChatMessage | Promise<void | ChatMessage>;
+  onSubmit?: (data: Record<string, unknown>, ctx: PluginContext) => void | Promise<void>;
+  onEvent?: (event: ChatPluginEvent, ctx: PluginContext) => void;
+  onDestroy?: (ctx: PluginContext) => void | Promise<void>;
+}
+
+interface ChatPluginEvent {
+  type: string;       // 'open' | 'close' | 'stepChange' | 'flowEnd' | 'quickReply' | 'login'
+  payload?: unknown;
+  timestamp: number;
 }
 ```
 

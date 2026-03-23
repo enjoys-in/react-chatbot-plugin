@@ -104,11 +104,13 @@ export function useChat() {
         timestamp: Date.now(),
         ...extras,
       };
+      // Let plugins see bot messages too
+      const finalMsg = pluginManager ? await pluginManager.onMessage(msg) : msg;
       dispatch({ type: 'SET_TYPING', payload: false });
-      dispatch({ type: 'ADD_MESSAGE', payload: msg });
-      propsRef.current.callbacks?.onMessageReceive?.(msg);
+      dispatch({ type: 'ADD_MESSAGE', payload: finalMsg });
+      propsRef.current.callbacks?.onMessageReceive?.(finalMsg);
     },
-    [dispatch],
+    [dispatch, pluginManager],
   );
 
   const addSystemMessage = useCallback(
@@ -134,6 +136,7 @@ export function useChat() {
     engine.pushHistory(stepId);
 
     dispatch({ type: 'SET_STEP', payload: stepId });
+    pluginManager?.emitEvent('stepChange', { stepId });
     dispatch({ type: 'SET_TYPING', payload: true });
     await delay(step.delay ?? 500);
 
@@ -324,6 +327,7 @@ export function useChat() {
       if (nextStepId) {
         processFlowStep(nextStepId);
       } else {
+        pluginManager?.emitEvent('flowEnd', engine.getData());
         propsRef.current.callbacks?.onFlowEnd?.(engine.getData());
         dispatch({ type: 'SET_STEP', payload: null });
       }
@@ -371,6 +375,7 @@ export function useChat() {
               if (nextId) {
                 processFlowStep(nextId);
               } else {
+                pluginManager?.emitEvent('flowEnd', flowRef.current.getData());
                 propsRef.current.callbacks?.onFlowEnd?.(flowRef.current.getData());
                 dispatch({ type: 'SET_STEP', payload: null });
               }
@@ -395,6 +400,7 @@ export function useChat() {
               processFlowStep(nextId);
             } else {
               addBotMessage("Thanks for your message! Our team will get back to you soon. \u{1F64C}");
+              pluginManager?.emitEvent('flowEnd', flowRef.current.getData());
               propsRef.current.callbacks?.onFlowEnd?.(flowRef.current.getData());
               dispatch({ type: 'SET_STEP', payload: null });
             }
@@ -406,6 +412,7 @@ export function useChat() {
               processFlowStep(nextId);
             } else {
               addBotMessage("Thanks for your message! Our team will get back to you soon. \u{1F64C}");
+              pluginManager?.emitEvent('flowEnd', flowRef.current.getData());
               propsRef.current.callbacks?.onFlowEnd?.(flowRef.current.getData());
               dispatch({ type: 'SET_STEP', payload: null });
             }
@@ -500,6 +507,8 @@ export function useChat() {
         timestamp: Date.now(),
       };
       dispatch({ type: 'ADD_MESSAGE', payload: msg });
+      pluginManager?.onMessage(msg);
+      pluginManager?.emitEvent('quickReply', { value, label });
       propsRef.current.callbacks?.onQuickReply?.(value, label);
 
       // Continue flow
@@ -512,6 +521,7 @@ export function useChat() {
           if (nextId) {
             processFlowStep(nextId);
           } else {
+            pluginManager?.emitEvent('flowEnd', flowRef.current.getData());
             propsRef.current.callbacks?.onFlowEnd?.(flowRef.current.getData());
             dispatch({ type: 'SET_STEP', payload: null });
           }
@@ -541,6 +551,8 @@ export function useChat() {
         timestamp: Date.now(),
       };
       dispatch({ type: 'ADD_MESSAGE', payload: msg });
+      pluginManager?.onMessage(msg);
+      await pluginManager?.onSubmit(data);
 
       await propsRef.current.callbacks?.onFormSubmit?.(formId, data);
 
@@ -553,32 +565,37 @@ export function useChat() {
           if (nextId) {
             processFlowStep(nextId);
           } else {
+            pluginManager?.emitEvent('flowEnd', flowRef.current.getData());
             propsRef.current.callbacks?.onFlowEnd?.(flowRef.current.getData());
             dispatch({ type: 'SET_STEP', payload: null });
           }
         }
       }
     },
-    [dispatch, processFlowStep],
+    [dispatch, processFlowStep, pluginManager],
   );
 
   const handleLogin = useCallback(
     async (data: Record<string, unknown>) => {
+      await pluginManager?.onSubmit(data);
+      pluginManager?.emitEvent('login', data);
       await propsRef.current.callbacks?.onLogin?.(data);
       dispatch({ type: 'SET_LOGGED_IN', payload: true });
     },
-    [dispatch],
+    [dispatch, pluginManager],
   );
 
   const toggleChat = useCallback(() => {
     const willOpen = !stateRef.current.isOpen;
     dispatch({ type: 'TOGGLE_OPEN' });
     if (willOpen) {
+      pluginManager?.emitEvent('open');
       propsRef.current.callbacks?.onOpen?.();
     } else {
+      pluginManager?.emitEvent('close');
       propsRef.current.callbacks?.onClose?.();
     }
-  }, [dispatch]);
+  }, [dispatch, pluginManager]);
 
   const dismissWelcome = useCallback(() => {
     dispatch({ type: 'DISMISS_WELCOME' });

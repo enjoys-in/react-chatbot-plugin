@@ -22,6 +22,10 @@ export class PluginManager {
     };
   }
 
+  getContext(): PluginContext | null {
+    return this.context;
+  }
+
   private on(event: string, handler: (...args: unknown[]) => void): void {
     if (!this.eventHandlers.has(event)) {
       this.eventHandlers.set(event, new Set());
@@ -74,6 +78,12 @@ export class PluginManager {
       }
     }
     this.dispatchEvent({ type: 'submit', payload: data, timestamp: Date.now() });
+  }
+
+  /** Emit a lifecycle event to all plugins (open, close, flowEnd, stepChange, quickReply, etc.) */
+  emitEvent(type: string, payload?: unknown): void {
+    this.dispatchEvent({ type, payload, timestamp: Date.now() });
+    this.emit(type, payload);
   }
 
   async destroy(): Promise<void> {

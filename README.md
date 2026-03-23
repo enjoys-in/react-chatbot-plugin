@@ -44,7 +44,7 @@
 - **Async actions** — Run API calls on step entry with real-time loading/progress/error states
 - **Custom step components** — Render your own React widgets inside flow steps
 - **Dynamic routing** — Route to different steps based on API results, status codes, or custom logic
-- **Plugin architecture** — Extend with analytics, webhooks, persistence, or custom plugins
+- **Plugin architecture** — 30 built-in plugins: analytics, AI, webhooks, persistence, i18n, CRM, rate limiting, live agent, and more
 - **Slash commands** — `/help`, `/back`, `/cancel`, `/restart` built-in
 - **Custom header/input** — Swap the header or input with your own React components
 - **Forms** — Text, select, radio, checkbox, file upload, with validation

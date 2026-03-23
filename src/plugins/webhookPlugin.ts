@@ -1,25 +1,23 @@
 import type { ChatPlugin } from '../types/plugin';
+import { postJSON } from './utils/http';
+
+type WebhookEventType = 'message' | 'submit' | 'init' | 'destroy' | 'open' | 'close' | 'flowEnd' | 'stepChange' | 'quickReply' | 'login';
 
 /**
- * Webhook Plugin — sends messages/submissions to an external endpoint
+ * Webhook Plugin — sends messages/submissions/lifecycle events to an external endpoint
  */
 export function webhookPlugin(options: {
   url: string;
   headers?: Record<string, string>;
-  events?: ('message' | 'submit' | 'init' | 'destroy')[];
+  events?: WebhookEventType[];
+  timeout?: number;
 }): ChatPlugin {
-  const events = options.events ?? ['message', 'submit'];
+  const events = new Set<string>(options.events ?? ['message', 'submit']);
+  const timeout = options.timeout ?? 10000;
 
   const send = async (type: string, payload: unknown) => {
     try {
-      await fetch(options.url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers,
-        },
-        body: JSON.stringify({ type, payload, timestamp: Date.now() }),
-      });
+      await postJSON(options.url, { type, payload, timestamp: Date.now() }, options.headers, timeout);
     } catch (err) {
       console.error(`[webhook] Failed to send ${type}:`, err);
     }
@@ -29,27 +27,25 @@ export function webhookPlugin(options: {
     name: 'webhook',
 
     async onInit() {
-      if (events.includes('init')) {
-        await send('init', {});
-      }
+      if (events.has('init')) await send('init', {});
     },
 
     async onMessage(message) {
-      if (events.includes('message')) {
-        await send('message', message);
-      }
+      if (events.has('message')) await send('message', message);
     },
 
     async onSubmit(data) {
-      if (events.includes('submit')) {
-        await send('submit', data);
+      if (events.has('submit')) await send('submit', data);
+    },
+
+    onEvent(event) {
+      if (events.has(event.type)) {
+        send(event.type, event.payload);
       }
     },
 
     async onDestroy() {
-      if (events.includes('destroy')) {
-        await send('destroy', {});
-      }
+      if (events.has('destroy')) await send('destroy', {});
     },
   };
 }
