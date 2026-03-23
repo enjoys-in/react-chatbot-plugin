@@ -110,7 +110,7 @@ const demo: DemoConfig = {
     syncPlugin({ endpoint: MOCK_API, syncInterval: 0 }),
 
     // ─── Intelligence ────────────────────────────
-    aiPlugin({ provider: 'custom', endpoint: MOCK_API }),
+    aiPlugin({ provider: 'custom', endpoint: MOCK_API, shouldRespond: () => false }),
     intentPlugin({
       rules: [
         { intent: 'greeting', patterns: ['hello', 'hi', 'hey'], matchType: 'contains' },
