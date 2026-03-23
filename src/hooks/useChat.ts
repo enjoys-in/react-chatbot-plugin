@@ -534,10 +534,35 @@ export function useChat() {
         flowRef.current.mergeData(data);
       }
 
-      // Summary message
+      // Look up form config for friendly labels
+      const formConfig =
+        propsRef.current.loginForm?.id === formId
+          ? propsRef.current.loginForm
+          : flowRef.current && stateRef.current.currentStepId
+            ? flowRef.current.getStep(stateRef.current.currentStepId)?.form
+            : undefined;
+
+      // Build field name → { label, optionMap } lookup
+      const fieldMeta = new Map<string, { label: string; optionMap?: Map<string, string> }>();
+      if (formConfig) {
+        for (const f of formConfig.fields) {
+          const optionMap = f.options
+            ? new Map(f.options.map((o) => [o.value, o.label]))
+            : undefined;
+          fieldMeta.set(f.name, { label: f.label ?? f.name, optionMap });
+        }
+      }
+
+      // Summary message with friendly labels
       const summaryLines = Object.entries(data)
         .filter(([, v]) => v !== undefined && v !== '')
-        .map(([k, v]) => `${k}: ${String(v)}`)
+        .map(([k, v]) => {
+          const meta = fieldMeta.get(k);
+          const displayKey = meta?.label ?? k;
+          const raw = String(v);
+          const displayVal = meta?.optionMap?.get(raw) ?? raw;
+          return `${displayKey}: ${displayVal}`;
+        })
         .join('\n');
       const msg: ChatMessage = {
         id: uid(),
