@@ -14,7 +14,7 @@ Comprehensive guide to `@enjoys/react-chatbot-plugin` — from basic setup to ad
 | 6 | [Custom Components](./custom-components.md) | React widgets inside flow steps |
 | 7 | [Dynamic Routing](./dynamic-routing.md) | Route based on API response status |
 | 8 | [Theming & Styling](./theming.md) | Colors, CSS variables, dark mode |
-| 9 | [Plugins](./plugins.md) | Built-in & custom plugins |
+| 9 | [Plugins](./plugins.md) | 30 built-in & custom plugins |
 | 10 | [Slash Commands](./slash-commands.md) | /help, /back, /restart, /cancel |
 | 11 | [File Upload](./file-upload.md) | Drag & drop, restrictions, previews |
 | 12 | [Custom Header & Input](./custom-header-input.md) | Replace header/input with React components |
@@ -32,7 +32,7 @@ bun install
 bun run dev
 ```
 
-The demo app at `http://localhost:3000` has **16 interactive demos** covering every feature, organized by category (Basic, Forms, Advanced, Components). Click any card to load that demo, then open the chat widget.
+The demo app at `http://localhost:3000` has **17 interactive demos** covering every feature, organized by category (Basic, Forms, Advanced, Components, Plugins). Click any card to load that demo, then open the chat widget.
 
 ## Quick Links
 

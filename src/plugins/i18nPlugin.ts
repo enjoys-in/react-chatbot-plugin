@@ -53,7 +53,7 @@ export function i18nPlugin(options: {
     onMessage(message) {
       if (message.sender === 'bot' && message.text) {
         // Auto-translate bot messages that look like translation keys
-        const translated = message.text.replace(/\{\{t:([^}]+)\}\}/g, (_, key: string) => t(key));
+        const translated = message.text.replace(/\{\{t:([^}]+)\}\}/g, (_:any, key: string) => t(key));
         if (translated !== message.text) {
           return { ...message, text: translated };
         }

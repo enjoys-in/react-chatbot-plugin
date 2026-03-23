@@ -16,6 +16,7 @@ import onboardingWizard from './onboarding-wizard';
 import customFields from './custom-fields';
 import keywordFallback from './keyword-fallback';
 import inputValidation from './input-validation';
+import pluginShowcase from './plugin-showcase';
 
 export const allDemos = [
   // Basic
@@ -38,6 +39,8 @@ export const allDemos = [
   // Components
   customComponents,
   customFields,
+  // Plugins
+  pluginShowcase,
 ];
 
 export const categories = [
@@ -45,4 +48,5 @@ export const categories = [
   { id: 'forms', label: 'Forms', icon: '📝' },
   { id: 'advanced', label: 'Advanced', icon: '⚡' },
   { id: 'components', label: 'Components', icon: '🧩' },
+  { id: 'plugins', label: 'Plugins', icon: '🔌' },
 ] as const;

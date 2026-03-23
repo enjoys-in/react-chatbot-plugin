@@ -81,8 +81,8 @@ export const App: React.FC = () => {
                 <div className="hero-stat__label">Demos</div>
               </div>
               <div>
-                <div className="hero-stat__value"><span className="accent">0</span></div>
-                <div className="hero-stat__label">Dependencies</div>
+                <div className="hero-stat__value"><span className="accent">30</span></div>
+                <div className="hero-stat__label">Plugins</div>
               </div>
             </div>
           </div>
@@ -129,6 +129,7 @@ export const App: React.FC = () => {
               {activeDemo.loginForm && <span className="badge badge--orange">login form</span>}
               {activeDemo.fileUpload?.enabled && <span className="badge badge--pink">file upload</span>}
               {activeDemo.renderFormField && <span className="badge badge--teal">custom fields</span>}
+              {activeDemo.plugins && <span className="badge badge--purple">plugins</span>}
             </div>
           </div>
         </main>
@@ -178,6 +179,7 @@ export const App: React.FC = () => {
             analyticsPlugin({
               onTrack: (event, data) => console.log(`[${activeDemo.id}] ${event}:`, data),
             }),
+            ...(activeDemo.plugins ?? []),
           ]}
           callbacks={{
             onOpen: () => console.log(`[${activeDemo.id}] opened`),

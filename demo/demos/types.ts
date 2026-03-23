@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import type { FlowConfig, FormConfig, StepComponentProps, FlowActionResult, ActionContext, FormFieldRenderMap, KeywordRoute } from '@enjoys/react-chatbot-plugin';
+import type { FlowConfig, FormConfig, StepComponentProps, FlowActionResult, ActionContext, FormFieldRenderMap, KeywordRoute, ChatPlugin } from '@enjoys/react-chatbot-plugin';
 import type { ReactNode } from 'react';
 
 export interface DemoConfig {
@@ -20,5 +20,6 @@ export interface DemoConfig {
   keywords?: KeywordRoute[];
   greetingResponse?: string;
   typingDelay?: number;
+  plugins?: ChatPlugin[];
   callbacks?: Record<string, unknown>;
 }

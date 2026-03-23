@@ -117,12 +117,13 @@ Full documentation is available in the [`docs/`](./docs/) folder:
 | 6 | [Custom Components](./docs/custom-components.md) | React widgets inside flow steps |
 | 7 | [Dynamic Routing](./docs/dynamic-routing.md) | Route based on API response status |
 | 8 | [Theming & Styling](./docs/theming.md) | Colors, CSS variables, dark mode |
-| 9 | [Plugins](./docs/plugins.md) | Built-in & custom plugins |
+| 9 | [Plugins](./docs/plugins.md) | 30 built-in & custom plugins |
 | 10 | [Slash Commands](./docs/slash-commands.md) | /help, /back, /restart, /cancel |
 | 11 | [File Upload](./docs/file-upload.md) | Drag & drop, restrictions, previews |
 | 12 | [Custom Header & Input](./docs/custom-header-input.md) | Replace header/input with React components |
 | 13 | [Advanced Patterns](./docs/advanced-patterns.md) | E-commerce bot, onboarding wizard, full examples |
-| 14 | [API Reference](./docs/api-reference.md) | All types, props, and exports |
+| 14 | [Keywords & Fallback](./docs/keywords-fallback.md) | Keyword routes, greeting detection, fallback, typing delay |
+| 15 | [API Reference](./docs/api-reference.md) | All types, props, and exports |
 
 ## Props
 
@@ -168,7 +169,7 @@ All internal components are exported for advanced use cases:
 
 **Theme utilities:** `resolveTheme`, `buildStyles`, `buildCSSVariables`
 
-**Built-in plugins:** `analyticsPlugin`, `webhookPlugin`, `persistencePlugin`
+**Built-in plugins:** `analyticsPlugin`, `webhookPlugin`, `persistencePlugin`, `loggerPlugin`, `crmPlugin`, `emailPlugin`, `syncPlugin`, `aiPlugin`, `intentPlugin`, `typingPlugin`, `autoReplyPlugin`, `validationPlugin`, `uploadPlugin`, `authPlugin`, `rateLimitPlugin`, `pushPlugin`, `soundPlugin`, `agentPlugin`, `transferPlugin`, `themePlugin`, `componentPlugin`, `leadPlugin`, `campaignPlugin`, `schedulerPlugin`, `reminderPlugin`, `i18nPlugin`, `debugPlugin`, `devtoolsPlugin`, `mediaPlugin`, `markdownPlugin`
 
 ## Development
 
@@ -176,7 +177,7 @@ All internal components are exported for advanced use cases:
 # Install dependencies
 bun install
 
-# Run demo (14 interactive demos)
+# Run demo (17 interactive demos)
 bun run dev
 
 # Build library

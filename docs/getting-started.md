@@ -75,7 +75,7 @@ This renders a chat launcher in the bottom-right corner. Click it to open the ch
 | Dynamic routing | Route based on API results |
 | Slash commands | /help, /back, /restart |
 | Theming | Light/dark, CSS variables |
-| Plugins | Analytics, webhooks, persistence |
+| Plugins | 30 built-in plugins (analytics, AI, i18n, CRM, etc.) |
 | File upload | Drag & drop with preview |
 
 ## Next Steps
