@@ -81,6 +81,8 @@ export interface ChatCallbacks {
   onFlowEnd?: (collectedData: Record<string, unknown>) => void;
   onError?: (error: Error) => void;
   onEvent?: (event: string, payload?: unknown) => void;
+  /** Called when user types text the bot couldn't handle */
+  onUnhandledMessage?: (text: string, context: { currentStepId: string | null }) => void;
 }
 
 // ─── Main Props ──────────────────────────────────────────────────
@@ -118,6 +120,32 @@ export interface ChatBotProps {
   actionHandlers?: Record<string, (data: Record<string, unknown>, ctx: ActionContext) => Promise<FlowActionResult>>;
   /** Override built-in form field renderers per field type. Each renderer receives strongly-typed props + the default element. */
   renderFormField?: FormFieldRenderMap;
+  /** Fallback message when user types text with no active flow or unmatched input */
+  fallbackMessage?: string | ((text: string) => string | null);
+  /** Keyword routes — match user text to responses or flow steps */
+  keywords?: KeywordRoute[];
+  /** Convenience: auto-respond to common greetings (hello, hi, hey, etc.) */
+  greetingResponse?: string;
+  /** Typing delay in ms before bot sends keyword/fallback replies (default: 0) */
+  typingDelay?: number;
+}
+
+// ─── Keyword / Intent Matching ───────────────────────────────────
+
+/** Route configuration for keyword-based text matching */
+export interface KeywordRoute {
+  /** Patterns to match against user text */
+  patterns: string[];
+  /** Bot response message when matched */
+  response?: string;
+  /** Jump to this flow step when matched */
+  next?: string;
+  /** Case-sensitive matching (default: false) */
+  caseSensitive?: boolean;
+  /** Matching strategy (default: 'contains') */
+  matchType?: 'exact' | 'contains' | 'startsWith' | 'regex';
+  /** Priority — higher wins when multiple routes match (default: 0) */
+  priority?: number;
 }
 
 // ─── Custom Step Component Props ─────────────────────────────────

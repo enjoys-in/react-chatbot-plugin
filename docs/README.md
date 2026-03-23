@@ -19,7 +19,8 @@ Comprehensive guide to `@enjoys/react-chatbot-plugin` — from basic setup to ad
 | 11 | [File Upload](./file-upload.md) | Drag & drop, restrictions, previews |
 | 12 | [Custom Header & Input](./custom-header-input.md) | Replace header/input with React components |
 | 13 | [Advanced Patterns](./advanced-patterns.md) | E-commerce bot, onboarding wizard, full examples |
-| 14 | [API Reference](./api-reference.md) | All types, props, and exports |
+| 14 | [Keywords & Fallback](./keywords-fallback.md) | Keyword routes, greeting detection, fallback, typing delay |
+| 15 | [API Reference](./api-reference.md) | All types, props, and exports |
 
 ## Running the Demos
 
@@ -31,7 +32,7 @@ bun install
 bun run dev
 ```
 
-The demo app at `http://localhost:3000` has **14 interactive demos** covering every feature, organized by category (Basic, Forms, Advanced, Components). Click any card to load that demo, then open the chat widget.
+The demo app at `http://localhost:3000` has **16 interactive demos** covering every feature, organized by category (Basic, Forms, Advanced, Components). Click any card to load that demo, then open the chat widget.
 
 ## Quick Links
 

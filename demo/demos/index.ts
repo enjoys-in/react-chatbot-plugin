@@ -14,6 +14,8 @@ import errorHandling from './error-handling';
 import ecommerceBot from './ecommerce-bot';
 import onboardingWizard from './onboarding-wizard';
 import customFields from './custom-fields';
+import keywordFallback from './keyword-fallback';
+import inputValidation from './input-validation';
 
 export const allDemos = [
   // Basic
@@ -25,12 +27,14 @@ export const allDemos = [
   formsShowcase,
   loginForm,
   fileUpload,
+  inputValidation,
   // Advanced
   asyncActions,
   dynamicRouting,
   errorHandling,
   ecommerceBot,
   onboardingWizard,
+  keywordFallback,
   // Components
   customComponents,
   customFields,

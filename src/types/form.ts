@@ -21,6 +21,7 @@ export interface FormFieldOption {
 }
 
 export interface FormFieldValidation {
+  required?: boolean;
   pattern?: string;
   minLength?: number;
   maxLength?: number;

@@ -148,6 +148,10 @@ export const App: React.FC = () => {
           welcomeScreen={activeDemo.welcomeScreen}
           components={activeDemo.components}
           actionHandlers={activeDemo.actionHandlers}
+          fallbackMessage={activeDemo.fallbackMessage}
+          keywords={activeDemo.keywords}
+          greetingResponse={activeDemo.greetingResponse}
+          typingDelay={activeDemo.typingDelay}
           theme={{
             primaryColor: '#6C5CE7',
             headerBg: 'linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%)',
@@ -185,6 +189,7 @@ export const App: React.FC = () => {
             onFlowEnd: (data) => console.log(`[${activeDemo.id}] flow ended:`, data),
             onFileUpload: (files) => console.log(`[${activeDemo.id}] files:`, files.map((f) => f.name)),
             onEvent: (event, payload) => console.log(`[${activeDemo.id}] event: ${event}`, payload),
+            onUnhandledMessage: (text, ctx) => console.log(`[${activeDemo.id}] unhandled: "${text}"`, ctx),
           }}
         />
       )}

@@ -123,7 +123,7 @@ export const ChatBot: React.FC<ChatBotProps> = (props) => {
   }, [state.isOpen, props.callbacks]);
 
   return (
-    <ChatContext.Provider value={{ state, dispatch, props }}>
+    <ChatContext.Provider value={{ state, dispatch, props, pluginManager: pluginManagerRef.current }}>
       <div style={{ ...styles.root, ...cssVars as React.CSSProperties }} className={props.className}>
         <ChatWindow styles={styles} position={position} zIndex={props.zIndex} hidden={!state.isOpen} />
         {showLauncher && (

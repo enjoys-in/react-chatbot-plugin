@@ -1,5 +1,16 @@
 import type { FlowQuickReply } from './message';
 import type { FormConfig } from './form';
+import type { FormFieldValidation } from './form';
+
+/** Configuration for a free-text input step with optional validation */
+export interface FlowStepInput {
+  /** Placeholder text for the input */
+  placeholder?: string;
+  /** Validation rules (reuses form validation) */
+  validation?: FormFieldValidation;
+  /** Transform user input before storing */
+  transform?: 'lowercase' | 'uppercase' | 'trim' | 'email';
+}
 
 export interface FlowStep {
   id: string;
@@ -13,6 +24,8 @@ export interface FlowStep {
   condition?: FlowCondition;
   /** Key into ChatBotProps.components — renders a custom React component in this step */
   component?: string;
+  /** Free-text input configuration — validates user input before advancing */
+  input?: FlowStepInput;
   /** Async action to run when this step is entered (API calls, verification, etc.) */
   asyncAction?: FlowAsyncAction;
 }

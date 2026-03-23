@@ -37,6 +37,10 @@
 ## Features
 
 - **JSON-driven flows** — Build conversational UIs with step-based JSON configuration
+- **Keyword matching** — Route user text to responses or flow steps via pattern matching
+- **Greeting detection** — Auto-respond to common greetings (hi, hello, hey, etc.)
+- **Fallback responses** — Catch-all reply when no keyword or flow matches
+- **Input validation** — Validate free-text input inside flow steps with transforms
 - **Async actions** — Run API calls on step entry with real-time loading/progress/error states
 - **Custom step components** — Render your own React widgets inside flow steps
 - **Dynamic routing** — Route to different steps based on API results, status codes, or custom logic
@@ -50,6 +54,8 @@
 - **Emoji picker** — Built-in emoji selector
 - **Welcome & login screens** — Optional onboarding flow
 - **Branding** — Customizable footer and header
+- **Typing delay** — Realistic typing pause before bot replies
+- **onUnhandledMessage** — Callback when nothing handles user text
 
 ## Installation
 

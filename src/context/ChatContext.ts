@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'react';
 import type { ChatMessage, ChatBotProps } from '../types';
+import type { PluginManager } from '../core/PluginManager';
 
 export interface ChatState {
   isOpen: boolean;
@@ -90,6 +91,7 @@ interface ChatContextValue {
   state: ChatState;
   dispatch: React.Dispatch<ChatAction>;
   props: ChatBotProps;
+  pluginManager?: PluginManager | null;
 }
 
 export const ChatContext = createContext<ChatContextValue | null>(null);

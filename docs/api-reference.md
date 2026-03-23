@@ -102,6 +102,10 @@ interface ChatBotProps {
   components?: Record<string, ComponentType<StepComponentProps>>;
   actionHandlers?: Record<string, (data: Record<string, unknown>, ctx: ActionContext) => Promise<FlowActionResult>>;
   renderFormField?: FormFieldRenderMap;
+  fallbackMessage?: string | ((text: string) => string | null);
+  keywords?: KeywordRoute[];
+  greetingResponse?: string;
+  typingDelay?: number;
 }
 ```
 
@@ -129,6 +133,7 @@ interface FlowStep {
   condition?: FlowCondition;
   component?: string;
   asyncAction?: FlowAsyncAction;
+  input?: FlowStepInput;
 }
 ```
 
@@ -231,6 +236,7 @@ interface ChatCallbacks {
   onFlowEnd?: (collectedData: Record<string, unknown>) => void;
   onError?: (error: Error) => void;
   onEvent?: (event: string, payload?: unknown) => void;
+  onUnhandledMessage?: (text: string, context: { currentStepId: string | null }) => void;
 }
 ```
 
@@ -361,5 +367,42 @@ interface FileFieldRenderProps {
   files: File[];
   onFileSelect: (files: File[]) => void;
   error?: string;
+}
+```
+
+### KeywordRoute
+
+```ts
+interface KeywordRoute {
+  patterns: string[];
+  response?: string;
+  next?: string;
+  caseSensitive?: boolean;
+  matchType?: 'exact' | 'contains' | 'startsWith' | 'regex';
+  priority?: number;
+}
+```
+
+### FlowStepInput
+
+```ts
+interface FlowStepInput {
+  placeholder?: string;
+  validation?: FormFieldValidation;
+  transform?: 'lowercase' | 'uppercase' | 'trim' | 'email';
+}
+```
+
+### FormFieldValidation
+
+```ts
+interface FormFieldValidation {
+  required?: boolean;
+  pattern?: string;
+  minLength?: number;
+  maxLength?: number;
+  min?: number;
+  max?: number;
+  message?: string;
 }
 ```

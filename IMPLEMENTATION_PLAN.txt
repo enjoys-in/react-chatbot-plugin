@@ -1,0 +1,244 @@
+============================================================
+  @enjoys/react-chatbot-plugin — Feature Implementation Plan
+  Based on: Missing conversational capabilities audit
+============================================================
+
+CURRENT STATE (v1.3.0)
+─────────────────────
+- Flow engine: JSON step-based, no intelligence
+- User text handling: only matches quick reply values or stores as step data
+- No fallback, no NLP, no keyword routing, no greeting detection
+- Slash commands: /help, /back, /cancel, /restart (exact match only)
+- Plugins: onMessage hook exists in types but NOT wired to user text input
+
+
+============================================================
+FEATURE 1: Fallback / Default Response System
+============================================================
+Priority: HIGH
+Effort: Small
+
+Problem:
+  When a user types anything that doesn't match a quick reply on a
+  quick-reply step, the bot says "I didn't quite get that." That's fine.
+  But when there's NO active flow or the flow has ended, typed text gets
+  NO response at all — the message just sits there.
+
+Implementation:
+  - Add `fallbackMessage` prop to ChatBotProps
+    Type: string | ((text: string) => string | null)
+    Default: "I'm not sure how to help with that. Try clicking one of the options above!"
+  - In useChat.sendMessage, after the flow-step switch block, if no flow
+    is active or flow has ended, fire fallbackMessage as a bot reply
+  - If fallbackMessage is a function, call it with user text — if it
+    returns null, stay silent (opt-out per message)
+
+Files to modify:
+  - src/types/config.ts (add fallbackMessage to ChatBotProps)
+  - src/hooks/useChat.ts (add fallback logic after flow block)
+
+
+============================================================
+FEATURE 2: Keyword / Intent Matching (No AI Required)
+============================================================
+Priority: HIGH
+Effort: Medium
+
+Problem:
+  Users naturally type "hello", "hi", "help", "pricing", "bye" etc.
+  The bot has zero ability to route based on keywords unless it happens
+  to match a quick reply label via the contains check.
+
+Implementation:
+  - Add `keywords` prop to ChatBotProps
+    Type: KeywordRoute[]
+    interface KeywordRoute {
+      patterns: string[];           // ["hello", "hi", "hey", "greetings"]
+      response?: string;            // "Hey there! 👋 How can I help?"
+      next?: string;                // jump to flow step "greeting"
+      caseSensitive?: boolean;      // default false
+      matchType?: 'exact' | 'contains' | 'startsWith' | 'regex';  // default 'contains'
+      priority?: number;            // higher wins if multiple match
+    }
+  - In useChat.sendMessage, BEFORE the flow-step block, check keywords:
+    1. Normalize text (lowercase, trim)
+    2. Iterate keywords sorted by priority desc
+    3. First match wins → send response and/or jump to step
+  - Keywords fire AFTER slash commands but BEFORE flow-step logic
+  - If a keyword matches and has `next`, call processFlowStep(next)
+
+Files to modify:
+  - src/types/config.ts (add KeywordRoute, keywords prop)
+  - src/hooks/useChat.ts (add keyword matching before flow block)
+  - src/engine/FlowEngine.ts (optional: add matchKeywords helper)
+
+Example usage:
+  <ChatBot
+    keywords={[
+      { patterns: ["hello", "hi", "hey"], response: "Hey there! 👋" },
+      { patterns: ["pricing", "plans", "cost"], next: "pricing_step" },
+      { patterns: ["bye", "goodbye"], response: "Goodbye! 👋 Have a great day!" },
+      { patterns: ["help"], response: "Type /help for commands, or choose an option below." },
+    ]}
+  />
+
+
+============================================================
+FEATURE 3: Greeting Detection
+============================================================
+Priority: MEDIUM
+Effort: Small (can be built on top of Feature 2)
+
+Problem:
+  "hello" "hi" "hey" are the most common first messages. No response.
+
+Implementation:
+  - This is just a preset keyword config, but we can add a convenience prop:
+    `greetingResponse?: string`
+  - Under the hood, it creates a KeywordRoute with common greetings:
+    ["hello", "hi", "hey", "howdy", "hola", "good morning", "good evening",
+     "what's up", "sup", "yo", "greetings"]
+  - If both `greetingResponse` and a matching `keywords` entry exist,
+    `keywords` takes priority (explicit wins)
+
+Files to modify:
+  - src/types/config.ts (add greetingResponse prop)
+  - src/hooks/useChat.ts (merge greeting into keywords array)
+
+
+============================================================
+FEATURE 4: Free-Text Input Steps
+============================================================
+Priority: MEDIUM
+Effort: Small
+
+Problem:
+  Currently, "normal text steps" always just store text and move to next.
+  There's no way to define a step that ASKS for free text and validates it.
+
+Implementation:
+  - Add `input` property to FlowStep:
+    interface FlowStepInput {
+      placeholder?: string;
+      validation?: FormFieldValidation;  // reuse existing validation
+      transform?: 'lowercase' | 'uppercase' | 'trim' | 'email';
+    }
+  - When a step has `input`, the bot expects free text:
+    1. User types → validate against input.validation
+    2. If invalid, show error message, don't advance
+    3. If valid, store in collectedData[step.id], advance to next
+
+Files to modify:
+  - src/types/flow.ts (add input to FlowStep)
+  - src/hooks/useChat.ts (add input validation in sendMessage flow block)
+
+Example:
+  {
+    id: 'ask_email',
+    message: 'What is your email address?',
+    input: {
+      placeholder: 'Enter your email...',
+      validation: { pattern: '^[^@]+@[^@]+\\.[^@]+$', message: 'Please enter a valid email' }
+    },
+    next: 'confirm'
+  }
+
+
+============================================================
+FEATURE 5: Plugin onMessage Wiring
+============================================================
+Priority: MEDIUM
+Effort: Small
+
+Problem:
+  ChatPlugin interface has onMessage hook but it's never called when
+  user sends text. Plugins can't react to user messages.
+
+Implementation:
+  - In useChat.sendMessage, after creating the user message object,
+    call pluginManager.onMessage(msg)
+  - This enables plugins to:
+    • Log all messages
+    • Trigger external webhooks on specific text
+    • Implement custom NLP via plugin
+
+Files to modify:
+  - src/hooks/useChat.ts (add pluginManager.onMessage call)
+  - src/components/ChatBot.tsx (ensure pluginManager ref is accessible)
+
+
+============================================================
+FEATURE 6: onUnhandledMessage Callback
+============================================================
+Priority: LOW
+Effort: Small
+
+Problem:
+  No way for the developer to know when a user typed something the bot
+  couldn't handle. Important for analytics and improving flows.
+
+Implementation:
+  - Add `onUnhandledMessage` to ChatCallbacks:
+    onUnhandledMessage?: (text: string, context: { currentStepId: string | null }) => void;
+  - Fire it when:
+    1. No flow active and no fallback configured
+    2. Quick reply step and text didn't match any option
+    3. Form/async/component step and user typed text
+
+Files to modify:
+  - src/types/config.ts (add to ChatCallbacks)
+  - src/hooks/useChat.ts (fire callback in unhandled branches)
+
+
+============================================================
+FEATURE 7: Typing Simulation for Bot Replies
+============================================================
+Priority: LOW
+Effort: Small
+
+Problem:
+  Bot replies appear instantly, which feels robotic. Quick-reply-matched
+  text responses could benefit from a brief typing indicator delay.
+
+Implementation:
+  - Already have TypingIndicator component and delay support on steps
+  - Add `typingDelay` prop to ChatBotProps (default: 0)
+    Also support per-keyword-route: `delay?: number`
+  - When sending bot reply from keyword/fallback, show typing indicator
+    for typingDelay ms before revealing message
+
+Files to modify:
+  - src/types/config.ts (add typingDelay)
+  - src/hooks/useChat.ts (add delay before bot message dispatch)
+
+
+============================================================
+IMPLEMENTATION ORDER (RECOMMENDED)
+============================================================
+
+Phase 1 — Essential (v1.4.0)
+  [1] Fallback response system         — 30 min
+  [2] Keyword/intent matching           — 1 hr
+  [3] Greeting detection (sugar)        — 15 min
+  [5] Plugin onMessage wiring           — 15 min
+
+Phase 2 — Enhanced (v1.5.0)
+  [4] Free-text input steps             — 45 min
+  [6] onUnhandledMessage callback       — 15 min
+  [7] Typing delay for keyword replies  — 30 min
+
+Total new types/props added:
+  - ChatBotProps: fallbackMessage, keywords, greetingResponse, typingDelay
+  - ChatCallbacks: onUnhandledMessage
+  - FlowStep: input
+  - New type: KeywordRoute
+
+============================================================
+NON-GOALS (Intentionally NOT implementing)
+============================================================
+  - AI/LLM integration — out of scope for a lightweight JSON flow widget
+  - NLP library dependency — no compromise on 0 dependencies / ~50KB bundle
+  - Fuzzy string matching library — contains match is sufficient
+  - Voice input — different feature category entirely
+
+============================================================

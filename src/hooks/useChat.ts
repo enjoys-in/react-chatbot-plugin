@@ -3,7 +3,8 @@ import { useChatContext } from '../context/ChatContext';
 import { FlowEngine } from '../engine/FlowEngine';
 import { uid, delay } from '../utils/helpers';
 import type { ChatMessage } from '../types';
-import type { FlowActionResult, ActionContext } from '../types/config';
+import type { FlowActionResult, ActionContext, KeywordRoute } from '../types/config';
+import type { FlowStepInput } from '../types/flow';
 
 /** Slash commands the user can type */
 const COMMANDS: Record<string, string> = {
@@ -13,8 +14,68 @@ const COMMANDS: Record<string, string> = {
   '/restart': 'Restart the conversation from the beginning',
 };
 
+/** Common greeting words for auto-detection */
+const GREETING_PATTERNS = ['hi', 'hello', 'hey', 'howdy', 'hola', 'greetings', 'good morning', 'good afternoon', 'good evening', 'sup', 'yo', 'hii', 'hiii'];
+
+/** Match user text against a single keyword route */
+function matchesRoute(text: string, route: KeywordRoute): boolean {
+  const compare = route.caseSensitive ? text : text.toLowerCase();
+  for (const pattern of route.patterns) {
+    const pat = route.caseSensitive ? pattern : pattern.toLowerCase();
+    switch (route.matchType ?? 'contains') {
+      case 'exact':
+        if (compare === pat) return true;
+        break;
+      case 'startsWith':
+        if (compare.startsWith(pat)) return true;
+        break;
+      case 'regex':
+        try {
+          if (new RegExp(pat, route.caseSensitive ? '' : 'i').test(text)) return true;
+        } catch { /* invalid regex — skip */ }
+        break;
+      case 'contains':
+      default:
+        if (compare.includes(pat)) return true;
+        break;
+    }
+  }
+  return false;
+}
+
+/** Find the best matching keyword route (highest priority) */
+function findKeywordMatch(text: string, keywords: KeywordRoute[]): KeywordRoute | undefined {
+  const sorted = [...keywords].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+  return sorted.find((r) => matchesRoute(text, r));
+}
+
+/** Validate and transform user text for an input step */
+function validateInput(text: string, input: FlowStepInput): { valid: boolean; value: string; error?: string } {
+  let value = text;
+  if (input.transform) {
+    switch (input.transform) {
+      case 'trim': value = value.trim(); break;
+      case 'lowercase': value = value.toLowerCase(); break;
+      case 'uppercase': value = value.toUpperCase(); break;
+      case 'email': value = value.trim().toLowerCase(); break;
+    }
+  }
+  if (input.validation) {
+    const v = input.validation;
+    if (v.required && !value.trim()) return { valid: false, value, error: v.message ?? 'This field is required.' };
+    if (v.minLength && value.length < v.minLength) return { valid: false, value, error: v.message ?? `Must be at least ${v.minLength} characters.` };
+    if (v.maxLength && value.length > v.maxLength) return { valid: false, value, error: v.message ?? `Must be at most ${v.maxLength} characters.` };
+    if (v.pattern) {
+      try {
+        if (!new RegExp(v.pattern).test(value)) return { valid: false, value, error: v.message ?? 'Invalid format.' };
+      } catch { /* invalid pattern */ }
+    }
+  }
+  return { valid: true, value };
+}
+
 export function useChat() {
-  const { state, dispatch, props } = useChatContext();
+  const { state, dispatch, props, pluginManager } = useChatContext();
   const flowRef = useRef<FlowEngine | null>(null);
   const flowStartedRef = useRef(false);
 
@@ -147,7 +208,7 @@ export function useChat() {
     }
 
     // Auto-advance if no user input required
-    if (!step.quickReplies && !step.form && step.next) {
+    if (!step.quickReplies && !step.form && !step.input && step.next) {
       await delay(300);
       processFlowStepRef.current(step.next);
     }
@@ -271,7 +332,7 @@ export function useChat() {
   );
 
   const sendMessage = useCallback(
-    (text: string) => {
+    async (text: string) => {
       // Check for slash commands first
       if (handleCommandRef.current(text)) return;
 
@@ -281,11 +342,17 @@ export function useChat() {
         text,
         timestamp: Date.now(),
       };
-      dispatch({ type: 'ADD_MESSAGE', payload: msg });
-      propsRef.current.callbacks?.onMessageSend?.(msg);
-      propsRef.current.callbacks?.onSubmit?.({ message: text });
+
+      // Let plugins transform the message before dispatching
+      const finalMsg = pluginManager ? await pluginManager.onMessage(msg) : msg;
+      dispatch({ type: 'ADD_MESSAGE', payload: finalMsg });
+      propsRef.current.callbacks?.onMessageSend?.(finalMsg);
+      propsRef.current.callbacks?.onSubmit?.({ message: finalMsg.text });
 
       const currentStepId = stateRef.current.currentStepId;
+      const typingMs = propsRef.current.typingDelay ?? 0;
+
+      // ── Active flow step ─────────────────────────────────────
       if (flowRef.current && currentStepId) {
         const step = flowRef.current.getStep(currentStepId);
         if (step) {
@@ -298,7 +365,6 @@ export function useChat() {
           if (flowRef.current.stepExpectsQuickReply(step)) {
             const matched = flowRef.current.matchQuickReply(step, text);
             if (matched) {
-              // User typed something matching a quick reply — handle it
               dispatch({ type: 'CLEAR_QUICK_REPLIES' });
               flowRef.current.setData(step.id, matched.value);
               const nextId = flowRef.current.resolveNext(step, matched.value);
@@ -309,17 +375,29 @@ export function useChat() {
                 dispatch({ type: 'SET_STEP', payload: null });
               }
             } else {
-              // User typed something that doesn't match — re-show options
               addBotMessage(
                 "I didn't quite get that. Please choose one of the options below:",
-                {
-                  quickReplies: step.quickReplies,
-                },
+                { quickReplies: step.quickReplies },
               );
             }
           } else if (flowRef.current.stepExpectsForm(step)) {
-            // Step has a form, nudge user
             addBotMessage("Please fill out the form above to continue.");
+          } else if (step.input) {
+            // ── Input step with validation ──
+            const result = validateInput(text, step.input);
+            if (!result.valid) {
+              addBotMessage(result.error ?? 'Invalid input. Please try again.');
+              return;
+            }
+            flowRef.current.setData(step.id, result.value);
+            const nextId = flowRef.current.resolveNext(step, result.value);
+            if (nextId) {
+              processFlowStep(nextId);
+            } else {
+              addBotMessage("Thanks for your message! Our team will get back to you soon. \u{1F64C}");
+              propsRef.current.callbacks?.onFlowEnd?.(flowRef.current.getData());
+              dispatch({ type: 'SET_STEP', payload: null });
+            }
           } else {
             // Normal text input step
             flowRef.current.setData(step.id, text);
@@ -327,16 +405,69 @@ export function useChat() {
             if (nextId) {
               processFlowStep(nextId);
             } else {
-              // End of flow — acknowledge
-              addBotMessage("Thanks for your message! Our team will get back to you soon. 🙌");
+              addBotMessage("Thanks for your message! Our team will get back to you soon. \u{1F64C}");
               propsRef.current.callbacks?.onFlowEnd?.(flowRef.current.getData());
               dispatch({ type: 'SET_STEP', payload: null });
             }
           }
+          return;
         }
       }
+
+      // ── No active flow step — try keyword / greeting / fallback ──
+
+      // Build runtime keyword list (user keywords + greeting shortcut)
+      const keywords: KeywordRoute[] = [...(propsRef.current.keywords ?? [])];
+      if (propsRef.current.greetingResponse) {
+        keywords.push({
+          patterns: GREETING_PATTERNS,
+          response: propsRef.current.greetingResponse,
+          matchType: 'exact',
+          priority: -1,
+        });
+      }
+
+      if (keywords.length > 0) {
+        const match = findKeywordMatch(text.trim(), keywords);
+        if (match) {
+          // Jump to flow step if route specifies `next`
+          if (match.next && flowRef.current) {
+            if (typingMs > 0) await delay(typingMs);
+            processFlowStep(match.next);
+            return;
+          }
+          // Send response message
+          if (match.response) {
+            if (typingMs > 0) {
+              dispatch({ type: 'SET_TYPING', payload: true });
+              await delay(typingMs);
+              dispatch({ type: 'SET_TYPING', payload: false });
+            }
+            await addBotMessage(match.response);
+            return;
+          }
+        }
+      }
+
+      // Fallback
+      const fb = propsRef.current.fallbackMessage;
+      if (fb) {
+        const fbText = typeof fb === 'function' ? fb(text) : fb;
+        if (fbText) {
+          if (typingMs > 0) {
+            dispatch({ type: 'SET_TYPING', payload: true });
+            await delay(typingMs);
+            dispatch({ type: 'SET_TYPING', payload: false });
+          }
+          await addBotMessage(fbText);
+          return;
+        }
+      }
+
+      // Nothing handled it — fire unhandled callback
+      propsRef.current.callbacks?.onUnhandledMessage?.(text, { currentStepId });
     },
-    [dispatch, addBotMessage, processFlowStep],
+    [dispatch, addBotMessage, processFlowStep, pluginManager],
   );
 
   const startFlow = useCallback(() => {
