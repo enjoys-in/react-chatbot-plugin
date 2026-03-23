@@ -20,6 +20,32 @@
       overflow: hidden;
     }
 
+    /* ─── Animations ───────────────────────── */
+
+    @keyframes float-slow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    @keyframes float-med {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-4px) rotate(1deg); }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+    @keyframes scan-line {
+      0% { top: -2px; }
+      100% { top: 100%; }
+    }
+    @keyframes gradient-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* ─── Banner Container ─────────────────── */
+
     .banner {
       width: 1280px;
       height: 640px;
@@ -28,7 +54,7 @@
       overflow: hidden;
       display: flex;
       align-items: center;
-      padding: 0 72px;
+      padding: 0 64px;
     }
 
     .banner::before {
@@ -53,6 +79,8 @@
       border-radius: 50%;
     }
 
+    /* ─── Background FX ────────────────────── */
+
     .orb-1 {
       position: absolute;
       width: 300px;
@@ -61,6 +89,18 @@
       top: 50%;
       left: 40%;
       border-radius: 50%;
+      animation: float-slow 8s ease-in-out infinite;
+    }
+
+    .orb-2 {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(253, 121, 168, 0.08) 0%, transparent 60%);
+      top: 10%;
+      left: 15%;
+      border-radius: 50%;
+      animation: float-med 6s ease-in-out infinite;
     }
 
     .grid-bg {
@@ -75,7 +115,7 @@
     .line-decor {
       position: absolute;
       top: 0;
-      right: 380px;
+      right: 420px;
       width: 1px;
       height: 100%;
       background: linear-gradient(to bottom, transparent, rgba(108, 92, 231, 0.2) 30%, rgba(108, 92, 231, 0.2) 70%, transparent);
@@ -92,41 +132,56 @@
       z-index: 1;
     }
 
+    .hex-pattern {
+      position: absolute;
+      top: 20px;
+      right: 80px;
+      width: 160px;
+      height: 160px;
+      opacity: 0.04;
+      z-index: 1;
+    }
+
+    .hex-pattern svg { width: 100%; height: 100%; }
+
+    /* ─── Left Content ─────────────────────── */
+
     .content {
       position: relative;
       z-index: 2;
       flex: 1;
-      padding-right: 40px;
+      padding-right: 36px;
     }
 
     .top-bar {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 32px;
+      gap: 10px;
+      margin-bottom: 20px;
     }
 
     .badge {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       background: rgba(108, 92, 231, 0.15);
       border: 1px solid rgba(108, 92, 231, 0.3);
       border-radius: 100px;
-      padding: 7px 18px;
-      font-size: 11px;
+      padding: 6px 14px;
+      font-size: 10px;
       font-weight: 700;
       color: #A29BFE;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.2px;
       text-transform: uppercase;
     }
 
     .badge .dot {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
       background: #00b894;
       border-radius: 50%;
       box-shadow: 0 0 8px rgba(0, 184, 148, 0.6);
+      animation: pulse-glow 2s ease-in-out infinite;
     }
 
     .badge-new {
@@ -135,20 +190,28 @@
       color: #fd79a8;
     }
 
+    .badge-ts {
+      background: rgba(49, 120, 198, 0.12);
+      border: 1px solid rgba(49, 120, 198, 0.3);
+      color: #5b9bd5;
+    }
+
     .title {
-      font-size: 54px;
+      font-size: 48px;
       font-weight: 900;
       color: #fff;
       line-height: 1.05;
-      margin-bottom: 18px;
+      margin-bottom: 12px;
       letter-spacing: -2px;
     }
 
     .title .gradient {
       background: linear-gradient(135deg, #A29BFE 0%, #6C5CE7 40%, #fd79a8 100%);
+      background-size: 200% 200%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      animation: gradient-shift 6s ease infinite;
     }
 
     .title .thin {
@@ -157,31 +220,31 @@
     }
 
     .subtitle {
-      font-size: 17px;
+      font-size: 14px;
       color: rgba(255, 255, 255, 0.5);
       line-height: 1.6;
-      max-width: 460px;
-      margin-bottom: 28px;
+      max-width: 440px;
+      margin-bottom: 18px;
       font-weight: 400;
     }
 
     .cta-row {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin-bottom: 28px;
+      gap: 12px;
+      margin-bottom: 16px;
     }
 
     .cta-install {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 12px 20px;
+      border-radius: 10px;
+      padding: 10px 16px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
+      font-size: 11.5px;
       color: rgba(255, 255, 255, 0.7);
     }
 
@@ -191,23 +254,55 @@
     .cta-btn {
       background: linear-gradient(135deg, #6C5CE7, #A29BFE);
       border: none;
-      border-radius: 12px;
-      padding: 13px 28px;
+      border-radius: 10px;
+      padding: 11px 22px;
       font-family: 'Raleway', sans-serif;
-      font-size: 14px;
+      font-size: 12.5px;
       font-weight: 700;
       color: #fff;
       letter-spacing: 0.3px;
       box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
     }
 
+    /* ─── 3x3 Feature Grid ─────────────────── */
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 14px;
+      max-width: 430px;
+    }
+
+    .feat {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 7px;
+      padding: 5px 8px;
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 0.2px;
+      transition: border-color 0.3s;
+    }
+
+    .feat .fi {
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+
+    /* ─── Stats Row ────────────────────────── */
+
     .stats {
       display: flex;
-      gap: 32px;
+      gap: 24px;
     }
 
     .stat-value {
-      font-size: 22px;
+      font-size: 18px;
       font-weight: 800;
       color: #fff;
       letter-spacing: -0.5px;
@@ -216,19 +311,31 @@
     .stat-value .accent { color: #A29BFE; }
 
     .stat-label {
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.35);
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.3);
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1px;
-      margin-top: 2px;
+      margin-top: 1px;
     }
+
+    /* ─── Right Side ───────────────────────── */
+
+    .right-side {
+      position: relative;
+      z-index: 2;
+      width: 380px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* ─── Chat Mockup ──────────────────────── */
 
     .chat-mockup {
       position: relative;
-      z-index: 2;
-      width: 320px;
-      flex-shrink: 0;
+      animation: float-slow 7s ease-in-out infinite;
     }
 
     .chat-window {
@@ -236,7 +343,7 @@
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
+      border-radius: 16px;
       overflow: hidden;
       box-shadow:
         0 24px 80px rgba(0, 0, 0, 0.5),
@@ -247,40 +354,40 @@
     .chat-header {
       background: linear-gradient(135deg, rgba(108, 92, 231, 0.9), rgba(162, 155, 254, 0.8));
       backdrop-filter: blur(10px);
-      padding: 16px 18px;
+      padding: 10px 14px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .chat-avatar {
-      width: 34px;
-      height: 34px;
+      width: 28px;
+      height: 28px;
       background: rgba(255, 255, 255, 0.2);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 13px;
     }
 
     .chat-header-text h3 {
       color: #fff;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 700;
     }
 
     .chat-header-text p {
       color: rgba(255, 255, 255, 0.65);
-      font-size: 11px;
+      font-size: 9px;
       display: flex;
       align-items: center;
       gap: 4px;
     }
 
     .online-dot {
-      width: 6px;
-      height: 6px;
+      width: 5px;
+      height: 5px;
       background: #00b894;
       border-radius: 50%;
       display: inline-block;
@@ -289,12 +396,12 @@
     .chat-dots {
       margin-left: auto;
       display: flex;
-      gap: 6px;
+      gap: 4px;
     }
 
     .chat-dots span {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
     }
 
@@ -303,19 +410,19 @@
     .chat-dots span:nth-child(3) { background: #00b894; }
 
     .chat-body {
-      padding: 16px;
+      padding: 10px 12px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      min-height: 180px;
+      gap: 6px;
+      min-height: 115px;
     }
 
     .msg {
       max-width: 82%;
-      padding: 9px 13px;
-      border-radius: 14px;
-      font-size: 12px;
-      line-height: 1.45;
+      padding: 7px 11px;
+      border-radius: 11px;
+      font-size: 10.5px;
+      line-height: 1.4;
     }
 
     .msg.bot {
@@ -323,20 +430,20 @@
       border: 1px solid rgba(108, 92, 231, 0.12);
       color: rgba(255, 255, 255, 0.8);
       align-self: flex-start;
-      border-bottom-left-radius: 4px;
+      border-bottom-left-radius: 3px;
     }
 
     .msg.user {
       background: linear-gradient(135deg, #6C5CE7, #A29BFE);
       color: #fff;
       align-self: flex-end;
-      border-bottom-right-radius: 4px;
+      border-bottom-right-radius: 3px;
       font-weight: 500;
     }
 
     .quick-replies {
       display: flex;
-      gap: 5px;
+      gap: 4px;
       align-self: flex-start;
       flex-wrap: wrap;
     }
@@ -345,35 +452,35 @@
       background: rgba(108, 92, 231, 0.12);
       border: 1px solid rgba(108, 92, 231, 0.25);
       border-radius: 20px;
-      padding: 5px 12px;
-      font-size: 11px;
+      padding: 3px 9px;
+      font-size: 9.5px;
       color: #A29BFE;
       font-weight: 600;
     }
 
     .chat-input {
       border-top: 1px solid rgba(255, 255, 255, 0.06);
-      padding: 12px 16px;
+      padding: 8px 12px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .chat-input-field {
       flex: 1;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 10px;
-      padding: 9px 12px;
-      font-size: 11px;
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 10px;
       color: rgba(255, 255, 255, 0.25);
     }
 
     .send-btn {
-      width: 34px;
-      height: 34px;
+      width: 28px;
+      height: 28px;
       background: linear-gradient(135deg, #6C5CE7, #A29BFE);
-      border-radius: 10px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -381,10 +488,76 @@
     }
 
     .send-btn svg {
-      width: 14px;
-      height: 14px;
+      width: 11px;
+      height: 11px;
       fill: #fff;
     }
+
+    /* ─── Code Snippet ─────────────────────── */
+
+    .code-block {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position: relative;
+    }
+
+    .code-block .scan {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(108, 92, 231, 0.4), transparent);
+      animation: scan-line 4s linear infinite;
+      z-index: 2;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .code-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .code-dot:nth-child(1) { background: #ff6b6b; }
+    .code-dot:nth-child(2) { background: #feca57; }
+    .code-dot:nth-child(3) { background: #00b894; }
+
+    .code-filename {
+      margin-left: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .code-body {
+      padding: 8px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9.5px;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.55);
+      white-space: pre;
+    }
+
+    .code-body .kw { color: #c792ea; }
+    .code-body .fn { color: #82aaff; }
+    .code-body .str { color: #c3e88d; }
+    .code-body .prop { color: #89ddff; }
+    .code-body .tag { color: #f07178; }
+    .code-body .attr { color: #ffcb6b; }
+    .code-body .num { color: #f78c6c; }
+
+    /* ─── Floating Pills ───────────────────── */
 
     .float-pill {
       position: absolute;
@@ -392,17 +565,73 @@
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 10px;
-      padding: 6px 12px;
-      font-size: 10px;
+      padding: 5px 10px;
+      font-size: 9px;
       font-weight: 600;
       color: rgba(255, 255, 255, 0.45);
       backdrop-filter: blur(10px);
       letter-spacing: 0.3px;
     }
 
-    .float-pill.p1 { top: 20px; right: -30px; color: #A29BFE; border-color: rgba(108, 92, 231, 0.2); }
-    .float-pill.p2 { bottom: 80px; right: -20px; color: #00b894; border-color: rgba(0, 184, 148, 0.2); }
-    .float-pill.p3 { top: 60px; left: -40px; color: #fd79a8; border-color: rgba(253, 121, 168, 0.2); }
+    .float-pill.p1 {
+      top: -6px; right: -8px; color: #A29BFE;
+      border-color: rgba(108, 92, 231, 0.25);
+      animation: float-med 5s ease-in-out infinite;
+    }
+
+    .float-pill.p2 {
+      bottom: 45px; right: -14px; color: #00b894;
+      border-color: rgba(0, 184, 148, 0.25);
+      animation: float-slow 6s ease-in-out 1s infinite;
+    }
+
+    .float-pill.p3 {
+      top: 35px; left: -28px; color: #fd79a8;
+      border-color: rgba(253, 121, 168, 0.25);
+      animation: float-med 7s ease-in-out 0.5s infinite;
+    }
+
+    .float-pill.p4 {
+      bottom: -8px; left: 20px; color: #feca57;
+      border-color: rgba(254, 202, 87, 0.25);
+      animation: float-slow 5.5s ease-in-out 0.3s infinite;
+    }
+
+    /* ─── Architecture Strip ───────────────── */
+
+    .arch-strip {
+      position: absolute;
+      z-index: 2;
+      left: 64px;
+      right: 64px;
+      bottom: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .arch-node {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 9px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 0.3px;
+    }
+
+    .arch-arrow {
+      color: rgba(108, 92, 231, 0.35);
+      font-size: 10px;
+      font-weight: 400;
+    }
+
+    /* ─── Bottom Bar ───────────────────────── */
 
     .bottom-bar {
       position: absolute;
@@ -413,32 +642,32 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 72px;
-      background: linear-gradient(to top, rgba(8, 6, 15, 0.95), transparent);
+      padding: 12px 64px;
+      background: linear-gradient(to top, rgba(8, 6, 15, 0.97), transparent);
     }
 
     .made-by {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
-      color: rgba(255, 255, 255, 0.35);
+      color: rgba(255, 255, 255, 0.3);
       letter-spacing: 0.5px;
     }
 
     .made-by span {
-      color: rgba(255, 255, 255, 0.7);
+      color: rgba(255, 255, 255, 0.65);
       font-weight: 800;
     }
 
     .bottom-badges {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
     }
 
     .b-badge {
-      border-radius: 8px;
-      padding: 5px 14px;
-      font-size: 12px;
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-size: 10px;
       font-weight: 700;
       font-family: 'JetBrains Mono', monospace;
     }
@@ -447,16 +676,29 @@
     .b-version { background: rgba(0, 184, 148, 0.12); border: 1px solid rgba(0, 184, 148, 0.25); color: #00b894; }
     .b-ts { background: rgba(49, 120, 198, 0.12); border: 1px solid rgba(49, 120, 198, 0.25); color: #3178c6; }
     .b-react { background: rgba(97, 218, 251, 0.1); border: 1px solid rgba(97, 218, 251, 0.2); color: #61dafb; }
-    .b-mit { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.5); }
+    .b-vite { background: rgba(189, 52, 254, 0.1); border: 1px solid rgba(189, 52, 254, 0.2); color: #bd34fe; }
+    .b-mit { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.45); }
   </style>
 </head>
 <body>
   <div class="banner" id="banner">
+
+    <!-- Background layers -->
     <div class="grid-bg"></div>
     <div class="orb-1"></div>
+    <div class="orb-2"></div>
     <div class="line-decor"></div>
     <div class="line-decor-2"></div>
 
+    <div class="hex-pattern">
+      <svg viewBox="0 0 100 100" fill="none" stroke="rgba(162,155,254,0.5)" stroke-width="0.5">
+        <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" />
+        <polygon points="50,20 80,35 80,65 50,80 20,65 20,35" />
+        <polygon points="50,35 65,42.5 65,57.5 50,65 35,57.5 35,42.5" />
+      </svg>
+    </div>
+
+    <!-- ═══ LEFT CONTENT ═══ -->
     <div class="content">
       <div class="top-bar">
         <div class="badge">
@@ -464,7 +706,10 @@
           Open Source
         </div>
         <div class="badge badge-new">
-          🚀 v1.6.0 — customizeChat Slots
+          🚀 v1.7.0
+        </div>
+        <div class="badge badge-ts">
+          TS 100%
         </div>
       </div>
 
@@ -474,8 +719,8 @@
       </h1>
 
       <p class="subtitle">
-        Drop-in chatbot widget with JSON-driven flows, 30 plugins, customizeChat
-        slot map, keyword matching, async actions & glassmorphism UI.
+        Drop-in chatbot widget with JSON-driven flows, 30 plugins,
+        9 customizable UI slots, keyword routing & glassmorphism UI.
       </p>
 
       <div class="cta-row">
@@ -487,10 +732,27 @@
         <div class="cta-btn">Get Started →</div>
       </div>
 
+      <!-- 3×3 Feature grid -->
+      <div class="features">
+        <div class="feat"><span class="fi">🧩</span> 9 UI Slots</div>
+        <div class="feat"><span class="fi">🔌</span> 30 Plugins</div>
+        <div class="feat"><span class="fi">📝</span> 15+ Form Fields</div>
+        <div class="feat"><span class="fi">⚡</span> Async Actions</div>
+        <div class="feat"><span class="fi">🔀</span> Conditional Flows</div>
+        <div class="feat"><span class="fi">🔑</span> Keyword Routes</div>
+        <div class="feat"><span class="fi">📁</span> File Upload</div>
+        <div class="feat"><span class="fi">🌙</span> Dark Mode</div>
+        <div class="feat"><span class="fi">💬</span> Slash Commands</div>
+      </div>
+
       <div class="stats">
         <div class="stat">
           <div class="stat-value"><span class="accent">~73</span>KB</div>
-          <div class="stat-label">Bundle Size</div>
+          <div class="stat-label">Bundle</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value"><span class="accent">9</span></div>
+          <div class="stat-label">Slots</div>
         </div>
         <div class="stat">
           <div class="stat-value"><span class="accent">30</span></div>
@@ -498,83 +760,105 @@
         </div>
         <div class="stat">
           <div class="stat-value"><span class="accent">18</span></div>
-          <div class="stat-label">Live Demos</div>
+          <div class="stat-label">Demos</div>
         </div>
         <div class="stat">
           <div class="stat-value"><span class="accent">16</span></div>
-          <div class="stat-label">Doc Pages</div>
+          <div class="stat-label">Docs</div>
         </div>
       </div>
     </div>
 
-    <div class="chat-mockup">
-      <div class="float-pill p1">🔌 30 Plugins</div>
-      <div class="float-pill p2">🎨 customizeChat</div>
-      <div class="float-pill p3">🔑 Keywords</div>
+    <!-- ═══ RIGHT SIDE: Chat Mockup + Code ═══ -->
+    <div class="right-side">
 
-      <div class="chat-window">
-        <div class="chat-header">
-          <div class="chat-avatar">🤖</div>
-          <div class="chat-header-text">
-            <h3>Acme Support</h3>
-            <p><span class="online-dot"></span> Online · Instant replies</p>
+      <!-- Chat mockup -->
+      <div class="chat-mockup">
+        <div class="float-pill p1">🔌 30 Plugins</div>
+        <div class="float-pill p2">🎨 customizeChat</div>
+        <div class="float-pill p3">🧩 9 Slots</div>
+
+        <div class="chat-window">
+          <div class="chat-header">
+            <div class="chat-avatar">🤖</div>
+            <div class="chat-header-text">
+              <h3>Acme Support</h3>
+              <p><span class="online-dot"></span> Online · Instant replies</p>
+            </div>
+            <div class="chat-dots">
+              <span></span><span></span><span></span>
+            </div>
           </div>
-          <div class="chat-dots">
-            <span></span>
-            <span></span>
-            <span></span>
+          <div class="chat-body">
+            <div class="msg bot">Hey! 👋 How can I help you today?</div>
+            <div class="quick-replies">
+              <span class="qr">💰 Pricing</span>
+              <span class="qr">🛠 Support</span>
+              <span class="qr">📖 Docs</span>
+            </div>
+            <div class="msg user">Show me a demo!</div>
+            <div class="msg bot">Check out 18 interactive demos 🎮</div>
           </div>
-        </div>
-        <div class="chat-body">
-          <div class="msg bot">Hey! 👋 Welcome to Acme. How can I help?</div>
-          <div class="quick-replies">
-            <span class="qr">💰 Pricing</span>
-            <span class="qr">🛠 Support</span>
-            <span class="qr">📖 Docs</span>
-          </div>
-          <div class="msg user">Show me a demo!</div>
-          <div class="msg bot">Sure! Check out our 18 interactive demos 🎮</div>
-        </div>
-        <div class="chat-input">
-          <div class="chat-input-field">Type a message…</div>
-          <div class="send-btn">
-            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          <div class="chat-input">
+            <div class="chat-input-field">Type a message…</div>
+            <div class="send-btn">
+              <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Code snippet -->
+      <div class="code-block">
+        <div class="scan"></div>
+        <div class="code-header">
+          <span class="code-dot"></span>
+          <span class="code-dot"></span>
+          <span class="code-dot"></span>
+          <span class="code-filename">App.tsx</span>
+        </div>
+        <div class="code-body"><span class="kw">import</span> { <span class="fn">ChatBot</span> } <span class="kw">from</span> <span class="str">'@enjoys/react-chatbot-plugin'</span>
+
+<span class="tag">&lt;ChatBot</span>
+  <span class="attr">flow</span><span class="prop">=</span>{myFlow}
+  <span class="attr">customizeChat</span><span class="prop">=</span>{{
+    <span class="attr">header</span>: { <span class="attr">config</span>: { <span class="attr">title</span>: <span class="str">'Support'</span> } },
+    <span class="attr">messageBubble</span>: { <span class="attr">component</span>: CustomBubble },
+  }}
+<span class="tag">/&gt;</span></div>
+      </div>
+
+      <div class="float-pill p4">⚡ Zero Config</div>
     </div>
 
+    <!-- Architecture strip -->
+    <div class="arch-strip">
+      <span class="arch-node">📄 JSON Flow</span>
+      <span class="arch-arrow">→</span>
+      <span class="arch-node">⚙️ FlowEngine</span>
+      <span class="arch-arrow">→</span>
+      <span class="arch-node">🔌 Plugins</span>
+      <span class="arch-arrow">→</span>
+      <span class="arch-node">🧩 Slots</span>
+      <span class="arch-arrow">→</span>
+      <span class="arch-node">🖥️ ChatBot UI</span>
+    </div>
+
+    <!-- Bottom bar -->
     <div class="bottom-bar">
       <div class="made-by">Made with ❤️ by <span>Enjoys</span></div>
       <div class="bottom-badges">
         <span class="b-badge b-npm">npm</span>
-        <span class="b-badge b-version">v1.6.0</span>
+        <span class="b-badge b-version">v1.7.0</span>
         <span class="b-badge b-ts">TypeScript</span>
         <span class="b-badge b-react">React 19</span>
+        <span class="b-badge b-vite">Vite 8</span>
         <span class="b-badge b-mit">MIT</span>
       </div>
     </div>
   </div>
 
   <script>
-    // Auto-screenshot via canvas
-    async function captureAndDownload() {
-      const banner = document.getElementById('banner');
-      const canvas = document.createElement('canvas');
-      canvas.width = 1280;
-      canvas.height = 640;
-      const ctx = canvas.getContext('2d');
-
-      const svgData = new XMLSerializer().serializeToString(
-        await htmlToSvg(banner)
-      );
-
-      // Fallback: use html2canvas-style approach
-      // For best results, right-click the banner → Inspect → Capture node screenshot
-      alert('Banner loaded! Right-click the banner → Inspect Element → right-click the .banner node → "Capture node screenshot" for pixel-perfect 1280x640 PNG.');
-    }
-
-    // Simple auto-download via window.print for quick capture
     window.addEventListener('load', () => {
       document.title = 'react-chatbot-plugin-banner';
     });
