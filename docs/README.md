@@ -21,6 +21,7 @@ Comprehensive guide to `@enjoys/react-chatbot-plugin` — from basic setup to ad
 | 13 | [Advanced Patterns](./advanced-patterns.md) | E-commerce bot, onboarding wizard, full examples |
 | 14 | [Keywords & Fallback](./keywords-fallback.md) | Keyword routes, greeting detection, fallback, typing delay |
 | 15 | [API Reference](./api-reference.md) | All types, props, and exports |
+| 16 | [Changelog](./changelog.md) | Version history and release notes |
 
 ## Running the Demos
 

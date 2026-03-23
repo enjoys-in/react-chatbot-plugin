@@ -136,6 +136,19 @@ Form data is merged into `collectedData` and accessible in:
 - `asyncAction` handlers receive all collected data as the first argument
 - Custom components receive it via `StepComponentProps.data`
 
+### Friendly Display Labels
+
+When a form is submitted, the chat shows a user-friendly summary using **field labels** and **option display names** instead of raw field names and values:
+
+```
+✅ Displayed as:         ❌ Not raw keys:
+Company Name: Acme       company: Acme
+Team Size: 2-10          team_size: 2-10
+Industry: Healthcare     industry: health
+```
+
+The raw data (`{ company: 'Acme', team_size: '2-10', industry: 'health' }`) is preserved in `message.formData` and `collectedData` for programmatic use — only the visible chat bubble uses friendly labels.
+
 ## FormConfig Properties
 
 | Property | Type | Description |

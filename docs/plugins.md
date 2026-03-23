@@ -509,11 +509,13 @@ Methods available in the plugin context (`PluginContext`):
 
 | Hook | When Called |
 |------|------------|
-| `onInit` | Chat component mounts |
+| `onInit` | Chat component mounts (all plugins init **in parallel**) |
 | `onMessage` | Any message is added (user, bot, quick reply, form) |
 | `onSubmit` | Form is submitted or login |
 | `onEvent` | Lifecycle events (open, close, stepChange, flowEnd, quickReply, login) |
-| `onDestroy` | Chat component unmounts |
+| `onDestroy` | Chat component unmounts (listeners are cleaned up) |
+
+> **Note:** Plugin `onInit` hooks run in parallel via `Promise.allSettled`, so a slow-initializing plugin (e.g., one that fetches remote config) won't block others from starting.
 
 ## Multiple Plugins
 
