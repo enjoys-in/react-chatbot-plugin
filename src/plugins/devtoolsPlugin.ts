@@ -58,15 +58,18 @@ export function devtoolsPlugin(options?: {
     if (visible) renderPanel();
   };
 
+  let keyHandler: ((e: KeyboardEvent) => void) | null = null;
+
   return {
     name: 'devtools',
 
     onInit(ctx) {
       if (typeof document === 'undefined') return;
 
-      document.addEventListener('keydown', (e) => {
+      keyHandler = (e: KeyboardEvent) => {
         if (e.key === shortcutKey) toggle();
-      });
+      };
+      document.addEventListener('keydown', keyHandler);
 
       state.messages = ctx.getMessages().length;
       state.data = ctx.getData();
@@ -90,6 +93,10 @@ export function devtoolsPlugin(options?: {
     },
 
     onDestroy() {
+      if (keyHandler) {
+        document.removeEventListener('keydown', keyHandler);
+        keyHandler = null;
+      }
       panel?.remove();
       panel = null;
     },

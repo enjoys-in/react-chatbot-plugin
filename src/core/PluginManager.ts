@@ -42,13 +42,16 @@ export class PluginManager {
 
   async init(): Promise<void> {
     if (!this.context) return;
-    for (const plugin of this.plugins) {
-      try {
-        await plugin.onInit?.(this.context);
-      } catch (err) {
-        console.error(`[Plugin:${plugin.name}] onInit error:`, err);
-      }
-    }
+    const ctx = this.context;
+    await Promise.allSettled(
+      this.plugins.map(async (plugin) => {
+        try {
+          await plugin.onInit?.(ctx);
+        } catch (err) {
+          console.error(`[Plugin:${plugin.name}] onInit error:`, err);
+        }
+      }),
+    );
   }
 
   async onMessage(message: ChatMessage): Promise<ChatMessage> {
