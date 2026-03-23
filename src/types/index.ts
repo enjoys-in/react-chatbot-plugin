@@ -17,5 +17,16 @@ export type {
   StepComponentProps,
   FlowActionResult,
   ActionContext,
+  ChatCustomizeChat,
+  ChatCustomizeSlotMap,
+  MessageBubbleSlotProps,
+  QuickRepliesSlotProps,
+  TypingIndicatorSlotProps,
+  HeaderSlotProps,
+  InputSlotProps,
+  BrandingSlotProps,
+  WelcomeScreenSlotProps,
+  LoginScreenSlotProps,
+  LauncherSlotProps,
 } from './config';
 

@@ -46,6 +46,7 @@
 - **Dynamic routing** — Route to different steps based on API results, status codes, or custom logic
 - **Plugin architecture** — 30 built-in plugins: analytics, AI, webhooks, persistence, i18n, CRM, rate limiting, live agent, and more
 - **Slash commands** — `/help`, `/back`, `/cancel`, `/restart` built-in
+- **`customizeChat` slot map** — All UI customization in one prop: component overrides (bubble, quick replies, typing indicator, header, input, launcher, branding, welcome/login screen) + config (header, branding, welcome screen content)
 - **Custom header/input** — Swap the header or input with your own React components
 - **Forms** — Text, select, radio, checkbox, file upload, with validation
 - **Custom form fields** — Replace any form field type with your own React component
@@ -97,7 +98,9 @@ function App() {
   return (
     <ChatBot
       flow={flow}
-      header={{ title: 'Acme Support', subtitle: 'Online', showRestart: true }}
+      customizeChat={{
+        header: { config: { title: 'Acme Support', subtitle: 'Online', showRestart: true } },
+      }}
     />
   );
 }
@@ -132,9 +135,6 @@ Full documentation is available in the [`docs/`](./docs/) folder:
 | `flow` | `FlowConfig` | JSON conversation flow |
 | `theme` | `ChatTheme` | Colors, fonts, border radius, light/dark mode |
 | `style` | `ChatStyle` | CSS overrides for launcher, window, header, etc. |
-| `header` | `HeaderConfig` | Title, subtitle, avatar, showClose, showMinimize, showRestart |
-| `branding` | `BrandingConfig` | "Powered by" footer, logo |
-| `welcomeScreen` | `ReactNode` | Custom welcome screen content |
 | `loginForm` | `FormConfig` | Pre-chat login/identification form |
 | `callbacks` | `ChatCallbacks` | Event handlers (onOpen, onClose, onMessageSend, etc.) |
 | `plugins` | `ChatPlugin[]` | Array of plugins |
@@ -143,8 +143,6 @@ Full documentation is available in the [`docs/`](./docs/) folder:
 | `position` | `'bottom-right' \| 'bottom-left'` | Widget position |
 | `enableEmoji` | `boolean` | Show emoji picker |
 | `fileUpload` | `FileUploadConfig` | File upload settings |
-| `renderHeader` | `(ctx, defaultHeader) => ReactNode` | Custom header renderer |
-| `renderInput` | `(ctx, defaultInput) => ReactNode` | Custom input renderer |
 | `components` | `Record<string, ComponentType<StepComponentProps>>` | Custom React components for flow steps |
 | `actionHandlers` | `Record<string, (data, ctx) => Promise<FlowActionResult>>` | Async action handlers for flow steps |
 | `defaultOpen` | `boolean` | Start with chat open |
@@ -153,7 +151,40 @@ Full documentation is available in the [`docs/`](./docs/) folder:
 | `closeIcon` | `ReactNode` | Custom close icon |
 | `zIndex` | `number` | CSS z-index |
 | `renderFormField` | `FormFieldRenderMap` | Custom renderers for form field types |
+| `customizeChat` | `ChatCustomizeChat` | All UI customization — slot configs + component overrides (see below) |
 | `className` | `string` | Root element class name |
+
+### `customizeChat` Slots
+
+Each key is a partial of its slot props — provide config, content, or a custom `component`. Only provided keys are used; missing keys use defaults. Forms (`DynamicForm` / `renderFormField`) are never affected.
+
+| Key | Slot Props | Configurable Fields |
+|-----|-----------|---------------------|
+| `header` | `HeaderSlotProps` | `config: HeaderConfig`, `component` |
+| `input` | `InputSlotProps` | `component` |
+| `branding` | `BrandingSlotProps` | `config: BrandingConfig`, `component` |
+| `welcomeScreen` | `WelcomeScreenSlotProps` | `content: ReactNode`, `component` |
+| `loginScreen` | `LoginScreenSlotProps` | `config: FormConfig`, `component` |
+| `launcher` | `LauncherSlotProps` | `component` |
+| `messageBubble` | `MessageBubbleSlotProps` | `component: ComponentType` |
+| `quickReplies` | `QuickRepliesSlotProps` | `component: ComponentType` |
+| `typingIndicator` | `TypingIndicatorSlotProps` | `component: ComponentType` |
+
+```tsx
+<ChatBot
+  flow={flow}
+  customizeChat={{
+    header: {
+      config: { title: 'Acme Support', subtitle: 'Online', showRestart: true },
+    },
+    branding: {
+      config: { poweredBy: 'Acme Inc', showBranding: true },
+    },
+    messageBubble: { component: MyCustomBubble },
+    quickReplies: { component: MyCustomQuickReplies },
+  }}
+/>
+```
 
 ## Exported Components
 

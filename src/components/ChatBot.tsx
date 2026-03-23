@@ -127,15 +127,16 @@ export const ChatBot: React.FC<ChatBotProps> = (props) => {
       <div style={{ ...styles.root, ...cssVars as React.CSSProperties }} className={props.className}>
         <ChatWindow styles={styles} position={position} zIndex={props.zIndex} hidden={!state.isOpen} />
         {showLauncher && (
-          <Launcher
-            onClick={handleToggle}
-            isOpen={state.isOpen}
-            position={position}
-            styles={styles}
-            icon={props.launcherIcon}
-            closeIcon={props.closeIcon}
-            zIndex={props.zIndex}
-          />
+          props.customizeChat?.launcher?.component
+            ?? <Launcher
+                onClick={handleToggle}
+                isOpen={state.isOpen}
+                position={position}
+                styles={styles}
+                icon={props.launcherIcon}
+                closeIcon={props.closeIcon}
+                zIndex={props.zIndex}
+              />
         )}
       </div>
     </ChatContext.Provider>

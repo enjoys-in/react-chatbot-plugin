@@ -1,9 +1,10 @@
 import type { ComponentType, ReactNode } from 'react';
 import type { ChatTheme, ChatStyle } from './theme';
-import type { ChatMessage } from './message';
+import type { ChatMessage, FlowQuickReply } from './message';
 import type { FlowConfig } from './flow';
 import type { FormConfig, FormFieldRenderMap } from './form';
 import type { ChatPlugin } from './plugin';
+import type { ChatStyles } from '../styles/theme';
 
 // ─── Branding ────────────────────────────────────────────────────
 
@@ -90,9 +91,6 @@ export interface ChatCallbacks {
 export interface ChatBotProps {
   theme?: ChatTheme;
   style?: ChatStyle;
-  header?: HeaderConfig;
-  branding?: BrandingConfig;
-  welcomeScreen?: ReactNode;
   flow?: FlowConfig;
   loginForm?: FormConfig;
   callbacks?: ChatCallbacks;
@@ -110,10 +108,6 @@ export interface ChatBotProps {
   enableEmoji?: boolean;
   /** File upload configuration */
   fileUpload?: FileUploadConfig;
-  /** Custom header component — receives ChatRenderContext as props */
-  renderHeader?: (ctx: ChatRenderContext, defaultHeader: ReactNode) => ReactNode;
-  /** Custom input component — receives ChatRenderContext as props */
-  renderInput?: (ctx: ChatRenderContext, defaultInput: ReactNode) => ReactNode;
   /** Map of custom components that can be rendered in flow steps (key = step.component) */
   components?: Record<string, ComponentType<StepComponentProps>>;
   /** Map of async action handlers (key = step.asyncAction.handler) */
@@ -128,6 +122,8 @@ export interface ChatBotProps {
   greetingResponse?: string;
   /** Typing delay in ms before bot sends keyword/fallback replies (default: 0) */
   typingDelay?: number;
+  /** Slot map — override individual UI components. Only provided keys are replaced; rest use defaults. */
+  customizeChat?: ChatCustomizeChat;
 }
 
 // ─── Keyword / Intent Matching ───────────────────────────────────
@@ -147,6 +143,136 @@ export interface KeywordRoute {
   /** Priority — higher wins when multiple routes match (default: 0) */
   priority?: number;
 }
+
+// ─── Customize Chat — Slot Map ───────────────────────────────────
+
+/** Props passed to a custom message bubble component */
+export interface MessageBubbleSlotProps {
+  message: ChatMessage;
+  styles: ChatStyles;
+  /** Custom component to replace the default bubble */
+  component?: ComponentType<{ message: ChatMessage; styles: ChatStyles }>;
+}
+
+/** Props passed to a custom quick replies component */
+export interface QuickRepliesSlotProps {
+  replies: FlowQuickReply[];
+  onSelect: (value: string, label: string) => void;
+  primaryColor: string;
+  /** Custom component to replace the default quick replies */
+  component?: ComponentType<{ replies: FlowQuickReply[]; onSelect: (value: string, label: string) => void; primaryColor: string }>;
+}
+
+/** Props passed to a custom typing indicator component */
+export interface TypingIndicatorSlotProps {
+  color: string;
+  /** Custom component to replace the default typing indicator */
+  component?: ComponentType<{ color: string }>;
+}
+
+/** Props passed to a custom header slot component */
+export interface HeaderSlotProps {
+  config: HeaderConfig;
+  styles: ChatStyles;
+  onClose: () => void;
+  onRestart?: () => void;
+  logo?: string;
+  logoWidth?: string;
+  /** Chat render context — current state, toggleChat, restartSession, sendMessage */
+  ctx: ChatRenderContext;
+  /** Custom header element — replaces the default header when provided */
+  component?: ReactNode;
+}
+
+/** Props passed to a custom input slot component */
+export interface InputSlotProps {
+  onSend: (text: string, files?: File[]) => void;
+  placeholder?: string;
+  primaryColor: string;
+  isDark?: boolean;
+  enableEmoji?: boolean;
+  fileUpload?: FileUploadConfig;
+  onFileUpload?: (files: File[]) => void | Promise<void>;
+  /** Chat render context — current state, toggleChat, restartSession, sendMessage */
+  ctx: ChatRenderContext;
+  /** Custom input element — replaces the default input when provided */
+  component?: ReactNode;
+}
+
+/** Props passed to a custom branding slot component */
+export interface BrandingSlotProps {
+  config: BrandingConfig;
+  primaryColor: string;
+  /** Custom branding element — replaces the default footer when provided */
+  component?: ReactNode;
+}
+
+/** Props passed to a custom welcome screen slot component */
+export interface WelcomeScreenSlotProps {
+  content: ReactNode;
+  onDismiss: () => void;
+  primaryColor: string;
+  /** Custom welcome screen element — replaces the default when provided */
+  component?: ReactNode;
+}
+
+/** Props passed to a custom login screen slot component */
+export interface LoginScreenSlotProps {
+  config: FormConfig;
+  onLogin: (data: Record<string, unknown>) => void;
+  primaryColor: string;
+  renderFormField?: FormFieldRenderMap;
+  /** Custom login screen element — replaces the default when provided */
+  component?: ReactNode;
+}
+
+/** Props passed to a custom launcher slot component */
+export interface LauncherSlotProps {
+  onClick: () => void;
+  isOpen: boolean;
+  position: 'bottom-right' | 'bottom-left';
+  styles: ChatStyles;
+  icon?: ReactNode;
+  closeIcon?: ReactNode;
+  zIndex?: number;
+  /** Custom launcher element — replaces the default when provided */
+  component?: ReactNode;
+}
+
+/**
+ * Strict slot-to-props mapping. Defines every allowed key and its exact props interface.
+ * No extra keys allowed — TypeScript will error on unknown slot names.
+ */
+export interface ChatCustomizeSlotMap {
+  messageBubble: MessageBubbleSlotProps;
+  quickReplies: QuickRepliesSlotProps;
+  typingIndicator: TypingIndicatorSlotProps;
+  header: HeaderSlotProps;
+  input: InputSlotProps;
+  branding: BrandingSlotProps;
+  welcomeScreen: WelcomeScreenSlotProps;
+  loginScreen: LoginScreenSlotProps;
+  launcher: LauncherSlotProps;
+}
+
+/**
+ * Slot map for customizing individual chat UI components.
+ * Each key accepts a partial of its slot props — provide config, content, or a custom component.
+ * Only the 9 defined slot keys are allowed — unknown keys cause a compile error.
+ * Form rendering (DynamicForm / renderFormField) is never affected.
+ *
+ * @example
+ * ```tsx
+ * customizeChat={{
+ *   header: { config: { title: 'Support', showRestart: true } },
+ *   branding: { config: { poweredBy: 'Acme', showBranding: true } },
+ *   messageBubble: { component: MyCustomBubble },
+ * }}
+ * ```
+ */
+export type ChatCustomizeChat = {
+  [K in keyof ChatCustomizeSlotMap]?: Partial<ChatCustomizeSlotMap[K]>;
+};
 
 // ─── Custom Step Component Props ─────────────────────────────────
 

@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import type { ComponentType } from 'react';
 import type { ChatMessage } from '../types';
-import type { StepComponentProps, FlowActionResult } from '../types/config';
+import type { StepComponentProps, FlowActionResult, ChatCustomizeChat } from '../types/config';
 import type { FormFieldRenderMap } from '../types/form';
 import type { ChatStyles } from '../styles/theme';
 import { MessageBubble } from './MessageBubble';
@@ -26,6 +26,8 @@ interface MessageListProps {
   currentStepId?: string | null;
   /** Custom form field renderers per field type */
   renderFormField?: FormFieldRenderMap;
+  /** Slot overrides from customizeChat */
+  customizeChat?: ChatCustomizeChat;
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -40,6 +42,7 @@ export const MessageList: React.FC<MessageListProps> = ({
   collectedData,
   currentStepId,
   renderFormField,
+  customizeChat,
 }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -47,13 +50,17 @@ export const MessageList: React.FC<MessageListProps> = ({
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
+  const Bubble = customizeChat?.messageBubble?.component ?? MessageBubble;
+  const QR = customizeChat?.quickReplies?.component ?? QuickReplies;
+  const Typing = customizeChat?.typingIndicator?.component ?? TypingIndicator;
+
   return (
     <div style={styles.messageList} className="cb-scrollbar">
       {messages.map((msg) => (
         <React.Fragment key={msg.id}>
-          <MessageBubble message={msg} styles={styles} />
+          <Bubble message={msg} styles={styles} />
           {msg.quickReplies && msg.quickReplies.length > 0 && (
-            <QuickReplies
+            <QR
               replies={msg.quickReplies}
               onSelect={onQuickReply}
               primaryColor={primaryColor}
@@ -80,7 +87,7 @@ export const MessageList: React.FC<MessageListProps> = ({
           )}
         </React.Fragment>
       ))}
-      {isTyping && <TypingIndicator color={primaryColor} />}
+      {isTyping && <Typing color={primaryColor} />}
       <div ref={bottomRef} />
     </div>
   );

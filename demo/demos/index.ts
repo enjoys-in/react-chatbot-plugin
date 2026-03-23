@@ -17,6 +17,7 @@ import customFields from './custom-fields';
 import keywordFallback from './keyword-fallback';
 import inputValidation from './input-validation';
 import pluginShowcase from './plugin-showcase';
+import customizeChat from './customize-chat';
 
 export const allDemos = [
   // Basic
@@ -39,6 +40,7 @@ export const allDemos = [
   // Components
   customComponents,
   customFields,
+  customizeChat,
   // Plugins
   pluginShowcase,
 ];

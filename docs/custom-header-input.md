@@ -1,40 +1,84 @@
 # Custom Header & Input
 
-Replace the default header or input with your own React components.
+Replace the default header or input via the `customizeChat` slot map.
 
-## renderHeader
+## Custom Header
+
+Pass a custom `component` (ReactNode) to the `header` slot:
 
 ```tsx
+const MyHeader = (
+  <div style={{ padding: 16, background: '#333', color: '#fff' }}>
+    <h3>My Custom Header</h3>
+  </div>
+);
+
 <ChatBot
   flow={flow}
-  renderHeader={(ctx, defaultHeader) => (
-    <div style={{ padding: 16, background: '#333', color: '#fff' }}>
-      <h3>My Custom Header</h3>
-      <p>Step: {ctx.currentStepId ?? 'none'}</p>
-      <button onClick={ctx.restartSession}>Restart</button>
-      <button onClick={ctx.toggleChat}>Close</button>
-    </div>
-  )}
+  customizeChat={{
+    header: {
+      config: { title: 'Support Bot', showRestart: true },
+      component: MyHeader,
+    },
+  }}
 />
 ```
 
-## renderInput
+When `component` is provided it replaces the default header entirely. If omitted, the default header renders using `config`.
+
+## Custom Input
+
+Pass a custom `component` (ReactNode) to the `input` slot:
 
 ```tsx
+const MyInput = (
+  <div style={{ padding: 12 }}>
+    <input type="text" placeholder="Type here..." />
+  </div>
+);
+
 <ChatBot
   flow={flow}
-  renderInput={(ctx, defaultInput) => (
-    <div>
-      {defaultInput}
-      <small>Current step: {ctx.currentStepId}</small>
-    </div>
-  )}
+  customizeChat={{
+    input: { component: MyInput },
+  }}
 />
 ```
+
+## HeaderSlotProps
+
+All fields available inside `customizeChat.header`:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `config` | `HeaderConfig` | Title, subtitle, avatar, showClose, showMinimize, showRestart |
+| `component` | `ReactNode` | Custom header element — replaces default when provided |
+| `ctx` | `ChatRenderContext` | Current state, toggleChat, restartSession, sendMessage |
+| `styles` | `ChatStyles` | Resolved theme styles |
+| `onClose` | `() => void` | Close the chat window |
+| `onRestart` | `() => void` | Restart the conversation |
+| `logo` | `string` | Logo URL from branding config |
+| `logoWidth` | `string` | Logo width |
+
+## InputSlotProps
+
+All fields available inside `customizeChat.input`:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `component` | `ReactNode` | Custom input element — replaces default when provided |
+| `ctx` | `ChatRenderContext` | Current state, toggleChat, restartSession, sendMessage |
+| `onSend` | `(text, files?) => void` | Send handler |
+| `placeholder` | `string` | Input placeholder text |
+| `primaryColor` | `string` | Theme primary color |
+| `isDark` | `boolean` | Whether dark mode is active |
+| `enableEmoji` | `boolean` | Whether emoji picker is enabled |
+| `fileUpload` | `FileUploadConfig` | File upload settings |
+| `onFileUpload` | `(files) => void` | File upload callback |
 
 ## ChatRenderContext
 
-Both `renderHeader` and `renderInput` receive a `ChatRenderContext` object:
+Available via `customizeChat.header.ctx` and `customizeChat.input.ctx`:
 
 | Property | Type | Description |
 |----------|------|-------------|
@@ -46,38 +90,22 @@ Both `renderHeader` and `renderInput` receive a `ChatRenderContext` object:
 | `restartSession` | `() => void` | Restart the conversation |
 | `sendMessage` | `(text: string) => void` | Send a message programmatically |
 
-## Wrapping the Default
+## Configuring Header Without Replacing
 
-The second argument is the default element. You can wrap it:
-
-```tsx
-renderHeader={(ctx, defaultHeader) => (
-  <div>
-    {defaultHeader}
-    <div style={{ padding: '4px 16px', background: '#f0ebff', fontSize: 12 }}>
-      Step: {ctx.currentStepId ?? 'Start'}
-    </div>
-  </div>
-)}
-```
-
-## Replacing Completely
-
-Or replace it entirely:
+Just pass `config` — no `component` needed:
 
 ```tsx
-renderInput={(ctx) => (
-  <div style={{ padding: 12 }}>
-    <input
-      type="text"
-      placeholder="Type here..."
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' && e.currentTarget.value) {
-          ctx.sendMessage(e.currentTarget.value);
-          e.currentTarget.value = '';
-        }
-      }}
-    />
-  </div>
-)}
+<ChatBot
+  flow={flow}
+  customizeChat={{
+    header: {
+      config: {
+        title: 'Acme Support',
+        subtitle: 'Online',
+        showRestart: true,
+        showMinimize: true,
+      },
+    },
+  }}
+/>
 ```

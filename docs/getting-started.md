@@ -51,11 +51,15 @@ This renders a chat launcher in the bottom-right corner. Click it to open the ch
     headerBg: 'linear-gradient(135deg, #6C5CE7, #A29BFE)',
     borderRadius: '20px',
   }}
-  header={{
-    title: 'My Bot',
-    subtitle: 'Online',
-    showClose: true,
-    showRestart: true,
+  customizeChat={{
+    header: {
+      config: {
+        title: 'My Bot',
+        subtitle: 'Online',
+        showClose: true,
+        showRestart: true,
+      },
+    },
   }}
   callbacks={{
     onFlowEnd: (data) => console.log('Collected:', data),

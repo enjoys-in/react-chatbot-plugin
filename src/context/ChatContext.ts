@@ -81,7 +81,7 @@ export const initialState = (props: ChatBotProps): ChatState => ({
   isOpen: props.defaultOpen ?? false,
   messages: props.initialMessages ?? [],
   isTyping: false,
-  showWelcome: !!props.welcomeScreen,
+  showWelcome: !!props.customizeChat?.welcomeScreen?.content,
   currentStepId: null,
   collectedData: {},
   isLoggedIn: !props.loginForm,

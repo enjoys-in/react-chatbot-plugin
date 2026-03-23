@@ -1,7 +1,6 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import type { CSSProperties } from 'react';
 import type { ChatStyles } from '../styles/theme';
-import type { ChatRenderContext } from '../types/config';
 import { ChatHeader } from './ChatHeader';
 import { WelcomeScreen } from './WelcomeScreen';
 import { LoginScreen } from './LoginScreen';
@@ -82,29 +81,20 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ styles, position, zIndex
     [sendMessage, dispatch, props.callbacks],
   );
 
-  // Build render context for custom components
-  const renderCtx: ChatRenderContext = useMemo(
-    () => ({
-      currentStepId: state.currentStepId,
-      isOpen: state.isOpen,
-      messages: state.messages,
-      collectedData: state.collectedData,
-      toggleChat,
-      restartSession,
-      sendMessage,
-    }),
-    [state.currentStepId, state.isOpen, state.messages, state.collectedData, toggleChat, restartSession, sendMessage],
-  );
+  // Resolve configs from customizeChat slots
+  const headerCfg = props.customizeChat?.header?.config ?? { title: 'Chat with us' };
+  const brandingCfg = props.customizeChat?.branding?.config;
+  const welcomeContent = props.customizeChat?.welcomeScreen?.content;
 
   // Default header element
   const defaultHeader = (
     <ChatHeader
-      config={props.header ?? { title: 'Chat with us' }}
+      config={headerCfg}
       styles={styles}
       onClose={toggleChat}
       onRestart={restartSession}
-      logo={props.branding?.logo}
-      logoWidth={props.branding?.logoWidth}
+      logo={brandingCfg?.logo}
+      logoWidth={brandingCfg?.logoWidth}
     />
   );
 
@@ -134,23 +124,26 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ styles, position, zIndex
         ...(zIndex != null ? { zIndex } : {}),
       }}
     >
-      {props.renderHeader ? props.renderHeader(renderCtx, defaultHeader) : defaultHeader}
+      {/* Header */}
+      {props.customizeChat?.header?.component ?? defaultHeader}
 
       {/* Welcome Screen */}
-      {state.showWelcome && props.welcomeScreen ? (
-        <WelcomeScreen
-          content={props.welcomeScreen}
-          onDismiss={dismissWelcome}
-          primaryColor={theme.primaryColor}
-        />
+      {state.showWelcome && welcomeContent ? (
+        props.customizeChat?.welcomeScreen?.component
+          ?? <WelcomeScreen
+              content={welcomeContent}
+              onDismiss={dismissWelcome}
+              primaryColor={theme.primaryColor}
+            />
       ) : /* Login Screen */
       !state.isLoggedIn && props.loginForm ? (
-        <LoginScreen
-          config={props.loginForm}
-          onLogin={handleLogin}
-          primaryColor={theme.primaryColor}
-          renderFormField={props.renderFormField}
-        />
+        props.customizeChat?.loginScreen?.component
+          ?? <LoginScreen
+              config={props.loginForm}
+              onLogin={handleLogin}
+              primaryColor={theme.primaryColor}
+              renderFormField={props.renderFormField}
+            />
       ) : (
         /* Chat Area */
         <>
@@ -166,12 +159,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ styles, position, zIndex
             collectedData={state.collectedData}
             currentStepId={state.currentStepId}
             renderFormField={props.renderFormField}
+            customizeChat={props.customizeChat}
           />
           <div style={styles.inputArea}>
-            {props.renderInput ? props.renderInput(renderCtx, defaultInput) : defaultInput}
+            {props.customizeChat?.input?.component ?? defaultInput}
           </div>
-          {props.branding && (
-            <Branding config={props.branding} primaryColor={theme.primaryColor} />
+          {brandingCfg && (
+            props.customizeChat?.branding?.component
+              ?? <Branding config={brandingCfg} primaryColor={theme.primaryColor} />
           )}
         </>
       )}

@@ -4,6 +4,31 @@ All notable changes to `@enjoys/react-chatbot-plugin` are documented here.
 
 ---
 
+## v1.6.0 — customizeChat Slot Map
+
+### Features
+
+- **`customizeChat` prop** — single slot map for all UI customization. Each key is a `Partial<SlotProps>` — provide config, content, or a custom `component`. Only provided keys are used; missing keys use defaults.
+  - `header` — configure via `config: HeaderConfig`, replace via `component`
+  - `input` — replace via `component`
+  - `branding` — configure via `config: BrandingConfig`, replace via `component`
+  - `welcomeScreen` — provide `content: ReactNode`, replace via `component`
+  - `loginScreen` — configure via `config: FormConfig`, replace via `component`
+  - `launcher` — replace via `component`
+  - `messageBubble` — replace via `component: ComponentType`
+  - `quickReplies` — replace via `component: ComponentType`
+  - `typingIndicator` — replace via `component: ComponentType`
+- **Strongly-typed slot props** — each slot has a dedicated props interface (`MessageBubbleSlotProps`, `HeaderSlotProps`, etc.) exported from the package.
+- **`header`, `branding`, `welcomeScreen`** config moved into `customizeChat` — no longer direct props on `ChatBotProps`.
+- Forms (`DynamicForm` / `renderFormField`) are architecturally separate and never affected by `customizeChat` overrides.
+
+### Breaking Changes
+
+- `header`, `branding`, `welcomeScreen` removed from `ChatBotProps`. Use `customizeChat.header.config`, `customizeChat.branding.config`, `customizeChat.welcomeScreen.content` instead.
+- `renderHeader` and `renderInput` removed from `ChatBotProps`. Use `customizeChat.header.component` and `customizeChat.input.component` instead.
+
+---
+
 ## v1.5.1 — Bug Fixes & Form Label Display
 
 ### Bug Fixes

@@ -28,9 +28,13 @@ You can also add a restart button to the header:
 
 ```tsx
 <ChatBot
-  header={{
-    title: 'Support Bot',
-    showRestart: true,  // Adds a restart icon button
+  customizeChat={{
+    header: {
+      config: {
+        title: 'Support Bot',
+        showRestart: true,  // Adds a restart icon button
+      },
+    },
   }}
 />
 ```

@@ -107,9 +107,6 @@ interface ChatBotProps {
   flow?: FlowConfig;
   theme?: ChatTheme;
   style?: ChatStyle;
-  header?: HeaderConfig;
-  branding?: BrandingConfig;
-  welcomeScreen?: ReactNode;
   loginForm?: FormConfig;
   callbacks?: ChatCallbacks;
   plugins?: ChatPlugin[];
@@ -124,8 +121,6 @@ interface ChatBotProps {
   zIndex?: number;
   enableEmoji?: boolean;
   fileUpload?: FileUploadConfig;
-  renderHeader?: (ctx: ChatRenderContext, defaultHeader: ReactNode) => ReactNode;
-  renderInput?: (ctx: ChatRenderContext, defaultInput: ReactNode) => ReactNode;
   components?: Record<string, ComponentType<StepComponentProps>>;
   actionHandlers?: Record<string, (data: Record<string, unknown>, ctx: ActionContext) => Promise<FlowActionResult>>;
   renderFormField?: FormFieldRenderMap;
@@ -133,6 +128,30 @@ interface ChatBotProps {
   keywords?: KeywordRoute[];
   greetingResponse?: string;
   typingDelay?: number;
+  /** All UI customization — slot configs + component overrides */
+  customizeChat?: ChatCustomizeChat;
+}
+```
+
+### ChatCustomizeChat
+
+Single prop for all UI customization. Each key is a `Partial` of its slot props.
+
+```ts
+type ChatCustomizeChat = {
+  [K in keyof ChatCustomizeSlotMap]?: Partial<ChatCustomizeSlotMap[K]>;
+};
+
+interface ChatCustomizeSlotMap {
+  header: HeaderSlotProps;         // config, component, ctx
+  input: InputSlotProps;           // component, ctx
+  branding: BrandingSlotProps;     // config, component
+  welcomeScreen: WelcomeScreenSlotProps; // content, component
+  loginScreen: LoginScreenSlotProps;     // config, component
+  launcher: LauncherSlotProps;     // component
+  messageBubble: MessageBubbleSlotProps; // component (ComponentType)
+  quickReplies: QuickRepliesSlotProps;   // component (ComponentType)
+  typingIndicator: TypingIndicatorSlotProps; // component (ComponentType)
 }
 ```
 

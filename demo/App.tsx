@@ -69,12 +69,12 @@ export const App: React.FC = () => {
             </div>
             <div className="hero-stats">
               <div>
-                <div className="hero-stat__value"><span className="accent">~50</span>KB</div>
+                <div className="hero-stat__value"><span className="accent">~73</span>KB</div>
                 <div className="hero-stat__label">Bundle</div>
               </div>
               <div>
-                <div className="hero-stat__value"><span className="accent">15+</span></div>
-                <div className="hero-stat__label">Form Fields</div>
+                <div className="hero-stat__value"><span className="accent">9</span></div>
+                <div className="hero-stat__label">UI Slots</div>
               </div>
               <div>
                 <div className="hero-stat__value"><span className="accent">{allDemos.length}</span></div>
@@ -129,6 +129,7 @@ export const App: React.FC = () => {
               {activeDemo.loginForm && <span className="badge badge--orange">login form</span>}
               {activeDemo.fileUpload?.enabled && <span className="badge badge--pink">file upload</span>}
               {activeDemo.renderFormField && <span className="badge badge--teal">custom fields</span>}
+              {activeDemo.customizeChat && <span className="badge badge--pink">customizeChat</span>}
               {activeDemo.plugins && <span className="badge badge--purple">plugins</span>}
             </div>
           </div>
@@ -146,7 +147,6 @@ export const App: React.FC = () => {
           key={chatKey}
           flow={activeDemo.flow}
           loginForm={activeDemo.loginForm}
-          welcomeScreen={activeDemo.welcomeScreen}
           components={activeDemo.components}
           actionHandlers={activeDemo.actionHandlers}
           fallbackMessage={activeDemo.fallbackMessage}
@@ -158,23 +158,30 @@ export const App: React.FC = () => {
             headerBg: 'linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%)',
             borderRadius: '20px',
           }}
-          header={{
-            title: activeDemo.title,
-            subtitle: activeDemo.category + ' demo',
-            showClose: true,
-            showMinimize: true,
-            showRestart: true,
-          }}
-          branding={{
-            poweredBy: 'Enjoys ChatBot',
-            poweredByUrl: 'https://github.com/enjoys-in/react-chatbot-plugin',
-            showBranding: true,
-          }}
           inputPlaceholder="Type a message or /help..."
           position="bottom-right"
           enableEmoji={activeDemo.enableEmoji ?? true}
           fileUpload={activeDemo.fileUpload ?? { enabled: false }}
           renderFormField={activeDemo.renderFormField}
+          customizeChat={{
+            header: {
+              config: {
+                title: activeDemo.title,
+                subtitle: activeDemo.category + ' demo',
+                showClose: true,
+                showMinimize: true,
+                showRestart: true,
+              },
+            },
+            branding: {
+              config: {
+                poweredBy: 'Enjoys ChatBot',
+                poweredByUrl: 'https://github.com/enjoys-in/react-chatbot-plugin',
+                showBranding: true,
+              },
+            },
+            ...activeDemo.customizeChat,
+          }}
           plugins={[
             analyticsPlugin({
               onTrack: (event, data) => console.log(`[${activeDemo.id}] ${event}:`, data),
