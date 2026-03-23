@@ -1,11 +1,10 @@
 import type { FlowConfig, FlowStep, ChatMessage, FlowQuickReply } from '../types';
+import { uid } from '../utils/helpers';
 
 export class FlowEngine {
   private steps: Map<string, FlowStep>;
   private startStep: string;
   private collectedData: Record<string, unknown> = {};
-  private idCounter = 0;
-  private uid = (): string => `msg_${Date.now()}_${++this.idCounter}`;
   private stepHistory: string[] = [];
 
   constructor(flow: FlowConfig) {
@@ -89,6 +88,7 @@ export class FlowEngine {
   matchQuickReply(step: FlowStep, text: string): FlowQuickReply | undefined {
     if (!step.quickReplies) return undefined;
     const lower = text.toLowerCase().trim();
+    if (!lower) return undefined;
     // Exact value match
     const exact = step.quickReplies.find((r) => r.value.toLowerCase() === lower);
     if (exact) return exact;
@@ -106,7 +106,7 @@ export class FlowEngine {
     const texts = step.messages ?? (step.message ? [step.message] : []);
     for (const text of texts) {
       messages.push({
-        id: this.uid(),
+        id: uid(),
         sender: 'bot',
         text,
         timestamp: Date.now(),
@@ -121,7 +121,7 @@ export class FlowEngine {
     // If step has a form, create a form message
     if (step.form) {
       messages.push({
-        id: this.uid(),
+        id: uid(),
         sender: 'bot',
         timestamp: Date.now(),
         form: step.form,
@@ -131,7 +131,7 @@ export class FlowEngine {
     // If step has a custom component, create a component message
     if (step.component) {
       messages.push({
-        id: this.uid(),
+        id: uid(),
         sender: 'bot',
         timestamp: Date.now(),
         component: step.component,
@@ -163,12 +163,11 @@ export class FlowEngine {
   }
 }
 
-let globalIdCounter = 0;
 export function createQuickReplyMessage(
   replies: FlowQuickReply[],
 ): ChatMessage {
   return {
-    id: `msg_${Date.now()}_${++globalIdCounter}`,
+    id: uid(),
     sender: 'bot',
     timestamp: Date.now(),
     quickReplies: replies,

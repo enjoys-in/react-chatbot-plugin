@@ -332,7 +332,7 @@ export function useChat() {
         dispatch({ type: 'SET_STEP', payload: null });
       }
     },
-    [dispatch, processFlowStep],
+    [dispatch, processFlowStep, pluginManager],
   );
 
   const sendMessage = useCallback(
@@ -446,9 +446,7 @@ export function useChat() {
           // Send response message
           if (match.response) {
             if (typingMs > 0) {
-              dispatch({ type: 'SET_TYPING', payload: true });
               await delay(typingMs);
-              dispatch({ type: 'SET_TYPING', payload: false });
             }
             await addBotMessage(match.response);
             return;
@@ -462,9 +460,7 @@ export function useChat() {
         const fbText = typeof fb === 'function' ? fb(text) : fb;
         if (fbText) {
           if (typingMs > 0) {
-            dispatch({ type: 'SET_TYPING', payload: true });
             await delay(typingMs);
-            dispatch({ type: 'SET_TYPING', payload: false });
           }
           await addBotMessage(fbText);
           return;
@@ -497,7 +493,7 @@ export function useChat() {
   }, [props.flow, state.showWelcome, state.isLoggedIn, startFlow]);
 
   const handleQuickReply = useCallback(
-    (value: string, label: string) => {
+    async (value: string, label: string) => {
       dispatch({ type: 'CLEAR_QUICK_REPLIES' });
       // Add user message
       const msg: ChatMessage = {
@@ -507,7 +503,7 @@ export function useChat() {
         timestamp: Date.now(),
       };
       dispatch({ type: 'ADD_MESSAGE', payload: msg });
-      pluginManager?.onMessage(msg);
+      await pluginManager?.onMessage(msg);
       pluginManager?.emitEvent('quickReply', { value, label });
       propsRef.current.callbacks?.onQuickReply?.(value, label);
 
@@ -528,7 +524,7 @@ export function useChat() {
         }
       }
     },
-    [dispatch, processFlowStep],
+    [dispatch, processFlowStep, pluginManager],
   );
 
   const handleFormSubmit = useCallback(
@@ -551,7 +547,7 @@ export function useChat() {
         timestamp: Date.now(),
       };
       dispatch({ type: 'ADD_MESSAGE', payload: msg });
-      pluginManager?.onMessage(msg);
+      await pluginManager?.onMessage(msg);
       await pluginManager?.onSubmit(data);
 
       await propsRef.current.callbacks?.onFormSubmit?.(formId, data);
