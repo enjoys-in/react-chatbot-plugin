@@ -36,6 +36,7 @@ export { DynamicForm, TextField, SelectField, RadioField, CheckboxField, FileUpl
 // ─── Core Engine ─────────────────────────────────────────────────
 export { FlowEngine } from './engine/FlowEngine';
 export { PluginManager } from './core/PluginManager';
+export { LiveAgentAdapter } from './core/LiveAgentAdapter';
 
 // ─── Plugins (built-in) ─────────────────────────────────────────
 export {
@@ -69,10 +70,12 @@ export {
   devtoolsPlugin,
   mediaPlugin,
   markdownPlugin,
+  liveAgentPlugin,
 } from './plugins';
 
 // ─── Hooks ───────────────────────────────────────────────────────
 export { useChat } from './hooks/useChat';
+export { useLiveAgent } from './hooks/useLiveAgent';
 
 // ─── Context ─────────────────────────────────────────────────────
 export { ChatContext, useChatContext } from './context/ChatContext';
@@ -129,4 +132,9 @@ export type {
   ChatPlugin,
   PluginContext,
   ChatPluginEvent,
+  LiveAgentConfig,
+  LiveAgentEvents,
+  AgentInfo,
+  ResolvedLiveAgentEvents,
 } from './types';
+export { DEFAULT_LIVE_AGENT_EVENTS } from './types';

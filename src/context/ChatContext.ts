@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 import type { ChatMessage, ChatBotProps } from '../types';
 import type { PluginManager } from '../core/PluginManager';
+import type { AgentInfo } from '../types/liveAgent';
 
 export interface ChatState {
   isOpen: boolean;
@@ -10,6 +11,8 @@ export interface ChatState {
   currentStepId: string | null;
   collectedData: Record<string, unknown>;
   isLoggedIn: boolean;
+  isLiveAgent: boolean;
+  agentInfo: AgentInfo | null;
 }
 
 export type ChatAction =
@@ -24,7 +27,9 @@ export type ChatAction =
   | { type: 'SET_LOGGED_IN'; payload: boolean }
   | { type: 'CLEAR_QUICK_REPLIES' }
   | { type: 'RESET_CHAT' }
-  | { type: 'UPDATE_MESSAGE'; payload: { id: string; updates: Partial<ChatMessage> } };
+  | { type: 'UPDATE_MESSAGE'; payload: { id: string; updates: Partial<ChatMessage> } }
+  | { type: 'SET_LIVE_AGENT'; payload: boolean }
+  | { type: 'SET_AGENT_INFO'; payload: AgentInfo | null };
 
 export function chatReducer(state: ChatState, action: ChatAction): ChatState {
   switch (action.type) {
@@ -72,6 +77,10 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
           m.id === action.payload.id ? { ...m, ...action.payload.updates } : m,
         ),
       };
+    case 'SET_LIVE_AGENT':
+      return { ...state, isLiveAgent: action.payload };
+    case 'SET_AGENT_INFO':
+      return { ...state, agentInfo: action.payload };
     default:
       return state;
   }
@@ -85,6 +94,8 @@ export const initialState = (props: ChatBotProps): ChatState => ({
   currentStepId: null,
   collectedData: {},
   isLoggedIn: !props.loginForm,
+  isLiveAgent: false,
+  agentInfo: null,
 });
 
 interface ChatContextValue {

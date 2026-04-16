@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import type { FlowConfig, FormConfig, StepComponentProps, FlowActionResult, ActionContext, FormFieldRenderMap, KeywordRoute, ChatPlugin, ChatCustomizeChat } from '@enjoys/react-chatbot-plugin';
+import type { FlowConfig, FormConfig, StepComponentProps, FlowActionResult, ActionContext, FormFieldRenderMap, KeywordRoute, ChatPlugin, ChatCustomizeChat, LiveAgentConfig } from '@enjoys/react-chatbot-plugin';
 
 export interface DemoConfig {
   id: string;
@@ -21,4 +21,5 @@ export interface DemoConfig {
   plugins?: ChatPlugin[];
   callbacks?: Record<string, unknown>;
   customizeChat?: ChatCustomizeChat;
+  liveAgent?: LiveAgentConfig;
 }

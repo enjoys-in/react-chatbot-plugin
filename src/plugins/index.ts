@@ -57,3 +57,6 @@ export { devtoolsPlugin } from './devtoolsPlugin';
 // ─── Media & Content ────────────────────────────────────────────
 export { mediaPlugin } from './mediaPlugin';
 export { markdownPlugin } from './markdownPlugin';
+
+// ─── Live Agent ────────────────────────────────────────────────────────
+export { liveAgentPlugin } from './liveAgentPlugin';

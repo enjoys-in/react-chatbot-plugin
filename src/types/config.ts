@@ -5,6 +5,7 @@ import type { FlowConfig } from './flow';
 import type { FormConfig, FormFieldRenderMap } from './form';
 import type { ChatPlugin } from './plugin';
 import type { ChatStyles } from '../styles/theme';
+import type { LiveAgentConfig } from './liveAgent';
 
 // ─── Branding ────────────────────────────────────────────────────
 
@@ -124,6 +125,8 @@ export interface ChatBotProps {
   typingDelay?: number;
   /** Slot map — override individual UI components. Only provided keys are replaced; rest use defaults. */
   customizeChat?: ChatCustomizeChat;
+  /** Live agent configuration — WebSocket or Socket.IO real-time chat with human agents */
+  liveAgent?: LiveAgentConfig;
 }
 
 // ─── Keyword / Intent Matching ───────────────────────────────────

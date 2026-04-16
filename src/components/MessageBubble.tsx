@@ -10,11 +10,14 @@ interface MessageBubbleProps {
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, styles }) => {
   const isBot = message.sender === 'bot';
+  const isAgent = message.sender === 'agent';
   const isSystem = message.sender === 'system';
-  const bubbleStyle = isBot || isSystem ? styles.botBubble : styles.userBubble;
+  const bubbleStyle = isBot || isSystem || isAgent ? styles.botBubble : styles.userBubble;
 
   const hasContent = message.text || (message.attachments && message.attachments.length > 0);
   if (!hasContent) return null;
+
+  const agentName = message.agentName ?? (message.metadata?.agentName as string | undefined);
 
   const systemStyle: React.CSSProperties = isSystem
     ? {
@@ -38,6 +41,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, styles })
         animation: 'cb-fade-in 0.3s ease-out',
       }}
     >
+      {isAgent && agentName && (
+        <div style={{ fontSize: '11px', fontWeight: 600, opacity: 0.7, marginBottom: '4px' }}>
+          {agentName}
+        </div>
+      )}
       {message.text && (
         <span style={{ display: 'block' }}>{message.text}</span>
       )}

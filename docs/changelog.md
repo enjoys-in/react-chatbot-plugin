@@ -4,6 +4,35 @@ All notable changes to `@enjoys/react-chatbot-plugin` are documented here.
 
 ---
 
+## v1.8.0 — Live Agent (WebSocket / Socket.IO)
+
+### Features
+
+- **`liveAgent` prop** — real-time handoff to human agents via WebSocket or Socket.IO
+  - Pass a pre-created `WebSocket` or `socket.io-client` instance
+  - Protocol-agnostic adapter with `WsDriver` and `SioDriver`
+  - Customizable event names via `events` config
+  - Session persistence across page refreshes via `localStorage`
+  - System messages for agent joined/left, queue position, transfer accepted
+  - Agent typing indicators with auto-clear
+  - `sessionId` auto-generated or user-provided
+  - Callbacks: `onAgentJoined`, `onAgentLeft`, `onQueueUpdate`, `onSessionRestored`, `onConnect`, `onDisconnect`
+- **`liveAgentPlugin`** — plugin alternative for those who prefer the plugin API
+- **`useLiveAgent` hook** — exported for advanced use cases
+- **`LiveAgentAdapter`** — exported core class for custom integrations
+- **Agent message sender** — `MessageSender` type now includes `'agent'`, rendered with agent name label in `MessageBubble`
+- **New demo**: Live Agent Chat with mock WebSocket simulation
+- **New doc page**: `docs/live-agent.md` — full guide with server implementation example
+
+### Types
+
+- `LiveAgentConfig`, `LiveAgentEvents`, `AgentInfo`, `ResolvedLiveAgentEvents`
+- `DEFAULT_LIVE_AGENT_EVENTS` constant
+- `ChatMessage.agentName` field
+- `ChatState.isLiveAgent` and `ChatState.agentInfo`
+
+---
+
 ## v1.6.0 — customizeChat Slot Map
 
 ### Features

@@ -29,4 +29,6 @@ export type {
   LoginScreenSlotProps,
   LauncherSlotProps,
 } from './config';
+export type { LiveAgentConfig, LiveAgentEvents, AgentInfo, ResolvedLiveAgentEvents } from './liveAgent';
+export { DEFAULT_LIVE_AGENT_EVENTS } from './liveAgent';
 

@@ -18,6 +18,7 @@ import keywordFallback from './keyword-fallback';
 import inputValidation from './input-validation';
 import pluginShowcase from './plugin-showcase';
 import customizeChat from './customize-chat';
+import liveAgent from './live-agent';
 
 export const allDemos = [
   // Basic
@@ -43,6 +44,8 @@ export const allDemos = [
   customizeChat,
   // Plugins
   pluginShowcase,
+  // Live Agent
+  liveAgent,
 ];
 
 export const categories = [

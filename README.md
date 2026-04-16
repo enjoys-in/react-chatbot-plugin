@@ -57,6 +57,7 @@
 - **Branding** — Customizable footer and header
 - **Typing delay** — Realistic typing pause before bot replies
 - **onUnhandledMessage** — Callback when nothing handles user text
+- **Live Agent (WebSocket / Socket.IO)** — Real-time handoff to human agents with session persistence, queue updates, typing indicators, and "agent joined/left" system messages. Pass a `WebSocket` or `socket.io-client` instance via the `liveAgent` prop — or use the `liveAgentPlugin`
 
 ## Installation
 
@@ -127,6 +128,7 @@ Full documentation is available in the [`docs/`](./docs/) folder:
 | 13 | [Advanced Patterns](./docs/advanced-patterns.md) | E-commerce bot, onboarding wizard, full examples |
 | 14 | [Keywords & Fallback](./docs/keywords-fallback.md) | Keyword routes, greeting detection, fallback, typing delay |
 | 15 | [API Reference](./docs/api-reference.md) | All types, props, and exports |
+| 16 | [Live Agent](./docs/live-agent.md) | WebSocket / Socket.IO real-time agent chat |
 
 ## Props
 
@@ -152,6 +154,7 @@ Full documentation is available in the [`docs/`](./docs/) folder:
 | `zIndex` | `number` | CSS z-index |
 | `renderFormField` | `FormFieldRenderMap` | Custom renderers for form field types |
 | `customizeChat` | `ChatCustomizeChat` | All UI customization — slot configs + component overrides (see below) |
+| `liveAgent` | `LiveAgentConfig` | WebSocket / Socket.IO real-time agent chat (see below) |
 | `className` | `string` | Root element class name |
 
 ### `customizeChat` Slots
@@ -185,6 +188,68 @@ Each key is a partial of its slot props — provide config, content, or a custom
   }}
 />
 ```
+
+### `liveAgent` — Real-time Agent Chat
+
+Connect your chatbot to a real human agent via **WebSocket** or **Socket.IO**. Messages are relayed in real-time, with system notifications for agent join/leave, queue position, and typing indicators. Sessions persist across page refreshes.
+
+**With Socket.IO:**
+
+```tsx
+import { io } from 'socket.io-client';
+
+const socket = io('https://support.example.com');
+
+<ChatBot
+  flow={botFlow}
+  liveAgent={{
+    type: 'socketio',
+    instance: socket,
+    sessionId: 'user_123',
+    persistSession: true,
+    onAgentJoined: (agent) => console.log(`${agent.name} joined`),
+  }}
+/>
+```
+
+**With native WebSocket:**
+
+```tsx
+const ws = new WebSocket('wss://support.example.com/chat');
+
+<ChatBot
+  flow={botFlow}
+  liveAgent={{
+    type: 'ws',
+    instance: ws,
+    sessionId: 'user_456',
+  }}
+/>
+```
+
+**Or as a plugin:**
+
+```tsx
+import { liveAgentPlugin } from '@enjoys/react-chatbot-plugin';
+
+<ChatBot
+  flow={botFlow}
+  plugins={[
+    liveAgentPlugin({ type: 'socketio', instance: socket, sessionId: 'user_123' }),
+  ]}
+/>
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `type` | `'ws' \| 'socketio'` | — | Transport protocol |
+| `instance` | `WebSocket \| Socket` | — | Pre-created connection instance |
+| `sessionId` | `string` | auto | Session ID for persistence |
+| `events` | `LiveAgentEvents` | defaults | Custom event name overrides |
+| `persistSession` | `boolean` | `true` | Store messages in localStorage |
+| `onAgentJoined` | `(agent) => void` | — | Agent joined callback |
+| `onAgentLeft` | `(agent) => void` | — | Agent left callback |
+| `onQueueUpdate` | `(pos, wait?) => void` | — | Queue position callback |
 
 ## Exported Components
 

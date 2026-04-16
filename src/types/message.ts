@@ -1,4 +1,4 @@
-export type MessageSender = 'bot' | 'user' | 'system';
+export type MessageSender = 'bot' | 'user' | 'system' | 'agent';
 
 export interface MessageAttachment {
   name: string;
@@ -27,4 +27,6 @@ export interface ChatMessage {
   metadata?: Record<string, unknown>;
   /** Key into components map — renders a custom component for this message */
   component?: string;
+  /** Agent name for live agent messages */
+  agentName?: string;
 }

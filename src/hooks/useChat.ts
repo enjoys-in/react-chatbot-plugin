@@ -5,6 +5,7 @@ import { uid, delay } from '../utils/helpers';
 import type { ChatMessage } from '../types';
 import type { FlowActionResult, ActionContext, KeywordRoute } from '../types/config';
 import type { FlowStepInput } from '../types/flow';
+import { useLiveAgent } from './useLiveAgent';
 
 /** Slash commands the user can type */
 const COMMANDS: Record<string, string> = {
@@ -84,6 +85,13 @@ export function useChat() {
   stateRef.current = state;
   const propsRef = useRef(props);
   propsRef.current = props;
+
+  // Live agent hook
+  const { sendLiveMessage, sendTyping, requestTransfer } = useLiveAgent({
+    config: props.liveAgent,
+    dispatch,
+    messages: state.messages,
+  });
 
   // Initialize flow engine
   useEffect(() => {
@@ -352,6 +360,12 @@ export function useChat() {
       dispatch({ type: 'ADD_MESSAGE', payload: finalMsg });
       propsRef.current.callbacks?.onMessageSend?.(finalMsg);
       propsRef.current.callbacks?.onSubmit?.({ message: finalMsg.text });
+
+      // ── Live agent mode — forward to server ──────────────────
+      if (stateRef.current.isLiveAgent) {
+        sendLiveMessage(finalMsg.text ?? '');
+        return;
+      }
 
       const currentStepId = stateRef.current.currentStepId;
       const typingMs = propsRef.current.typingDelay ?? 0;
@@ -636,5 +650,7 @@ export function useChat() {
     goBack,
     restartSession,
     handleComponentComplete,
+    requestTransfer,
+    sendTyping,
   };
 }
