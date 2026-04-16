@@ -1,6 +1,21 @@
 import type { ChatTheme, ChatStyle } from '../types';
 import type { CSSProperties } from 'react';
 
+// ─── Resolved Style Map ─────────────────────────────────────────
+
+/** Resolved inline styles for each chatbot section. Uses `CSSProperties` by reference
+ *  so the emitted `.d.ts` stays compact instead of expanding every CSS property. */
+export interface ChatStyles {
+  root: CSSProperties;
+  launcher: CSSProperties;
+  window: CSSProperties;
+  header: CSSProperties;
+  messageList: CSSProperties;
+  inputArea: CSSProperties;
+  botBubble: CSSProperties;
+  userBubble: CSSProperties;
+}
+
 // ─── Light Mode Defaults ─────────────────────────────────────────
 
 const lightDefaults: Required<ChatTheme> = {
@@ -68,7 +83,7 @@ export function buildCSSVariables(theme: Required<ChatTheme>): Record<string, st
 export function buildStyles(
   theme: Required<ChatTheme>,
   overrides?: ChatStyle,
-) {
+): ChatStyles {
   const isDark = theme.mode === 'dark';
 
   const styles = {
@@ -193,4 +208,4 @@ export function buildStyles(
   return styles;
 }
 
-export type ChatStyles = ReturnType<typeof buildStyles>;
+
