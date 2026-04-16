@@ -2,6 +2,7 @@ import React from 'react';
 import type { HeaderConfig } from '../types';
 import type { ChatStyles as ThemeStyles } from '../styles/theme';
 import { CloseIcon, MinimizeIcon, RestartIcon } from './icons';
+import { useChatContext } from '../context/ChatContext';
 
 interface ChatHeaderProps {
   config: HeaderConfig;
@@ -13,6 +14,8 @@ interface ChatHeaderProps {
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({ config, styles, onClose, onRestart, logo, logoWidth }) => {
+  const { props: chatProps } = useChatContext();
+  const icons = chatProps.icons;
   return (
     <div style={styles.header}>
       {/* Decorative glow overlay */}
@@ -127,7 +130,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ config, styles, onClose,
             onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.2)')}
             onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
           >
-            <RestartIcon size={16} />
+            {icons?.restart ?? <RestartIcon size={16} />}
           </button>
         )}
         {config.showMinimize && (
@@ -148,7 +151,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ config, styles, onClose,
             onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.2)')}
             onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
           >
-            <MinimizeIcon size={16} />
+            {icons?.minimize ?? <MinimizeIcon size={16} />}
           </button>
         )}
         {config.showClose !== false && (
@@ -169,7 +172,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ config, styles, onClose,
             onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.2)')}
             onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
           >
-            <CloseIcon size={18} />
+            {icons?.close ?? <CloseIcon size={18} />}
           </button>
         )}
       </div>

@@ -28,6 +28,7 @@ export type {
   WelcomeScreenSlotProps,
   LoginScreenSlotProps,
   LauncherSlotProps,
+  ChatIconMap,
 } from './config';
 export type { LiveAgentConfig, LiveAgentEvents, AgentInfo, ResolvedLiveAgentEvents } from './liveAgent';
 export { DEFAULT_LIVE_AGENT_EVENTS } from './liveAgent';

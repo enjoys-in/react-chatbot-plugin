@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import type { FileUploadConfig } from '../types/config';
 import { AttachmentIcon, RemoveIcon, FileIcon, ImageIcon } from './icons';
+import { useChatContext } from '../context/ChatContext';
 
 interface FileUploadButtonProps {
   config: FileUploadConfig;
@@ -17,6 +18,8 @@ export const FileUploadButton: React.FC<FileUploadButtonProps> = ({
   onRemoveFile,
   primaryColor,
 }) => {
+  const { props: chatProps } = useChatContext();
+  const icons = chatProps.icons;
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,7 +78,7 @@ export const FileUploadButton: React.FC<FileUploadButtonProps> = ({
         onMouseEnter={(e) => (e.currentTarget.style.color = primaryColor)}
         onMouseLeave={(e) => (e.currentTarget.style.color = '#999')}
       >
-        <AttachmentIcon size={20} />
+        {icons?.attachment ?? <AttachmentIcon size={20} />}
       </button>
     </div>
   );
@@ -126,6 +129,8 @@ interface FilePreviewChipProps {
 }
 
 const FilePreviewChip: React.FC<FilePreviewChipProps> = ({ file, onRemove, primaryColor }) => {
+  const { props: chatProps } = useChatContext();
+  const icons = chatProps.icons;
   const isImage = file.type.startsWith('image/');
 
   return (
@@ -142,7 +147,7 @@ const FilePreviewChip: React.FC<FilePreviewChipProps> = ({ file, onRemove, prima
       }}
     >
       <span style={{ color: primaryColor, flexShrink: 0 }}>
-        {isImage ? <ImageIcon size={14} /> : <FileIcon size={14} />}
+        {isImage ? (icons?.image ?? <ImageIcon size={14} />) : (icons?.file ?? <FileIcon size={14} />)}
       </span>
       <span
         style={{
@@ -169,7 +174,7 @@ const FilePreviewChip: React.FC<FilePreviewChipProps> = ({ file, onRemove, prima
           flexShrink: 0,
         }}
       >
-        <RemoveIcon size={14} />
+        {icons?.remove ?? <RemoveIcon size={14} />}
       </button>
     </div>
   );

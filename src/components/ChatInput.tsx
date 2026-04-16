@@ -4,6 +4,7 @@ import type { FileUploadConfig } from '../types/config';
 import { SendIcon, EmojiIcon } from './icons';
 import { EmojiPicker } from './EmojiPicker';
 import { FileUploadButton, FilePreviewList } from './FileUpload';
+import { useChatContext } from '../context/ChatContext';
 
 interface ChatInputProps {
   onSend: (text: string, files?: File[]) => void;
@@ -28,6 +29,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   fileUpload,
   onFileUpload,
 }) => {
+  const { props: chatProps } = useChatContext();
+  const icons = chatProps.icons;
   const [text, setText] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
@@ -117,7 +120,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 transition: 'all 0.2s ease',
               }}
             >
-              <EmojiIcon size={20} />
+              {icons?.emoji ?? <EmojiIcon size={20} />}
             </button>
           )}
 
@@ -182,7 +185,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             boxShadow: hasContent ? `0 4px 12px ${primaryColor}44` : 'none',
           }}
         >
-          <SendIcon size={16} />
+          {icons?.send ?? <SendIcon size={16} />}
         </button>
       </div>
     </div>

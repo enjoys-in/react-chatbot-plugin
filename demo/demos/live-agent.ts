@@ -88,7 +88,7 @@ const liveAgent: DemoConfig = {
   icon: '🎧',
   category: 'advanced',
   flow: {
-    start: 'welcome',
+    startStep: 'welcome',
     steps: [
       {
         id: 'welcome',

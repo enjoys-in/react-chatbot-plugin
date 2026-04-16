@@ -2,6 +2,7 @@ import React from 'react';
 import type { ChatMessage, MessageAttachment } from '../types';
 import type { ChatStyles } from '../styles/theme';
 import { FileIcon } from './icons';
+import { useChatContext } from '../context/ChatContext';
 
 interface MessageBubbleProps {
   message: ChatMessage;
@@ -68,6 +69,8 @@ interface AttachmentPreviewProps {
 }
 
 const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({ attachment, isBot }) => {
+  const { props: chatProps } = useChatContext();
+  const icons = chatProps.icons;
   const isImage = attachment.type.startsWith('image/');
 
   if (isImage && attachment.url) {
@@ -107,7 +110,7 @@ const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({ attachment, isBot
         transition: 'background 0.2s ease',
       }}
     >
-      <FileIcon size={16} />
+      {icons?.file ?? <FileIcon size={16} />}
       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
         {attachment.name}
       </span>

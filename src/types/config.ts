@@ -7,6 +7,23 @@ import type { ChatPlugin } from './plugin';
 import type { ChatStyles } from '../styles/theme';
 import type { LiveAgentConfig } from './liveAgent';
 
+// ─── Icon Overrides ──────────────────────────────────────────────
+
+/** Map of all replaceable icons. Each value is a `ReactNode` so users can
+ *  supply any JSX element (SVG, image, icon-library component, etc.). */
+export interface ChatIconMap {
+  send: ReactNode;
+  chatBubble: ReactNode;
+  close: ReactNode;
+  minimize: ReactNode;
+  emoji: ReactNode;
+  attachment: ReactNode;
+  file: ReactNode;
+  image: ReactNode;
+  remove: ReactNode;
+  restart: ReactNode;
+}
+
 // ─── Branding ────────────────────────────────────────────────────
 
 export interface BrandingConfig {
@@ -125,6 +142,8 @@ export interface ChatBotProps {
   typingDelay?: number;
   /** Slot map — override individual UI components. Only provided keys are replaced; rest use defaults. */
   customizeChat?: ChatCustomizeChat;
+  /** Override built-in icons — only provided keys are replaced; rest use defaults. */
+  icons?: Partial<ChatIconMap>;
   /** Live agent configuration — WebSocket or Socket.IO real-time chat with human agents */
   liveAgent?: LiveAgentConfig;
 }

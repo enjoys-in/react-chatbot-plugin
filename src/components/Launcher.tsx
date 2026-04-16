@@ -2,6 +2,7 @@ import React from 'react';
 import type { CSSProperties } from 'react';
 import type { ChatStyles } from '../styles/theme';
 import { ChatBubbleIcon, CloseIcon } from './icons';
+import { useChatContext } from '../context/ChatContext';
 
 interface LauncherProps {
   onClick: () => void;
@@ -22,6 +23,8 @@ export const Launcher: React.FC<LauncherProps> = ({
   closeIcon,
   zIndex,
 }) => {
+  const { props: chatProps } = useChatContext();
+  const icons = chatProps.icons;
   const posStyle: CSSProperties =
     position === 'bottom-left'
       ? { bottom: '24px', left: '24px' }
@@ -40,8 +43,8 @@ export const Launcher: React.FC<LauncherProps> = ({
       }}
     >
       {isOpen
-        ? closeIcon ?? <CloseIcon size={22} />
-        : icon ?? <ChatBubbleIcon size={26} />}
+        ? closeIcon ?? icons?.close ?? <CloseIcon size={22} />
+        : icon ?? icons?.chatBubble ?? <ChatBubbleIcon size={26} />}
     </button>
   );
 };
