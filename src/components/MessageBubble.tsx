@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { ChatMessage, MessageAttachment } from '../types';
 import type { ChatStyles } from '../styles/theme';
 import { FileIcon } from './icons';
@@ -62,6 +62,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, styles })
             <AttachmentPreview key={i} attachment={attachment} isBot={isBot} />
           ))}
         </div>
+      )}
+      {/* Reactions */}
+      {chatProps.enableReactions && (isBot || isAgent) && !isSystem && (
+        <MessageReactions message={message} />
       )}
     </div>
   );
@@ -134,3 +138,83 @@ function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)}KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
 }
+
+// ─── Message Reactions ───────────────────────────────────────────
+
+const DEFAULT_REACTIONS = ['👍', '👎', '❤️', '😂', '😮'];
+
+const MessageReactions: React.FC<{ message: ChatMessage }> = ({ message }) => {
+  const { props: chatProps, dispatch } = useChatContext();
+  const [showPicker, setShowPicker] = useState(false);
+
+  const emojis = Array.isArray(chatProps.enableReactions)
+    ? chatProps.enableReactions
+    : DEFAULT_REACTIONS;
+
+  const reactions = message.reactions ?? [];
+
+  const handleReact = (emoji: string) => {
+    const existing = reactions.find((r) => r.emoji === emoji);
+    const reacted = !existing?.reacted;
+    const updated = existing
+      ? reactions.map((r) => r.emoji === emoji ? { ...r, count: reacted ? r.count + 1 : Math.max(0, r.count - 1), reacted } : r)
+      : [...reactions, { emoji, count: 1, reacted: true }];
+
+    dispatch({ type: 'UPDATE_MESSAGE', payload: { id: message.id, updates: { reactions: updated.filter((r) => r.count > 0) } } });
+    chatProps.callbacks?.onReaction?.(message.id, emoji, reacted);
+    setShowPicker(false);
+  };
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px', flexWrap: 'wrap' }}>
+      {reactions.map((r) => (
+        <button
+          key={r.emoji}
+          onClick={() => handleReact(r.emoji)}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '3px',
+            padding: '2px 6px', borderRadius: '12px', border: r.reacted ? '1px solid rgba(108,92,231,0.4)' : '1px solid rgba(0,0,0,0.08)',
+            background: r.reacted ? 'rgba(108,92,231,0.1)' : 'rgba(0,0,0,0.03)',
+            cursor: 'pointer', fontSize: '12px', transition: 'all 0.15s ease',
+          }}
+        >
+          <span>{r.emoji}</span>
+          {r.count > 0 && <span style={{ fontSize: '11px', opacity: 0.7 }}>{r.count}</span>}
+        </button>
+      ))}
+      <div style={{ position: 'relative' }}>
+        <button
+          onClick={() => setShowPicker(!showPicker)}
+          style={{
+            width: '22px', height: '22px', borderRadius: '50%', border: '1px solid rgba(0,0,0,0.08)',
+            background: 'rgba(0,0,0,0.03)', cursor: 'pointer', fontSize: '11px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s ease',
+          }}
+          aria-label="React"
+        >
+          +
+        </button>
+        {showPicker && (
+          <div style={{
+            position: 'absolute', bottom: '100%', left: 0, marginBottom: '4px',
+            display: 'flex', gap: '2px', padding: '4px 6px', borderRadius: '16px',
+            background: '#fff', boxShadow: '0 2px 12px rgba(0,0,0,0.15)', border: '1px solid rgba(0,0,0,0.08)',
+            zIndex: 10,
+          }}>
+            {emojis.map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => handleReact(emoji)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', padding: '2px', borderRadius: '4px', transition: 'transform 0.1s' }}
+                onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.3)')}
+                onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};

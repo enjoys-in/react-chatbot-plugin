@@ -1,5 +1,13 @@
 export type MessageSender = 'bot' | 'user' | 'system' | 'agent';
 
+export type MessageStatus = 'sent' | 'delivered' | 'read';
+
+export interface MessageReaction {
+  emoji: string;
+  count: number;
+  reacted: boolean;
+}
+
 export interface MessageAttachment {
   name: string;
   url: string;
@@ -29,4 +37,8 @@ export interface ChatMessage {
   component?: string;
   /** Agent name for live agent messages */
   agentName?: string;
+  /** Reactions on this message */
+  reactions?: MessageReaction[];
+  /** Message delivery status */
+  status?: MessageStatus;
 }
