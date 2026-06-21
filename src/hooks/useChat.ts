@@ -4,7 +4,7 @@ import { FlowEngine } from '../engine/FlowEngine';
 import { uid, delay } from '../utils/helpers';
 import type { ChatMessage } from '../types';
 import type { FlowActionResult, ActionContext, KeywordRoute } from '../types/config';
-import type { FlowStepInput } from '../types/flow';
+import type { FlowStepInput, FlowMiddleware } from '../types/flow';
 import { useLiveAgent } from './useLiveAgent';
 
 /** Slash commands the user can type */
@@ -48,6 +48,23 @@ function matchesRoute(text: string, route: KeywordRoute): boolean {
 function findKeywordMatch(text: string, keywords: KeywordRoute[]): KeywordRoute | undefined {
   const sorted = [...keywords].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
   return sorted.find((r) => matchesRoute(text, r));
+}
+
+/** Run middleware pipeline — returns final message or null if blocked */
+function runMiddleware(
+  message: ChatMessage,
+  data: Record<string, unknown>,
+  middlewares: FlowMiddleware[],
+): ChatMessage | null {
+  let current = message;
+  let blocked = false;
+  for (const mw of middlewares) {
+    let called = false;
+    const result = mw(current, data, () => { called = true; });
+    if (result) current = result;
+    if (!called) { blocked = true; break; }
+  }
+  return blocked ? null : current;
 }
 
 /** Validate and transform user text for an input step */
@@ -380,6 +397,15 @@ export function useChat() {
         text,
         timestamp: Date.now(),
       };
+
+      // Run middleware pipeline if configured
+      const middlewares = propsRef.current.middleware;
+      if (middlewares && middlewares.length > 0) {
+        const data = flowRef.current?.getData() ?? {};
+        const result = runMiddleware(msg, data, middlewares);
+        if (!result) return; // Middleware blocked the message
+        Object.assign(msg, result);
+      }
 
       // Let plugins transform the message before dispatching
       const finalMsg = pluginManager ? await pluginManager.onMessage(msg) : msg;
