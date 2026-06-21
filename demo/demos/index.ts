@@ -19,6 +19,7 @@ import inputValidation from './input-validation';
 import pluginShowcase from './plugin-showcase';
 import customizeChat from './customize-chat';
 import liveAgent from './live-agent';
+import markdownRendering from './markdown-rendering';
 
 export const allDemos = [
   // Basic
@@ -46,6 +47,8 @@ export const allDemos = [
   pluginShowcase,
   // Live Agent
   liveAgent,
+  // Markdown
+  markdownRendering,
 ];
 
 export const categories = [

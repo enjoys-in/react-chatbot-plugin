@@ -189,6 +189,7 @@ export const App: React.FC = () => {
             ...(activeDemo.plugins ?? []),
           ]}
           liveAgent={activeDemo.liveAgent}
+          markdown={activeDemo.markdown}
           callbacks={{
             onOpen: () => console.log(`[${activeDemo.id}] opened`),
             onClose: () => console.log(`[${activeDemo.id}] closed`),
