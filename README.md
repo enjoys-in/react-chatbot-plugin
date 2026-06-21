@@ -76,34 +76,53 @@
 - **Offline Queue** — Queue messages offline, auto-send on reconnect
 - **Proactive Messages** — Trigger bot messages based on page behavior (idle, scroll, exit intent)
 - **Persona Switching** — Switch between bot personalities in one widget
+- **Message Pinning** — Pin/unpin important messages for quick reference
+- **Theme Toggle** — In-chat dark/light mode switch with persistence
+- **Confetti/Animations** — Celebration effects on flow completion or custom events
+- **Priority & Labels** — Set conversation urgency and custom tags
+- **Whisper Mode** — Supervisor notes visible only to agents
+- **Message Scheduling** — Send messages at a future time
+- **Conversation Summary** — AI-powered or keyword-based conversation recap
+- **Knowledge Base** — Search FAQ/docs inline and surface answers
+- **Auto-Translation** — Real-time message translation between languages
+- **Transcript Export** — Download chat as text, JSON, CSV, or HTML
+- **Notification Badge** — Unread count on launcher + browser notifications
+- **Location Sharing** — Share GPS coordinates with map links
+- **Code Snippets** — Syntax-highlighted code blocks with copy button
+- **Inline Polls** — Create polls with voting and result visualization
+- **Payment Widget** — Stripe/Razorpay/custom payment collection inline
+- **Appointment Booking** — Calendar-based slot booking with confirmation
 
 ---
 
 ## Release History
 
-| Version | Features | Description |
-|---------|----------|-------------|
-| **v1.20.0** | #12 Headless Mode | `createHeadlessBot()` + `headless` prop — run engine without UI |
-| **v1.19.0** | #11 Event Bus | `createEventBus()` standalone pub/sub utility |
-| **v1.18.0** | #10 Middleware Pipeline | `middleware` prop — intercept/transform/block messages |
-| **v1.17.0** | #8 Conditional Rendering, #9 Flow Composition | `visibleIf` on steps + `subFlow` for reusable flows |
-| **v1.16.0** | #7 Tags, #15 Rating, #16 Offline, #17 Proactive, #18 Persona | 5 new plugins with correct PluginContext signatures |
-| **v1.15.0** | #6 Date/Time Picker | Native `date`, `time`, `datetime` form field types |
-| **v1.14.0** | #5 Rich Cards / Carousels | `CarouselCards` component + `cards` message field |
-| **v1.13.0** | #4 Typing, #13 Edit/Delete, #14 Read Receipts | User typing indicator, message edit/delete, delivery status |
-| **v1.12.0** | #3 Voice Input | Speech-to-text via Web Speech API |
-| **v1.11.0** | #2 Message Search | Full-text search with header search bar |
-| **v1.10.0** | #1 Message Reactions | Emoji reactions on messages |
-| **v1.9.0** | Live Agent | WebSocket / Socket.IO real-time agent chat |
-| **v1.8.0** | Custom Icons | `icons` prop — override any built-in icon |
-| **v1.7.0** | Markdown Rendering | `markdown` prop — bold, italic, code, links, lists |
-| **v1.6.0** | Keywords & Fallback | Pattern matching, greeting detection, typing delay |
-| **v1.5.0** | Custom Form Fields | `renderFormField` prop — replace any form field renderer |
-| **v1.4.0** | customizeChat Slot Map | 9-slot UI customization system |
-| **v1.3.0** | Async Actions + Dynamic Routing | Step-entry API calls with status-based routing |
-| **v1.2.0** | File Upload + Emoji Picker | Drag & drop uploads, emoji selector |
-| **v1.1.0** | Plugin System | 30 built-in plugins + custom plugin API |
-| **v1.0.0** | Initial Release | Flow engine, forms, theming, slash commands |
+| Version | Features | Type | Description |
+|---------|----------|------|-------------|
+| **v1.23.0** | Badge, Poll, Payment, Booking, Location | Plugin | Unread badge, inline polls, payment gateway, calendar booking, GPS sharing |
+| **v1.22.0** | Summary, KB, Translation, Export, Code | Plugin | AI summary, FAQ search, auto-translate, transcript download, syntax highlight |
+| **v1.21.0** | Pin, Theme Toggle, Confetti, Priority, Whisper, Schedule | Plugin | Pin messages, dark/light toggle, celebrations, priority labels, agent whisper, delayed send |
+| **v1.20.0** | Headless Mode | Prop + Utility | `createHeadlessBot()` + `headless` prop — run engine without UI |
+| **v1.19.0** | Event Bus | Utility | `createEventBus()` standalone pub/sub utility |
+| **v1.18.0** | Middleware Pipeline | Prop | `middleware` prop — intercept/transform/block messages |
+| **v1.17.0** | Conditional Rendering, Flow Composition | Engine | `visibleIf` on steps + `subFlow` for reusable flows |
+| **v1.16.0** | Tags, Rating, Offline, Proactive, Persona | Plugin | 5 conversation plugins |
+| **v1.15.0** | Date/Time Picker | Prop (form field) | Native `date`, `time`, `datetime` form field types |
+| **v1.14.0** | Rich Cards / Carousels | Prop (message) | `CarouselCards` component + `cards` message field |
+| **v1.13.0** | Typing, Edit/Delete, Read Receipts | Prop | User typing indicator, message edit/delete, delivery status |
+| **v1.12.0** | Voice Input | Prop | Speech-to-text via Web Speech API |
+| **v1.11.0** | Message Search | Prop | Full-text search with header search bar |
+| **v1.10.0** | Message Reactions | Prop | Emoji reactions on messages |
+| **v1.9.0** | Live Agent | Prop + Plugin | WebSocket / Socket.IO real-time agent chat |
+| **v1.8.0** | Custom Icons | Prop | `icons` prop — override any built-in icon |
+| **v1.7.0** | Markdown Rendering | Prop | `markdown` prop — bold, italic, code, links, lists |
+| **v1.6.0** | Keywords & Fallback | Prop | Pattern matching, greeting detection, typing delay |
+| **v1.5.0** | Custom Form Fields | Prop | `renderFormField` prop — replace any form field renderer |
+| **v1.4.0** | customizeChat Slot Map | Prop | 9-slot UI customization system |
+| **v1.3.0** | Async Actions + Dynamic Routing | Prop | Step-entry API calls with status-based routing |
+| **v1.2.0** | File Upload + Emoji Picker | Prop | Drag & drop uploads, emoji selector |
+| **v1.1.0** | Plugin System | Architecture | 30 built-in plugins + custom plugin API |
+| **v1.0.0** | Initial Release | Core | Flow engine, forms, theming, slash commands |
 
 ## Installation
 
@@ -321,7 +340,7 @@ All internal components are exported for advanced use cases:
 
 **Theme utilities:** `resolveTheme`, `buildStyles`, `buildCSSVariables`, `renderMarkdown`
 
-**Built-in plugins:** `analyticsPlugin`, `webhookPlugin`, `persistencePlugin`, `loggerPlugin`, `crmPlugin`, `emailPlugin`, `syncPlugin`, `aiPlugin`, `intentPlugin`, `typingPlugin`, `autoReplyPlugin`, `validationPlugin`, `uploadPlugin`, `authPlugin`, `rateLimitPlugin`, `pushPlugin`, `soundPlugin`, `agentPlugin`, `transferPlugin`, `themePlugin`, `componentPlugin`, `leadPlugin`, `campaignPlugin`, `schedulerPlugin`, `reminderPlugin`, `i18nPlugin`, `debugPlugin`, `devtoolsPlugin`, `mediaPlugin`, `markdownPlugin`, `liveAgentPlugin`, `tagsPlugin`, `ratingPlugin`, `offlinePlugin`, `proactivePlugin`, `personaPlugin`
+**Built-in plugins (51):** `analyticsPlugin`, `webhookPlugin`, `persistencePlugin`, `loggerPlugin`, `crmPlugin`, `emailPlugin`, `syncPlugin`, `aiPlugin`, `intentPlugin`, `typingPlugin`, `autoReplyPlugin`, `validationPlugin`, `uploadPlugin`, `authPlugin`, `rateLimitPlugin`, `pushPlugin`, `soundPlugin`, `agentPlugin`, `transferPlugin`, `themePlugin`, `componentPlugin`, `leadPlugin`, `campaignPlugin`, `schedulerPlugin`, `reminderPlugin`, `i18nPlugin`, `debugPlugin`, `devtoolsPlugin`, `mediaPlugin`, `markdownPlugin`, `liveAgentPlugin`, `tagsPlugin`, `ratingPlugin`, `offlinePlugin`, `proactivePlugin`, `personaPlugin`, `pinPlugin`, `themeTogglePlugin`, `confettiPlugin`, `priorityPlugin`, `whisperPlugin`, `messageSchedulePlugin`, `notificationBadgePlugin`, `summaryPlugin`, `knowledgeBasePlugin`, `translationPlugin`, `transcriptExportPlugin`, `codeHighlightPlugin`, `pollPlugin`, `paymentPlugin`, `bookingPlugin`, `locationPlugin`
 
 ## Development
 
