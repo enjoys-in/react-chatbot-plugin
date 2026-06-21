@@ -9,4 +9,9 @@ export {
   ImageIcon,
   RemoveIcon,
   RestartIcon,
+  SearchIcon,
+  MicIcon,
+  StarIcon,
+  EditIcon,
+  TrashIcon,
 } from './Icons';

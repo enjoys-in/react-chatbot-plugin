@@ -41,6 +41,11 @@ export interface ChatIconMap {
   image: ReactNode;
   remove: ReactNode;
   restart: ReactNode;
+  search: ReactNode;
+  mic: ReactNode;
+  star: ReactNode;
+  edit: ReactNode;
+  trash: ReactNode;
 }
 
 // ─── Branding ────────────────────────────────────────────────────
@@ -148,6 +153,8 @@ export interface ChatBotProps {
   /** Enable message reactions (👍👎 on bot/agent messages).
    *  Pass `true` for default emojis, or an array of custom emoji strings. */
   enableReactions?: boolean | string[];
+  /** Enable message search — adds a search icon in the header */
+  enableSearch?: boolean;
   /** Enable built-in markdown rendering in messages (bold, italic, code, links, lists).
    *  Pass `true` for all features, or an options object to selectively enable. */
   markdown?: boolean | MarkdownOptions;

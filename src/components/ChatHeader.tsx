@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { HeaderConfig } from '../types';
 import type { ChatStyles as ThemeStyles } from '../styles/theme';
-import { CloseIcon, MinimizeIcon, RestartIcon } from './icons';
+import { CloseIcon, MinimizeIcon, RestartIcon, SearchIcon } from './icons';
 import { useChatContext } from '../context/ChatContext';
 
 interface ChatHeaderProps {
@@ -11,11 +11,26 @@ interface ChatHeaderProps {
   onRestart?: () => void;
   logo?: string;
   logoWidth?: string;
+  onSearchChange?: (query: string) => void;
 }
 
-export const ChatHeader: React.FC<ChatHeaderProps> = ({ config, styles, onClose, onRestart, logo, logoWidth }) => {
+export const ChatHeader: React.FC<ChatHeaderProps> = ({ config, styles, onClose, onRestart, logo, logoWidth, onSearchChange }) => {
   const { props: chatProps } = useChatContext();
   const icons = chatProps.icons;
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const toggleSearch = () => {
+    const next = !searchOpen;
+    setSearchOpen(next);
+    if (!next) { setSearchQuery(''); onSearchChange?.(''); }
+  };
+
+  const handleSearchInput = (val: string) => {
+    setSearchQuery(val);
+    onSearchChange?.(val);
+  };
+
   return (
     <div style={styles.header}>
       {/* Decorative glow overlay */}
@@ -111,6 +126,28 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ config, styles, onClose,
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '2px', position: 'relative', zIndex: 1 }}>
+        {chatProps.enableSearch && (
+          <button
+            onClick={toggleSearch}
+            aria-label="Search messages"
+            title="Search messages"
+            style={{
+              background: searchOpen ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.1)',
+              border: 'none',
+              color: 'inherit',
+              cursor: 'pointer',
+              padding: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              borderRadius: '8px',
+              transition: 'background 0.2s ease',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.2)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = searchOpen ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.1)')}
+          >
+            {icons?.search ?? <SearchIcon size={15} />}
+          </button>
+        )}
         {config.showRestart && onRestart && (
           <button
             onClick={onRestart}
@@ -176,6 +213,23 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ config, styles, onClose,
           </button>
         )}
       </div>
+      {/* Search bar */}
+      {searchOpen && (
+        <div style={{ position: 'absolute', bottom: '-40px', left: 0, right: 0, padding: '6px 12px', background: 'inherit', zIndex: 5 }}>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => handleSearchInput(e.target.value)}
+            placeholder="Search messages..."
+            autoFocus
+            style={{
+              width: '100%', padding: '6px 10px', borderRadius: '8px',
+              border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.15)',
+              color: 'inherit', fontSize: '13px', outline: 'none',
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };

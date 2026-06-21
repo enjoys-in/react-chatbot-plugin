@@ -28,6 +28,8 @@ interface MessageListProps {
   renderFormField?: FormFieldRenderMap;
   /** Slot overrides from customizeChat */
   customizeChat?: ChatCustomizeChat;
+  /** Search filter query */
+  searchQuery?: string;
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -43,6 +45,7 @@ export const MessageList: React.FC<MessageListProps> = ({
   currentStepId,
   renderFormField,
   customizeChat,
+  searchQuery,
 }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -54,9 +57,13 @@ export const MessageList: React.FC<MessageListProps> = ({
   const QR = customizeChat?.quickReplies?.component ?? QuickReplies;
   const Typing = customizeChat?.typingIndicator?.component ?? TypingIndicator;
 
+  const filteredMessages = searchQuery
+    ? messages.filter((m) => m.text?.toLowerCase().includes(searchQuery.toLowerCase()))
+    : messages;
+
   return (
     <div style={styles.messageList} className="cb-scrollbar">
-      {messages.map((msg) => (
+      {filteredMessages.map((msg) => (
         <React.Fragment key={msg.id}>
           <Bubble message={msg} styles={styles} />
           {msg.quickReplies && msg.quickReplies.length > 0 && (

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { CSSProperties } from 'react';
 import type { ChatStyles } from '../styles/theme';
 import { ChatHeader } from './ChatHeader';
@@ -85,6 +85,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ styles, position, zIndex
   const headerCfg = props.customizeChat?.header?.config ?? { title: 'Chat with us' };
   const brandingCfg = props.customizeChat?.branding?.config;
   const welcomeContent = props.customizeChat?.welcomeScreen?.content;
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Default header element
   const defaultHeader = (
@@ -95,6 +96,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ styles, position, zIndex
       onRestart={restartSession}
       logo={brandingCfg?.logo}
       logoWidth={brandingCfg?.logoWidth}
+      onSearchChange={setSearchQuery}
     />
   );
 
@@ -160,6 +162,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ styles, position, zIndex
             currentStepId={state.currentStepId}
             renderFormField={props.renderFormField}
             customizeChat={props.customizeChat}
+            searchQuery={searchQuery}
           />
           <div style={styles.inputArea}>
             {props.customizeChat?.input?.component ?? defaultInput}
