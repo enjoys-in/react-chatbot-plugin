@@ -67,3 +67,25 @@ export { ratingPlugin } from './ratingPlugin';
 export { offlinePlugin } from './offlinePlugin';
 export { proactivePlugin } from './proactivePlugin';
 export { personaPlugin } from './personaPlugin';
+
+// ─── Engagement & Notifications ─────────────────────────────────
+export { pinPlugin } from './pinPlugin';
+export { themeTogglePlugin } from './themeTogglePlugin';
+export { confettiPlugin } from './confettiPlugin';
+export { priorityPlugin } from './priorityPlugin';
+export { whisperPlugin } from './whisperPlugin';
+export { messageSchedulePlugin } from './messageSchedulePlugin';
+export { notificationBadgePlugin } from './notificationBadgePlugin';
+
+// ─── Content & Knowledge ────────────────────────────────────────
+export { summaryPlugin } from './summaryPlugin';
+export { knowledgeBasePlugin } from './knowledgeBasePlugin';
+export { translationPlugin } from './translationPlugin';
+export { transcriptExportPlugin } from './transcriptExportPlugin';
+export { codeHighlightPlugin } from './codeHighlightPlugin';
+
+// ─── Commerce & Scheduling ──────────────────────────────────────
+export { pollPlugin } from './pollPlugin';
+export { paymentPlugin } from './paymentPlugin';
+export { bookingPlugin } from './bookingPlugin';
+export { locationPlugin } from './locationPlugin';

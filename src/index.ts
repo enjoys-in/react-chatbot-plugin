@@ -80,6 +80,22 @@ export {
   offlinePlugin,
   proactivePlugin,
   personaPlugin,
+  pinPlugin,
+  themeTogglePlugin,
+  confettiPlugin,
+  priorityPlugin,
+  whisperPlugin,
+  messageSchedulePlugin,
+  notificationBadgePlugin,
+  summaryPlugin,
+  knowledgeBasePlugin,
+  translationPlugin,
+  transcriptExportPlugin,
+  codeHighlightPlugin,
+  pollPlugin,
+  paymentPlugin,
+  bookingPlugin,
+  locationPlugin,
 } from './plugins';
 
 // ─── Hooks ───────────────────────────────────────────────────────
