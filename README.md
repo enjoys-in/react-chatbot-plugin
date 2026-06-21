@@ -44,7 +44,7 @@
 - **Async actions** — Run API calls on step entry with real-time loading/progress/error states
 - **Custom step components** — Render your own React widgets inside flow steps
 - **Dynamic routing** — Route to different steps based on API results, status codes, or custom logic
-- **Plugin architecture** — 30 built-in plugins: analytics, AI, webhooks, persistence, i18n, CRM, rate limiting, live agent, and more
+- **Plugin architecture** — 35+ built-in plugins: analytics, AI, webhooks, persistence, i18n, CRM, rate limiting, live agent, tags, rating, offline, proactive, persona, and more
 - **Slash commands** — `/help`, `/back`, `/cancel`, `/restart` built-in
 - **`customizeChat` slot map** — All UI customization in one prop: component overrides (bubble, quick replies, typing indicator, header, input, launcher, branding, welcome/login screen) + config (header, branding, welcome screen content)
 - **Custom header/input** — Swap the header or input with your own React components
@@ -57,7 +57,53 @@
 - **Branding** — Customizable footer and header
 - **Typing delay** — Realistic typing pause before bot replies
 - **onUnhandledMessage** — Callback when nothing handles user text
-- **Live Agent (WebSocket / Socket.IO)** — Real-time handoff to human agents with session persistence, queue updates, typing indicators, and "agent joined/left" system messages. Pass a `WebSocket` or `socket.io-client` instance via the `liveAgent` prop — or use the `liveAgentPlugin`
+- **Live Agent (WebSocket / Socket.IO)** — Real-time handoff to human agents with session persistence, queue updates, typing indicators, and "agent joined/left" system messages
+- **Message Reactions** — 👍👎 emoji reactions on messages with analytics events
+- **Message Search** — Full-text search through chat history with highlighted matches
+- **Voice Input** — Speech-to-text via Web Speech API with language support
+- **Typing Preview** — Real-time "User is typing..." indicator for live agent/flow mode
+- **Rich Cards / Carousels** — Horizontal scrollable cards with images, titles, buttons
+- **Date/Time Picker** — Native date/time/datetime form field type
+- **Conversation Tags** — Group and tag conversations by topic
+- **Conditional Rendering** — Show/hide steps with `visibleIf` rules based on collected data
+- **Flow Composition** — Reusable sub-flows via `subFlow` field
+- **Middleware Pipeline** — Pre-process, transform, or block messages before dispatch
+- **Event Bus** — Standalone pub/sub system via `createEventBus()`
+- **Headless Mode** — Run engine + plugins without UI via `createHeadlessBot()`
+- **Message Edit/Delete** — Users can edit or delete their sent messages
+- **Read Receipts** — ✓ sent, ✓✓ delivered, ✓✓ read status indicators
+- **Rating Plugin** — End-of-chat satisfaction survey (1-5 stars)
+- **Offline Queue** — Queue messages offline, auto-send on reconnect
+- **Proactive Messages** — Trigger bot messages based on page behavior (idle, scroll, exit intent)
+- **Persona Switching** — Switch between bot personalities in one widget
+
+---
+
+## Release History
+
+| Version | Features | Description |
+|---------|----------|-------------|
+| **v1.20.0** | #12 Headless Mode | `createHeadlessBot()` + `headless` prop — run engine without UI |
+| **v1.19.0** | #11 Event Bus | `createEventBus()` standalone pub/sub utility |
+| **v1.18.0** | #10 Middleware Pipeline | `middleware` prop — intercept/transform/block messages |
+| **v1.17.0** | #8 Conditional Rendering, #9 Flow Composition | `visibleIf` on steps + `subFlow` for reusable flows |
+| **v1.16.0** | #7 Tags, #15 Rating, #16 Offline, #17 Proactive, #18 Persona | 5 new plugins with correct PluginContext signatures |
+| **v1.15.0** | #6 Date/Time Picker | Native `date`, `time`, `datetime` form field types |
+| **v1.14.0** | #5 Rich Cards / Carousels | `CarouselCards` component + `cards` message field |
+| **v1.13.0** | #4 Typing, #13 Edit/Delete, #14 Read Receipts | User typing indicator, message edit/delete, delivery status |
+| **v1.12.0** | #3 Voice Input | Speech-to-text via Web Speech API |
+| **v1.11.0** | #2 Message Search | Full-text search with header search bar |
+| **v1.10.0** | #1 Message Reactions | Emoji reactions on messages |
+| **v1.9.0** | Live Agent | WebSocket / Socket.IO real-time agent chat |
+| **v1.8.0** | Custom Icons | `icons` prop — override any built-in icon |
+| **v1.7.0** | Markdown Rendering | `markdown` prop — bold, italic, code, links, lists |
+| **v1.6.0** | Keywords & Fallback | Pattern matching, greeting detection, typing delay |
+| **v1.5.0** | Custom Form Fields | `renderFormField` prop — replace any form field renderer |
+| **v1.4.0** | customizeChat Slot Map | 9-slot UI customization system |
+| **v1.3.0** | Async Actions + Dynamic Routing | Step-entry API calls with status-based routing |
+| **v1.2.0** | File Upload + Emoji Picker | Drag & drop uploads, emoji selector |
+| **v1.1.0** | Plugin System | 30 built-in plugins + custom plugin API |
+| **v1.0.0** | Initial Release | Flow engine, forms, theming, slash commands |
 
 ## Installation
 
@@ -144,17 +190,27 @@ Full documentation is available in the [`docs/`](./docs/) folder:
 | `inputPlaceholder` | `string` | Input placeholder text |
 | `position` | `'bottom-right' \| 'bottom-left'` | Widget position |
 | `enableEmoji` | `boolean` | Show emoji picker |
+| `enableReactions` | `boolean \| string[]` | Emoji reactions on messages |
+| `enableSearch` | `boolean` | Message search in header |
+| `enableVoice` | `boolean \| { lang?, continuous? }` | Speech-to-text input |
+| `showUserTyping` | `boolean` | Show typing indicator to agents |
+| `allowMessageEdit` | `boolean` | Let users edit/delete sent messages |
+| `showReadReceipts` | `boolean` | Show ✓/✓✓ delivery status |
+| `markdown` | `boolean \| MarkdownOptions` | Render markdown in messages |
 | `fileUpload` | `FileUploadConfig` | File upload settings |
 | `components` | `Record<string, ComponentType<StepComponentProps>>` | Custom React components for flow steps |
 | `actionHandlers` | `Record<string, (data, ctx) => Promise<FlowActionResult>>` | Async action handlers for flow steps |
+| `middleware` | `FlowMiddleware[]` | Message middleware pipeline |
+| `headless` | `boolean` | Hide UI, run only engine + plugins |
+| `icons` | `Partial<ChatIconMap>` | Override built-in icons |
 | `defaultOpen` | `boolean` | Start with chat open |
 | `showLauncher` | `boolean` | Show/hide launcher button |
 | `launcherIcon` | `ReactNode` | Custom launcher icon |
 | `closeIcon` | `ReactNode` | Custom close icon |
 | `zIndex` | `number` | CSS z-index |
 | `renderFormField` | `FormFieldRenderMap` | Custom renderers for form field types |
-| `customizeChat` | `ChatCustomizeChat` | All UI customization — slot configs + component overrides (see below) |
-| `liveAgent` | `LiveAgentConfig` | WebSocket / Socket.IO real-time agent chat (see below) |
+| `customizeChat` | `ChatCustomizeChat` | All UI customization — slot configs + component overrides |
+| `liveAgent` | `LiveAgentConfig` | WebSocket / Socket.IO real-time agent chat |
 | `className` | `string` | Root element class name |
 
 ### `customizeChat` Slots
@@ -259,13 +315,13 @@ All internal components are exported for advanced use cases:
 
 **Forms:** `TextField`, `SelectField`, `RadioField`, `CheckboxField`, `FileUploadField`
 
-**Icons:** `SendIcon`, `ChatBubbleIcon`, `CloseIcon`, `MinimizeIcon`, `EmojiIcon`, `AttachmentIcon`, `FileIcon`, `ImageIcon`, `RemoveIcon`, `RestartIcon`
+**Icons:** `SendIcon`, `ChatBubbleIcon`, `CloseIcon`, `MinimizeIcon`, `EmojiIcon`, `AttachmentIcon`, `FileIcon`, `ImageIcon`, `RemoveIcon`, `RestartIcon`, `SearchIcon`, `MicIcon`, `StarIcon`, `EditIcon`, `TrashIcon`
 
-**Engine & Core:** `FlowEngine`, `PluginManager`, `useChat`, `ChatContext`, `useChatContext`
+**Engine & Core:** `FlowEngine`, `PluginManager`, `createEventBus`, `createHeadlessBot`, `LiveAgentAdapter`, `useChat`, `useLiveAgent`, `ChatContext`, `useChatContext`
 
-**Theme utilities:** `resolveTheme`, `buildStyles`, `buildCSSVariables`
+**Theme utilities:** `resolveTheme`, `buildStyles`, `buildCSSVariables`, `renderMarkdown`
 
-**Built-in plugins:** `analyticsPlugin`, `webhookPlugin`, `persistencePlugin`, `loggerPlugin`, `crmPlugin`, `emailPlugin`, `syncPlugin`, `aiPlugin`, `intentPlugin`, `typingPlugin`, `autoReplyPlugin`, `validationPlugin`, `uploadPlugin`, `authPlugin`, `rateLimitPlugin`, `pushPlugin`, `soundPlugin`, `agentPlugin`, `transferPlugin`, `themePlugin`, `componentPlugin`, `leadPlugin`, `campaignPlugin`, `schedulerPlugin`, `reminderPlugin`, `i18nPlugin`, `debugPlugin`, `devtoolsPlugin`, `mediaPlugin`, `markdownPlugin`
+**Built-in plugins:** `analyticsPlugin`, `webhookPlugin`, `persistencePlugin`, `loggerPlugin`, `crmPlugin`, `emailPlugin`, `syncPlugin`, `aiPlugin`, `intentPlugin`, `typingPlugin`, `autoReplyPlugin`, `validationPlugin`, `uploadPlugin`, `authPlugin`, `rateLimitPlugin`, `pushPlugin`, `soundPlugin`, `agentPlugin`, `transferPlugin`, `themePlugin`, `componentPlugin`, `leadPlugin`, `campaignPlugin`, `schedulerPlugin`, `reminderPlugin`, `i18nPlugin`, `debugPlugin`, `devtoolsPlugin`, `mediaPlugin`, `markdownPlugin`, `liveAgentPlugin`, `tagsPlugin`, `ratingPlugin`, `offlinePlugin`, `proactivePlugin`, `personaPlugin`
 
 ## Development
 
