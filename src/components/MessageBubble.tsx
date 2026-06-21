@@ -3,6 +3,7 @@ import type { ChatMessage, MessageAttachment } from '../types';
 import type { ChatStyles } from '../styles/theme';
 import { FileIcon } from './icons';
 import { useChatContext } from '../context/ChatContext';
+import { renderMarkdown } from '../utils/markdown';
 
 interface MessageBubbleProps {
   message: ChatMessage;
@@ -10,6 +11,7 @@ interface MessageBubbleProps {
 }
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, styles }) => {
+  const { props: chatProps } = useChatContext();
   const isBot = message.sender === 'bot';
   const isAgent = message.sender === 'agent';
   const isSystem = message.sender === 'system';
@@ -48,7 +50,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, styles })
         </div>
       )}
       {message.text && (
-        <span style={{ display: 'block' }}>{message.text}</span>
+        <span style={{ display: 'block' }}>
+          {chatProps.markdown
+            ? renderMarkdown(message.text, chatProps.markdown === true ? {} : chatProps.markdown)
+            : message.text}
+        </span>
       )}
       {message.attachments && message.attachments.length > 0 && (
         <div style={{ marginTop: message.text ? '10px' : 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>

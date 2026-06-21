@@ -7,6 +7,25 @@ import type { ChatPlugin } from './plugin';
 import type { ChatStyles } from '../styles/theme';
 import type { LiveAgentConfig } from './liveAgent';
 
+// ─── Markdown Options ────────────────────────────────────────────
+
+export interface MarkdownOptions {
+  /** Render **bold** and __bold__ (default: true) */
+  bold?: boolean;
+  /** Render *italic* and _italic_ (default: true) */
+  italic?: boolean;
+  /** Render `inline code` and ```code blocks``` (default: true) */
+  code?: boolean;
+  /** Render [text](url) as links (default: true) */
+  links?: boolean;
+  /** Render - / * / • list items (default: true) */
+  lists?: boolean;
+  /** Render ~~strikethrough~~ (default: true) */
+  strikethrough?: boolean;
+  /** Render headings # ## ### (default: false) */
+  headings?: boolean;
+}
+
 // ─── Icon Overrides ──────────────────────────────────────────────
 
 /** Map of all replaceable icons. Each value is a `ReactNode` so users can
@@ -124,6 +143,9 @@ export interface ChatBotProps {
   zIndex?: number;
   /** Enable emoji picker */
   enableEmoji?: boolean;
+  /** Enable built-in markdown rendering in messages (bold, italic, code, links, lists).
+   *  Pass `true` for all features, or an options object to selectively enable. */
+  markdown?: boolean | MarkdownOptions;
   /** File upload configuration */
   fileUpload?: FileUploadConfig;
   /** Map of custom components that can be rendered in flow steps (key = step.component) */

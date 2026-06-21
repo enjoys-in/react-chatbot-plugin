@@ -83,6 +83,9 @@ export { ChatContext, useChatContext } from './context/ChatContext';
 // ─── Theme Utilities ─────────────────────────────────────────────
 export { resolveTheme, buildStyles, buildCSSVariables } from './styles/theme';
 
+// ─── Utilities ───────────────────────────────────────────────────
+export { renderMarkdown } from './utils/markdown';
+
 // ─── Types ───────────────────────────────────────────────────────
 export type {
   ChatBotProps,
@@ -132,6 +135,8 @@ export type {
   ChatPlugin,
   PluginContext,
   ChatPluginEvent,
+  ChatIconMap,
+  MarkdownOptions,
   LiveAgentConfig,
   LiveAgentEvents,
   AgentInfo,
