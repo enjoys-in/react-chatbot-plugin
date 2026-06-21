@@ -20,6 +20,7 @@ import pluginShowcase from './plugin-showcase';
 import customizeChat from './customize-chat';
 import liveAgent from './live-agent';
 import markdownRendering from './markdown-rendering';
+import allPluginsDemo from './all-plugins-demo';
 
 export const allDemos = [
   // Basic
@@ -49,6 +50,8 @@ export const allDemos = [
   liveAgent,
   // Markdown
   markdownRendering,
+  // All Plugins
+  allPluginsDemo,
 ];
 
 export const categories = [
