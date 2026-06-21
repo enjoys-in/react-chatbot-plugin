@@ -13,6 +13,9 @@ export type FormFieldType =
   | 'file'
   | 'date'
   | 'time'
+  | 'datetime'
+  | 'color'
+  | 'range'
   | 'hidden';
 
 export interface FormFieldOption {

@@ -200,7 +200,10 @@ const FormField: React.FC<FormFieldProps> = ({ field, value, onChange, error, pr
     case 'url':
     case 'textarea':
     case 'date':
-    case 'time': {
+    case 'time':
+    case 'datetime':
+    case 'color':
+    case 'range': {
       const typedProps = { type: field.type as 'text', field, value: String(value ?? ''), onChange: onChange as (v: string) => void, error };
       const defaultEl = <TextField field={field} value={String(value ?? '')} onChange={onChange as (v: string) => void} error={error} />;
       if (customRenderer) return <>{(customRenderer as (p: typeof typedProps, d: React.ReactNode) => React.ReactNode)(typedProps, defaultEl)}</>;

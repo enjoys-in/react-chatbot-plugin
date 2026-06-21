@@ -10,7 +10,7 @@ interface TextFieldProps {
 
 export const TextField: React.FC<TextFieldProps> = ({ field, value, onChange, error }) => {
   const isTextarea = field.type === 'textarea';
-  const inputType = field.type === 'textarea' ? undefined : field.type;
+  const inputType = field.type === 'textarea' ? undefined : field.type === 'datetime' ? 'datetime-local' : field.type;
 
   const baseStyle: React.CSSProperties = {
     width: '100%',
