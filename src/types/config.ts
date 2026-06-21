@@ -155,6 +155,8 @@ export interface ChatBotProps {
   enableReactions?: boolean | string[];
   /** Enable message search — adds a search icon in the header */
   enableSearch?: boolean;
+  /** Enable voice input (speech-to-text) via Web Speech API */
+  enableVoice?: boolean | { lang?: string; continuous?: boolean };
   /** Enable built-in markdown rendering in messages (bold, italic, code, links, lists).
    *  Pass `true` for all features, or an options object to selectively enable. */
   markdown?: boolean | MarkdownOptions;

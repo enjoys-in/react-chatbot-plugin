@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import type { CSSProperties } from 'react';
 import type { FileUploadConfig } from '../types/config';
-import { SendIcon, EmojiIcon } from './icons';
+import { SendIcon, EmojiIcon, MicIcon } from './icons';
 import { EmojiPicker } from './EmojiPicker';
 import { FileUploadButton, FilePreviewList } from './FileUpload';
 import { useChatContext } from '../context/ChatContext';
@@ -34,7 +34,44 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [text, setText] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [isListening, setIsListening] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const recognitionRef = useRef<unknown>(null);
+
+  const voiceCfg = chatProps.enableVoice;
+  const voiceEnabled = !!voiceCfg && typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
+
+  const toggleVoice = useCallback(() => {
+    if (!voiceEnabled) return;
+    if (isListening) {
+      (recognitionRef.current as { stop: () => void })?.stop?.();
+      setIsListening(false);
+      return;
+    }
+    const SpeechRecognition = (window as unknown as Record<string, unknown>).SpeechRecognition ?? (window as unknown as Record<string, unknown>).webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+    const recognition = new (SpeechRecognition as new () => {
+      lang: string; continuous: boolean; interimResults: boolean;
+      onresult: ((e: { results: { transcript: string; isFinal: boolean }[][] }) => void) | null;
+      onend: (() => void) | null;
+      onerror: (() => void) | null;
+      start: () => void; stop: () => void;
+    })();
+    const lang = typeof voiceCfg === 'object' ? voiceCfg.lang : undefined;
+    const continuous = typeof voiceCfg === 'object' ? voiceCfg.continuous : false;
+    recognition.lang = lang ?? navigator.language;
+    recognition.continuous = continuous ?? false;
+    recognition.interimResults = true;
+    recognition.onresult = (e) => {
+      const transcript = Array.from(e.results).map((r) => r[0].transcript).join('');
+      setText(transcript);
+    };
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+    recognition.start();
+    recognitionRef.current = recognition;
+    setIsListening(true);
+  }, [voiceEnabled, voiceCfg, isListening]);
 
   const handleSend = useCallback(() => {
     const trimmed = text.trim();
@@ -132,6 +169,28 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               onRemoveFile={handleRemoveFile}
               primaryColor={primaryColor}
             />
+          )}
+
+          {voiceEnabled && (
+            <button
+              type="button"
+              onClick={toggleVoice}
+              aria-label={isListening ? 'Stop listening' : 'Voice input'}
+              title={isListening ? 'Stop listening' : 'Voice input'}
+              style={{
+                background: isListening ? primaryColor : 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '6px',
+                display: 'flex',
+                color: isListening ? '#fff' : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.3)'),
+                borderRadius: '8px',
+                transition: 'all 0.2s ease',
+                animation: isListening ? 'cb-pulse 1.5s infinite' : 'none',
+              }}
+            >
+              {icons?.mic ?? <MicIcon size={18} />}
+            </button>
           )}
         </div>
 
