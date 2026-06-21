@@ -71,6 +71,11 @@ export {
   mediaPlugin,
   markdownPlugin,
   liveAgentPlugin,
+  tagsPlugin,
+  ratingPlugin,
+  offlinePlugin,
+  proactivePlugin,
+  personaPlugin,
 } from './plugins';
 
 // ─── Hooks ───────────────────────────────────────────────────────

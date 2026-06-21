@@ -60,3 +60,10 @@ export { markdownPlugin } from './markdownPlugin';
 
 // ─── Live Agent ────────────────────────────────────────────────────────
 export { liveAgentPlugin } from './liveAgentPlugin';
+
+// ─── Conversation & UX ──────────────────────────────────────────
+export { tagsPlugin } from './tagsPlugin';
+export { ratingPlugin } from './ratingPlugin';
+export { offlinePlugin } from './offlinePlugin';
+export { proactivePlugin } from './proactivePlugin';
+export { personaPlugin } from './personaPlugin';
