@@ -8,6 +8,7 @@ import { MessageBubble } from './MessageBubble';
 import { QuickReplies } from './QuickReplies';
 import { TypingIndicator } from './TypingIndicator';
 import { DynamicForm } from './forms/DynamicForm';
+import { CarouselCards } from './CarouselCards';
 
 interface MessageListProps {
   messages: ChatMessage[];
@@ -66,6 +67,13 @@ export const MessageList: React.FC<MessageListProps> = ({
       {filteredMessages.map((msg) => (
         <React.Fragment key={msg.id}>
           <Bubble message={msg} styles={styles} />
+          {msg.cards && msg.cards.length > 0 && (
+            <CarouselCards
+              cards={msg.cards}
+              primaryColor={primaryColor}
+              onCardAction={(val) => onQuickReply(val, val)}
+            />
+          )}
           {msg.quickReplies && msg.quickReplies.length > 0 && (
             <QR
               replies={msg.quickReplies}

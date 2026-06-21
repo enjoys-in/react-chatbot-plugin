@@ -16,6 +16,23 @@ export interface MessageAttachment {
   preview?: string;
 }
 
+export interface CarouselCard {
+  title: string;
+  subtitle?: string;
+  image?: string;
+  buttons?: CardButton[];
+}
+
+export interface CardButton {
+  label: string;
+  /** Quick reply value — triggers onQuickReply */
+  value?: string;
+  /** URL to open in a new tab */
+  url?: string;
+  /** Flow step to jump to */
+  next?: string;
+}
+
 export interface FlowQuickReply {
   label: string;
   value: string;
@@ -37,6 +54,8 @@ export interface ChatMessage {
   component?: string;
   /** Agent name for live agent messages */
   agentName?: string;
+  /** Carousel cards — renders horizontally scrollable rich cards */
+  cards?: CarouselCard[];
   /** Reactions on this message */
   reactions?: MessageReaction[];
   /** Message delivery status */
