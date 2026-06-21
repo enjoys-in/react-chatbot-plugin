@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { ChatMessage, MessageAttachment } from '../types';
 import type { ChatStyles } from '../styles/theme';
-import { FileIcon } from './icons';
+import { FileIcon, EditIcon, TrashIcon } from './icons';
 import { useChatContext } from '../context/ChatContext';
 import { renderMarkdown } from '../utils/markdown';
 
@@ -66,6 +66,18 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, styles })
       {/* Reactions */}
       {chatProps.enableReactions && (isBot || isAgent) && !isSystem && (
         <MessageReactions message={message} />
+      )}
+      {/* Read receipts */}
+      {chatProps.showReadReceipts && message.sender === 'user' && message.status && (
+        <div style={{ fontSize: '10px', opacity: 0.5, textAlign: 'right', marginTop: '2px' }}>
+          {message.status === 'sent' && '✓'}
+          {message.status === 'delivered' && '✓✓'}
+          {message.status === 'read' && <span style={{ color: '#3B82F6' }}>✓✓</span>}
+        </div>
+      )}
+      {/* Edit/Delete */}
+      {chatProps.allowMessageEdit && message.sender === 'user' && !isSystem && (
+        <MessageActions message={message} />
       )}
     </div>
   );
@@ -215,6 +227,57 @@ const MessageReactions: React.FC<{ message: ChatMessage }> = ({ message }) => {
           </div>
         )}
       </div>
+    </div>
+  );
+};
+
+// ─── Message Edit/Delete Actions ─────────────────────────────────
+
+const MessageActions: React.FC<{ message: ChatMessage }> = ({ message }) => {
+  const { dispatch, props: chatProps } = useChatContext();
+  const [editing, setEditing] = useState(false);
+  const [editText, setEditText] = useState(message.text ?? '');
+  const icons = chatProps.icons;
+
+  const handleSaveEdit = () => {
+    if (editText.trim()) {
+      dispatch({ type: 'UPDATE_MESSAGE', payload: { id: message.id, updates: { text: editText.trim(), metadata: { ...message.metadata, edited: true } } } });
+    }
+    setEditing(false);
+  };
+
+  const handleDelete = () => {
+    dispatch({ type: 'UPDATE_MESSAGE', payload: { id: message.id, updates: { text: undefined, metadata: { ...message.metadata, deleted: true } } } });
+  };
+
+  if (editing) {
+    return (
+      <div style={{ marginTop: '4px', display: 'flex', gap: '4px' }}>
+        <input
+          value={editText}
+          onChange={(e) => setEditText(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit()}
+          autoFocus
+          style={{ flex: 1, padding: '4px 8px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', fontSize: '13px', outline: 'none' }}
+        />
+        <button onClick={handleSaveEdit} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#10B981' }}>✓</button>
+        <button onClick={() => setEditing(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#999' }}>✕</button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', gap: '4px', marginTop: '4px', opacity: 0.4, transition: 'opacity 0.15s' }}
+      onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+      onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.4')}
+    >
+      <button onClick={() => setEditing(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: '2px' }} aria-label="Edit">
+        {icons?.edit ?? <EditIcon size={12} />}
+      </button>
+      <button onClick={handleDelete} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: '2px', color: '#EF4444' }} aria-label="Delete">
+        {icons?.trash ?? <TrashIcon size={12} />}
+      </button>
+      {!!message.metadata?.edited && <span style={{ fontSize: '10px', opacity: 0.5 }}>(edited)</span>}
     </div>
   );
 };

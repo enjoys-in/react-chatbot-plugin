@@ -89,6 +89,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
+  // Typing indicator — debounce typing events
+  const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleTextChange = (val: string) => {
+    setText(val);
+    if (chatProps.showUserTyping && chatProps.callbacks?.onUserTyping) {
+      chatProps.callbacks.onUserTyping(true);
+      if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
+      typingTimerRef.current = setTimeout(() => chatProps.callbacks?.onUserTyping?.(false), 2000);
+    }
+  };
+
   const handleEmojiSelect = (emoji: string) => {
     setText((prev) => prev + emoji);
     inputRef.current?.focus();
@@ -198,7 +209,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <textarea
           ref={inputRef}
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => handleTextChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled}

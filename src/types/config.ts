@@ -126,6 +126,8 @@ export interface ChatCallbacks {
   onEvent?: (event: string, payload?: unknown) => void;
   /** Called when user reacts to a message */
   onReaction?: (messageId: string, emoji: string, reacted: boolean) => void;
+  /** Called when user starts/stops typing */
+  onUserTyping?: (isTyping: boolean) => void;
   /** Called when user types text the bot couldn't handle */
   onUnhandledMessage?: (text: string, context: { currentStepId: string | null }) => void;
 }
@@ -157,6 +159,12 @@ export interface ChatBotProps {
   enableSearch?: boolean;
   /** Enable voice input (speech-to-text) via Web Speech API */
   enableVoice?: boolean | { lang?: string; continuous?: boolean };
+  /** Show "User is typing..." to the bot/agent side — emits typing events */
+  showUserTyping?: boolean;
+  /** Allow user to edit/delete their sent messages */
+  allowMessageEdit?: boolean;
+  /** Show read receipt indicators (✓ sent, ✓✓ delivered, ✓✓ read) */
+  showReadReceipts?: boolean;
   /** Enable built-in markdown rendering in messages (bold, italic, code, links, lists).
    *  Pass `true` for all features, or an options object to selectively enable. */
   markdown?: boolean | MarkdownOptions;
