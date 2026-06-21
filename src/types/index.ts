@@ -3,7 +3,7 @@
 
 export type { ChatMessage, MessageSender, MessageAttachment, FlowQuickReply, MessageReaction, MessageStatus, CarouselCard, CardButton } from './message';
 export type { FormConfig, FormFieldConfig, FormFieldType, FormFieldOption, FormFieldValidation, FormFieldRenderProps, TextFieldRenderProps, SelectFieldRenderProps, RadioFieldRenderProps, CheckboxFieldRenderProps, FileFieldRenderProps, FormFieldRenderMap } from './form';
-export type { FlowConfig, FlowStep, FlowStepInput, FlowCondition, FlowAsyncAction } from './flow';
+export type { FlowConfig, FlowStep, FlowStepInput, FlowCondition, FlowAsyncAction, FlowMiddleware } from './flow';
 export type { ChatTheme, ChatStyle } from './theme';
 export type { ChatPlugin, PluginContext, ChatPluginEvent } from './plugin';
 export type {

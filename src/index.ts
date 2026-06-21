@@ -37,6 +37,8 @@ export { DynamicForm, TextField, SelectField, RadioField, CheckboxField, FileUpl
 export { FlowEngine } from './engine/FlowEngine';
 export { PluginManager } from './core/PluginManager';
 export { LiveAgentAdapter } from './core/LiveAgentAdapter';
+export { createEventBus } from './core/EventBus';
+export type { EventBus, EventHandler } from './core/EventBus';
 
 // ─── Plugins (built-in) ─────────────────────────────────────────
 export {
@@ -113,6 +115,7 @@ export type {
   FlowStepInput,
   FlowCondition,
   FlowAsyncAction,
+  FlowMiddleware,
   KeywordRoute,
   ChatCustomizeChat,
   ChatCustomizeSlotMap,
