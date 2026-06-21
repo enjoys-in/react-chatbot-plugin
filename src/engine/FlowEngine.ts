@@ -74,6 +74,19 @@ export class FlowEngine {
     return step.next;
   }
 
+  /** Check if a step should be visible based on its `visibleIf` condition */
+  isStepVisible(step: FlowStep): boolean {
+    if (!step.visibleIf) return true;
+    const { field, operator, value } = step.visibleIf;
+    return this.evaluate(this.collectedData[field], operator, value);
+  }
+
+  /** Resolve a sub-flow's start step (for flow composition) */
+  getSubFlowStartStep(step: FlowStep): FlowStep | undefined {
+    if (!step.subFlow) return undefined;
+    return step.subFlow.steps.find((s) => s.id === step.subFlow!.startStep);
+  }
+
   /** Returns true if the step expects a quick reply (not free text) */
   stepExpectsQuickReply(step: FlowStep): boolean {
     return !!(step.quickReplies && step.quickReplies.length > 0);

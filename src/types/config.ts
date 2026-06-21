@@ -1,7 +1,7 @@
 import type { ComponentType, ReactNode } from 'react';
 import type { ChatTheme, ChatStyle } from './theme';
 import type { ChatMessage, FlowQuickReply } from './message';
-import type { FlowConfig } from './flow';
+import type { FlowConfig, FlowMiddleware } from './flow';
 import type { FormConfig, FormFieldRenderMap } from './form';
 import type { ChatPlugin } from './plugin';
 import type { ChatStyles } from '../styles/theme';
@@ -190,6 +190,10 @@ export interface ChatBotProps {
   icons?: Partial<ChatIconMap>;
   /** Live agent configuration — WebSocket or Socket.IO real-time chat with human agents */
   liveAgent?: LiveAgentConfig;
+  /** Middleware pipeline — functions that intercept/transform messages before processing */
+  middleware?: FlowMiddleware[];
+  /** Headless mode — hides all UI, exposes only the engine & plugin system via ref */
+  headless?: boolean;
 }
 
 // ─── Keyword / Intent Matching ───────────────────────────────────

@@ -28,7 +28,20 @@ export interface FlowStep {
   input?: FlowStepInput;
   /** Async action to run when this step is entered (API calls, verification, etc.) */
   asyncAction?: FlowAsyncAction;
+  /** Only show this step when condition is met (conditional rendering) */
+  visibleIf?: FlowCondition;
+  /** Sub-flow composition — inline another flow's steps */
+  subFlow?: FlowConfig;
+  /** Step to go to after sub-flow completes */
+  onSubFlowComplete?: string;
 }
+
+/** Middleware function — can transform messages or short-circuit */
+export type FlowMiddleware = (
+  message: import('./message').ChatMessage,
+  data: Record<string, unknown>,
+  next: () => void,
+) => void | import('./message').ChatMessage;
 
 /** Configuration for an async action that runs when a step is entered */
 export interface FlowAsyncAction {

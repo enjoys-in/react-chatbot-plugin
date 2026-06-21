@@ -140,6 +140,32 @@ export function useChat() {
     const step = engine.getStep(stepId);
     if (!step) return;
 
+    // Conditional rendering: skip step if visibleIf condition is not met
+    if (!engine.isStepVisible(step)) {
+      const nextId = engine.resolveNext(step);
+      if (nextId) {
+        await processFlowStepRef.current(nextId);
+      }
+      return;
+    }
+
+    // Sub-flow composition: enter sub-flow if defined
+    if (step.subFlow) {
+      const subStart = engine.getSubFlowStartStep(step);
+      if (subStart) {
+        // Register sub-flow steps temporarily
+        step.subFlow.steps.forEach((s) => {
+          engine['steps'].set(s.id, {
+            ...s,
+            // Wire sub-flow's terminal step back to parent's onSubFlowComplete
+            next: s.next ?? step.onSubFlowComplete,
+          });
+        });
+        await processFlowStepRef.current(step.subFlow.startStep);
+        return;
+      }
+    }
+
     // Track step history for /back navigation
     engine.pushHistory(stepId);
 
