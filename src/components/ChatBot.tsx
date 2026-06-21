@@ -122,6 +122,9 @@ export const ChatBot: React.FC<ChatBotProps> = (props) => {
     else props.callbacks?.onClose?.();
   }, [state.isOpen, props.callbacks]);
 
+  // Headless mode — no UI rendered, only engine/plugins run
+  if (props.headless) return null;
+
   return (
     <ChatContext.Provider value={{ state, dispatch, props, pluginManager: pluginManagerRef.current }}>
       <div style={{ ...styles.root, ...cssVars as React.CSSProperties }} className={props.className}>

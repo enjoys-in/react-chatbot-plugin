@@ -39,6 +39,8 @@ export { PluginManager } from './core/PluginManager';
 export { LiveAgentAdapter } from './core/LiveAgentAdapter';
 export { createEventBus } from './core/EventBus';
 export type { EventBus, EventHandler } from './core/EventBus';
+export { createHeadlessBot } from './core/HeadlessBot';
+export type { HeadlessBot, HeadlessBotOptions } from './core/HeadlessBot';
 
 // ─── Plugins (built-in) ─────────────────────────────────────────
 export {
