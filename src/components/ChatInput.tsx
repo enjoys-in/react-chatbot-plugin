@@ -242,7 +242,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             height: '36px',
             borderRadius: '12px',
             background: hasContent
-              ? `linear-gradient(135deg, ${primaryColor} 0%, ${adjustColor(primaryColor, 30)} 100%)`
+              ? primaryColor
               : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'),
             color: hasContent ? '#fff' : (isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)'),
             border: 'none',
@@ -261,11 +261,3 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     </div>
   );
 };
-
-function adjustColor(hex: string, amount: number): string {
-  const num = parseInt(hex.replace('#', ''), 16);
-  const r = Math.min(255, ((num >> 16) & 0xff) + amount);
-  const g = Math.min(255, ((num >> 8) & 0xff) + amount);
-  const b = Math.min(255, (num & 0xff) + amount);
-  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
-}

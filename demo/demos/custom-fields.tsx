@@ -62,7 +62,7 @@ const renderFormField: FormFieldRenderMap = {
           fontFamily: 'inherit',
           outline: 'none',
           boxSizing: 'border-box',
-          background: 'linear-gradient(135deg, #f0fff4, #e0f7fa)',
+          background: '#f0fff4',
           color: '#2D3436',
         }}
       />

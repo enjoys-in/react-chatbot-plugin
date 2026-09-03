@@ -1,18 +1,74 @@
 import React, { useState, useCallback } from 'react';
 import { ChatBot, analyticsPlugin } from '@enjoys/react-chatbot-plugin';
+import {
+  HandWaving, LinkSimple, ArrowsSplit, Keyboard, ListChecks, Lock, Paperclip,
+  CheckCircle, ArrowsClockwise, MapTrifold, XCircle, ShoppingCart, MagicWand, Key,
+  PuzzlePiece, Palette, SlidersHorizontal, Plug, Headset, MarkdownLogo, Trophy,
+  Package, NotePencil, Lightning, SquaresFour, Heart, GithubLogo,
+  type Icon, type IconProps,
+} from '@phosphor-icons/react';
 import { allDemos, categories } from './demos';
 import type { DemoConfig } from './demos';
 
-// ─── Demo Card ───────────────────────────────────────────────────
+// ─── Icon Maps (demo/category id → Phosphor icon) ─────────────────
+
+const demoIcons: Record<string, Icon> = {
+  'basic-greeting': HandWaving,
+  'multi-step': LinkSimple,
+  'conditional-branching': ArrowsSplit,
+  'slash-commands': Keyboard,
+  'forms-showcase': ListChecks,
+  'login-form': Lock,
+  'file-upload': Paperclip,
+  'input-validation': CheckCircle,
+  'async-actions': ArrowsClockwise,
+  'dynamic-routing': MapTrifold,
+  'error-handling': XCircle,
+  'ecommerce-bot': ShoppingCart,
+  'onboarding-wizard': MagicWand,
+  'keyword-fallback': Key,
+  'custom-components': PuzzlePiece,
+  'custom-fields': Palette,
+  'customize-chat': SlidersHorizontal,
+  'plugin-showcase': Plug,
+  'live-agent': Headset,
+  'markdown-rendering': MarkdownLogo,
+  'all-plugins-demo': Trophy,
+};
+
+const categoryIcons: Record<string, Icon> = {
+  basic: Package,
+  forms: NotePencil,
+  advanced: Lightning,
+  components: PuzzlePiece,
+  plugins: Plug,
+};
+
+const DemoIcon: React.FC<{ id: string } & IconProps> = ({ id, ...props }) => {
+  const Ico = demoIcons[id];
+  return Ico ? <Ico {...props} /> : null;
+};
+
+const CategoryIcon: React.FC<{ id: string } & IconProps> = ({ id, ...props }) => {
+  const Ico = categoryIcons[id];
+  return Ico ? <Ico {...props} /> : null;
+};
+
+const NpmIcon: React.FC<{ size?: number }> = ({ size = 13 }) => (
+  <svg width={size} height={size} viewBox="0 0 576 512" fill="currentColor" style={{ verticalAlign: '-2px', marginRight: 4 }} aria-hidden="true">
+    <path d="M288 288h-32v-64h32v64zm288-128v192H288v32H160v-32H0V160h576zm-416 32H32v128h64v-96h32v96h32V192zm160 0H192v160h64v-32h64V192zm224 0H352v128h64v-96h32v96h32v-96h32v96h32V192z" />
+  </svg>
+);
+
+// ─── Demo Card ───────────────────────────────────────
 
 const DemoCard: React.FC<{ demo: DemoConfig; onClick: () => void }> = ({ demo, onClick }) => (
   <button onClick={onClick} className="demo-card">
-    <span className="demo-card__icon">{demo.icon}</span>
+    <span className="demo-card__icon"><DemoIcon id={demo.id} size={24} color="#FFFFFF" weight="regular" /></span>
     <div className="demo-card__body">
       <h3 className="demo-card__title">{demo.title}</h3>
       <p className="demo-card__desc">{demo.description}</p>
     </div>
-    <span className="demo-card__arrow">→</span>
   </button>
 );
 
@@ -45,7 +101,7 @@ export const App: React.FC = () => {
             <button onClick={goBack} className="back-btn">← Back</button>
             <div>
               <h1 className="app-header__title">
-                <span>{activeDemo.icon}</span> {activeDemo.title}
+                <DemoIcon id={activeDemo.id} size={26} color="#3FCF8E" weight="duotone" style={{ verticalAlign: '-4px', marginRight: 4 }} /> {activeDemo.title}
               </h1>
               <p className="app-header__subtitle">{activeDemo.description}</p>
             </div>
@@ -53,17 +109,17 @@ export const App: React.FC = () => {
         ) : (
           <div className="app-header__inner app-header__inner--hero">
             <div className="hero-badge">
-              <span className="dot" />
-              Open Source · MIT
+              <GithubLogo size={14} weight="fill" style={{ verticalAlign: '-2px', marginRight: 2 }} />
+              Open Source
             </div>
             <h1 className="app-header__title">
-              <span className="gradient-text">React ChatBot</span> Plugin
+              Conversational Chatbots,<br />Built for React
             </h1>
             <p className="app-header__subtitle">
-              {allDemos.length} interactive demos — click any card then open the chat bubble ↘
+              A drop-in, plugin-based chat widget for React. JSON-driven flows, 30+ plugins, and full UI control. Explore {allDemos.length} live demos below.
             </p>
             <div className="hero-install">
-              <span className="prompt">$</span>
+              <span className="prompt"><NpmIcon size={22} /></span>
               <span>npm i</span>
               <span className="pkg">@enjoys/react-chatbot-plugin</span>
             </div>
@@ -95,7 +151,7 @@ export const App: React.FC = () => {
           {/* Category Filter */}
           <div className="filter-bar">
             <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>
-                All
+                <SquaresFour size={14} weight="bold" style={{ marginRight: 6, verticalAlign: '-2px' }} /> All
             </button>
             {categories.map((cat) => (
               <button
@@ -103,7 +159,7 @@ export const App: React.FC = () => {
                 className={`filter-btn ${filter === cat.id ? 'active' : ''}`}
                 onClick={() => setFilter(cat.id)}
               >
-                {cat.icon} {cat.label}
+                <CategoryIcon id={cat.id} size={14} weight="bold" style={{ marginRight: 6, verticalAlign: '-2px' }} /> {cat.label}
               </button>
             ))}
           </div>
@@ -138,7 +194,7 @@ export const App: React.FC = () => {
 
       {/* Footer */}
       <footer className="demo-footer">
-        Made with ❤️ by <a href="https://github.com/enjoys-in" target="_blank" rel="noopener noreferrer">Enjoys</a> · <a href="https://www.npmjs.com/package/@enjoys/react-chatbot-plugin" target="_blank" rel="noopener noreferrer">npm</a> · <a href="https://github.com/enjoys-in/react-chatbot-plugin" target="_blank" rel="noopener noreferrer">GitHub</a>
+        Made with <Heart size={13} weight="fill" color="#fd79a8" style={{ verticalAlign: '-2px' }} /> by <a href="https://github.com/enjoys-in" target="_blank" rel="noopener noreferrer">Enjoys</a> · <a href="https://www.npmjs.com/package/@enjoys/react-chatbot-plugin" target="_blank" rel="noopener noreferrer"><NpmIcon /> npm</a> · <a href="https://github.com/enjoys-in/react-chatbot-plugin" target="_blank" rel="noopener noreferrer"><GithubLogo size={13} weight="fill" style={{ verticalAlign: '-2px', marginRight: 4 }} /> GitHub</a>
       </footer>
 
       {/* ChatBot — only rendered when a demo is selected */}
@@ -154,8 +210,8 @@ export const App: React.FC = () => {
           greetingResponse={activeDemo.greetingResponse}
           typingDelay={activeDemo.typingDelay}
           theme={{
-            primaryColor: '#6C5CE7',
-            headerBg: 'linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%)',
+            primaryColor: '#3FCF8E',
+            headerBg: '#3FCF8E',
             borderRadius: '20px',
           }}
           inputPlaceholder="Type a message or /help..."

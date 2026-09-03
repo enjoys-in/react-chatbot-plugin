@@ -25,14 +25,14 @@
   <meta name="twitter:description" content="A customizable, plugin-based chatbot widget for React. JSON-driven flows, async actions, custom components, theming, and more." />
   <meta name="twitter:image" content="https://repository-images.githubusercontent.com/enjoys-in/react-chatbot-plugin/social-preview.png" />
 
-  <meta name="theme-color" content="#6C5CE7" />
+  <meta name="theme-color" content="#00C573" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="ChatBot Demos" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
   <script type="application/ld+json">
   {
@@ -62,8 +62,8 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: "Raleway", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0b0815;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #141414;
       min-height: 100vh;
       color: #e0daf7;
     }
@@ -72,7 +72,7 @@
     .app-header {
       position: relative;
       overflow: hidden;
-      background: linear-gradient(160deg, #0b0815 0%, #14102a 40%, #1e1548 70%, #6C5CE7 150%);
+      background: #141414;
       padding: 0;
       color: #fff;
     }
@@ -80,7 +80,7 @@
       content: '';
       position: absolute;
       width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(108,92,231,0.18) 0%, transparent 70%);
+      background: transparent;
       top: -200px; right: -100px;
       border-radius: 50%;
       pointer-events: none;
@@ -89,17 +89,13 @@
       content: '';
       position: absolute;
       width: 350px; height: 350px;
-      background: radial-gradient(circle, rgba(253,121,168,0.08) 0%, transparent 70%);
+      background: transparent;
       bottom: -100px; left: 50px;
       border-radius: 50%;
       pointer-events: none;
     }
     .app-header .dot-grid {
       position: absolute; inset: 0;
-      background-image: radial-gradient(rgba(108,92,231,0.1) 1px, transparent 1px);
-      background-size: 24px 24px;
-      mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 100%);
-      -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 100%);
       pointer-events: none;
     }
     .app-header__inner {
@@ -119,31 +115,28 @@
 
     .hero-badge {
       display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(108,92,231,0.15);
-      border: 1px solid rgba(108,92,231,0.3);
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
       border-radius: 100px;
       padding: 6px 18px;
       font-size: 11px; font-weight: 700;
-      color: #A29BFE;
+      color: #fff;
       letter-spacing: 1.2px;
       text-transform: uppercase;
       margin-bottom: 20px;
     }
     .hero-badge .dot {
       width: 6px; height: 6px;
-      background: #00b894; border-radius: 50%;
-      box-shadow: 0 0 6px rgba(0,184,148,0.5);
+      background: #fff; border-radius: 50%;
     }
 
     .app-header__title {
-      font-size: 2.6rem; font-weight: 900;
-      letter-spacing: -0.04em; line-height: 1.1;
+      font-size: 3.2rem; font-weight: 900;
+      letter-spacing: -0.045em; line-height: 1.05;
+      color: #fff;
     }
     .app-header__title .gradient-text {
-      background: linear-gradient(135deg, #A29BFE 0%, #6C5CE7 40%, #fd79a8 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: #fff;
     }
     .app-header__subtitle {
       margin-top: 12px; font-size: 1.05rem;
@@ -153,17 +146,17 @@
     }
     .hero-install {
       display: inline-flex; align-items: center; gap: 10px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
       border-radius: 12px;
       padding: 12px 22px;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'Inter', sans-serif;
       font-size: 13px;
-      color: rgba(255,255,255,0.6);
+      color: rgba(255,255,255,0.7);
       margin-top: 24px;
     }
-    .hero-install .prompt { color: #00b894; font-weight: 600; }
-    .hero-install .pkg { color: #A29BFE; font-weight: 500; }
+    .hero-install .prompt { color: #00C573; font-weight: 700; }
+    .hero-install .pkg { color: #00C573; font-weight: 600; }
 
     .hero-stats {
       display: flex; gap: 36px; margin-top: 28px;
@@ -171,7 +164,7 @@
     .hero-stat__value {
       font-size: 20px; font-weight: 800; color: #fff;
     }
-    .hero-stat__value .accent { color: #A29BFE; }
+    .hero-stat__value .accent { color: #fff; }
     .hero-stat__label {
       font-size: 10px;
       color: rgba(255,255,255,0.3);
@@ -191,7 +184,7 @@
       cursor: pointer;
       transition: all 0.2s;
       white-space: nowrap;
-      font-family: 'Raleway', sans-serif;
+      font-family: 'Inter', sans-serif;
     }
     .back-btn:hover {
       background: rgba(255,255,255,0.15);
@@ -208,25 +201,26 @@
     /* Filter Bar */
     .filter-bar {
       display: flex; gap: 8px;
-      margin-bottom: 28px; flex-wrap: wrap;
+      margin-bottom: 48px; flex-wrap: wrap;
+      justify-content: center;
     }
     .filter-btn {
-      border: 1px solid rgba(108,92,231,0.2);
-      background: rgba(255,255,255,0.03);
-      color: #A29BFE;
-      padding: 8px 18px; border-radius: 24px;
+      border: 1px solid #2a2a2a;
+      background: #1a1a1a;
+      color: rgba(255,255,255,0.55);
+      padding: 8px 18px; border-radius: 10px;
       font-size: 13px; font-weight: 600;
       cursor: pointer; transition: all 0.2s;
-      font-family: 'Raleway', sans-serif;
+      font-family: 'Inter', sans-serif;
     }
     .filter-btn:hover {
-      background: rgba(108,92,231,0.1);
-      border-color: rgba(108,92,231,0.35);
+      color: #fff;
+      border-color: rgba(255,255,255,0.25);
     }
     .filter-btn.active {
-      background: #6C5CE7; color: #fff;
-      border-color: #6C5CE7;
-      box-shadow: 0 2px 12px rgba(108,92,231,0.3);
+      background: #1a1a1a; color: #fff;
+      border-color: rgba(255,255,255,0.6);
+      box-shadow: none;
     }
 
     /* Demo Grid */
@@ -239,8 +233,8 @@
     /* Demo Card */
     .demo-card {
       display: flex; align-items: center; gap: 14px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(108,92,231,0.12);
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
       border-radius: 16px;
       padding: 18px 20px;
       cursor: pointer; transition: all 0.25s;
@@ -249,22 +243,20 @@
       backdrop-filter: blur(8px);
     }
     .demo-card:hover {
-      border-color: rgba(108,92,231,0.4);
-      background: rgba(108,92,231,0.06);
-      box-shadow: 0 4px 24px rgba(108,92,231,0.12);
-      transform: translateY(-2px);
+      border-color: #3a3a3a;
+      background: #1f1f1f;
     }
     .demo-card__icon {
       font-size: 26px; flex-shrink: 0;
       width: 44px; height: 44px;
       display: flex; align-items: center; justify-content: center;
-      background: rgba(108,92,231,0.1);
+      background: rgba(255,255,255,0.06);
       border-radius: 12px;
-      border: 1px solid rgba(108,92,231,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
     }
     .demo-card__body { flex: 1; min-width: 0; }
     .demo-card__title {
-      font-size: 15px; font-weight: 700;
+      font-size: 15px; font-weight: 500;
       margin-bottom: 3px; color: #fff;
     }
     .demo-card__desc {
@@ -283,14 +275,13 @@
       transition: color 0.2s, transform 0.2s;
     }
     .demo-card:hover .demo-card__arrow {
-      color: #A29BFE;
-      transform: translateX(3px);
+      color: rgba(255,255,255,0.5);
     }
 
     /* Active Info */
     .active-info {
       background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(108,92,231,0.15);
+      border: 1px solid rgba(0,197,115,0.15);
       border-radius: 16px;
       padding: 32px; text-align: center;
       max-width: 600px;
@@ -310,9 +301,9 @@
     .badge {
       padding: 5px 14px; border-radius: 20px;
       font-size: 11px; font-weight: 700;
-      background: rgba(108,92,231,0.15); color: #A29BFE;
+      background: rgba(0,197,115,0.15); color: #00C573;
       text-transform: uppercase; letter-spacing: 0.05em;
-      border: 1px solid rgba(108,92,231,0.2);
+      border: 1px solid rgba(0,197,115,0.2);
     }
     .badge--purple { background: rgba(124,77,255,0.12); color: #b388ff; border-color: rgba(124,77,255,0.2); }
     .badge--teal { background: rgba(0,206,201,0.1); color: #00cec9; border-color: rgba(0,206,201,0.2); }
@@ -325,7 +316,7 @@
       color: rgba(255,255,255,0.2);
       font-size: 12px; font-weight: 500;
     }
-    .demo-footer a { color: #A29BFE; text-decoration: none; }
+    .demo-footer a { color: rgba(255,255,255,0.85); text-decoration: none; }
     .demo-footer a:hover { text-decoration: underline; }
 
     @media (max-width: 700px) {
