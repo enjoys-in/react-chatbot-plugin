@@ -20,11 +20,11 @@ export interface ChatStyles {
 
 const lightDefaults: Required<ChatTheme> = {
   primaryColor: '#6C5CE7',
-  headerBg: 'linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%)',
+  headerBg: '#6C5CE7',
   headerText: '#FFFFFF',
-  bubbleBg: 'rgba(241, 243, 249, 0.85)',
+  bubbleBg: '#F1F3F9',
   bubbleText: '#2D3436',
-  userBubbleBg: 'linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%)',
+  userBubbleBg: '#6C5CE7',
   userBubbleText: '#FFFFFF',
   fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   fontSize: '14px',
@@ -35,13 +35,14 @@ const lightDefaults: Required<ChatTheme> = {
 };
 
 // ─── Dark Mode Overrides ─────────────────────────────────────────
+// Flat, modern dark palette — deep neutral surfaces + a single indigo accent.
 
 const darkOverrides: Partial<ChatTheme> = {
-  headerBg: 'linear-gradient(135deg, #2D1B69 0%, #4A3298 100%)',
-  headerText: '#F0F0FF',
-  bubbleBg: 'rgba(45, 45, 70, 0.85)',
+  headerBg: '#17171F',
+  headerText: '#F5F5FA',
+  bubbleBg: '#242430',
   bubbleText: '#E8E8F0',
-  userBubbleBg: 'linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%)',
+  userBubbleBg: '#d2d2d3',
   userBubbleText: '#FFFFFF',
 };
 
@@ -69,12 +70,12 @@ export function buildCSSVariables(theme: Required<ChatTheme>): Record<string, st
     '--cb-border-radius': theme.borderRadius,
     '--cb-window-width': theme.windowWidth,
     '--cb-window-height': theme.windowHeight,
-    '--cb-bg': theme.mode === 'dark' ? 'rgba(22, 22, 40, 0.95)' : 'rgba(255, 255, 255, 0.92)',
+    '--cb-bg': theme.mode === 'dark' ? '#141414' : '#FFFFFF',
     '--cb-border': theme.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
-    '--cb-input-bg': theme.mode === 'dark' ? 'rgba(40, 40, 65, 0.8)' : 'rgba(245, 247, 252, 0.9)',
-    '--cb-input-border': theme.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)',
-    '--cb-input-text': theme.mode === 'dark' ? '#E0E0E0' : '#2D3436',
-    '--cb-branding-bg': theme.mode === 'dark' ? 'rgba(20, 20, 35, 0.8)' : 'rgba(250, 250, 255, 0.8)',
+    '--cb-input-bg': theme.mode === 'dark' ? '#1E1E28' : '#F5F7FC',
+    '--cb-input-border': theme.mode === 'dark' ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)',
+    '--cb-input-text': theme.mode === 'dark' ? '#E8E8F0' : '#2D3436',
+    '--cb-branding-bg': theme.mode === 'dark' ? '#101017' : '#FAFAFF',
   };
 }
 
@@ -98,7 +99,7 @@ export function buildStyles(
       width: '62px',
       height: '62px',
       borderRadius: '50%',
-      background: theme.headerBg,
+      background: theme.primaryColor,
       color: '#fff',
       border: 'none',
       cursor: 'pointer',
@@ -123,10 +124,8 @@ export function buildStyles(
       boxShadow: isDark
         ? '0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)'
         : '0 20px 60px rgba(108, 92, 231, 0.15), 0 8px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)',
-      backgroundColor: isDark ? 'rgba(22, 22, 40, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
-      border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(255,255,255,0.8)',
+      backgroundColor: isDark ? '#141414' : '#FFFFFF',
+      border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
       zIndex: 9999,
       animation: 'cb-window-enter 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
       ...overrides?.window,
@@ -153,24 +152,20 @@ export function buildStyles(
       display: 'flex',
       flexDirection: 'column',
       gap: '10px',
-      background: isDark
-        ? 'linear-gradient(180deg, rgba(22, 22, 40, 0.98) 0%, rgba(30, 30, 50, 0.98) 100%)'
-        : 'linear-gradient(180deg, rgba(248, 249, 254, 0.95) 0%, rgba(255, 255, 255, 0.95) 100%)',
+      background: isDark ? '#141414' : '#FFFFFF',
       ...overrides?.messageList,
     } satisfies CSSProperties,
 
     inputArea: {
       padding: '12px 16px 14px',
       borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}`,
-      backgroundColor: isDark ? 'rgba(20, 20, 38, 0.9)' : 'rgba(255, 255, 255, 0.95)',
-      backdropFilter: 'blur(12px)',
-      WebkitBackdropFilter: 'blur(12px)',
+      backgroundColor: isDark ? '#101017' : '#FFFFFF',
       flexShrink: 0,
       ...overrides?.inputArea,
     } satisfies CSSProperties,
 
     botBubble: {
-      background: isDark ? 'rgba(45, 45, 70, 0.7)' : 'rgba(241, 243, 249, 0.9)',
+      background: isDark ? '#242430' : '#F1F3F9',
       color: isDark ? '#E8E8F0' : '#2D3436',
       padding: '12px 16px',
       borderRadius: '18px 18px 18px 4px',
@@ -178,8 +173,6 @@ export function buildStyles(
       alignSelf: 'flex-start',
       wordBreak: 'break-word',
       whiteSpace: 'pre-wrap',
-      backdropFilter: 'blur(8px)',
-      WebkitBackdropFilter: 'blur(8px)',
       border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.04)',
       boxShadow: isDark
         ? '0 2px 8px rgba(0,0,0,0.2)'

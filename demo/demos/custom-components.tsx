@@ -70,7 +70,7 @@ const StarRating: React.FC<StepComponentProps> = ({ onComplete }) => {
         })}
         style={{
           padding: '8px 24px', borderRadius: '20px', border: 'none',
-          background: rating ? 'linear-gradient(135deg, #6C5CE7, #A29BFE)' : '#ddd',
+          background: rating ? '#6C5CE7' : '#ddd',
           color: '#fff', fontWeight: 600, fontSize: '13px', cursor: rating ? 'pointer' : 'default',
         }}
       >

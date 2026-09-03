@@ -91,7 +91,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ config, onSubmit, prim
       <div
         style={{
           padding: '16px',
-          background: 'linear-gradient(135deg, rgba(46, 213, 115, 0.1), rgba(46, 213, 115, 0.05))',
+          background: 'rgba(46, 213, 115, 0.1)',
           borderRadius: '14px',
           fontSize: '14px',
           color: '#2ecc71',
@@ -148,7 +148,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ config, onSubmit, prim
         style={{
           width: '100%',
           padding: '12px',
-          background: `linear-gradient(135deg, ${primaryColor} 0%, ${adjustColor(primaryColor, 30)} 100%)`,
+          background: primaryColor,
           color: '#fff',
           border: 'none',
           borderRadius: '12px',
@@ -240,11 +240,3 @@ const FormField: React.FC<FormFieldProps> = ({ field, value, onChange, error, pr
       return null;
   }
 };
-
-function adjustColor(hex: string, amount: number): string {
-  const num = parseInt(hex.replace('#', ''), 16);
-  const r = Math.min(255, ((num >> 16) & 0xff) + amount);
-  const g = Math.min(255, ((num >> 8) & 0xff) + amount);
-  const b = Math.min(255, (num & 0xff) + amount);
-  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
-}

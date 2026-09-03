@@ -15,7 +15,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ content, onDismiss
         display: 'flex',
         flexDirection: 'column',
         overflow: 'auto',
-        background: 'linear-gradient(180deg, rgba(248, 249, 254, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%)',
       }}
     >
       <div style={{ flex: 1, padding: '28px 24px', overflow: 'auto' }}>
@@ -35,7 +34,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ content, onDismiss
           style={{
             width: '100%',
             padding: '14px',
-            background: `linear-gradient(135deg, ${primaryColor} 0%, ${adjustColor(primaryColor, 30)} 100%)`,
+            background: primaryColor,
             color: '#fff',
             border: 'none',
             borderRadius: '14px',
@@ -62,11 +61,3 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ content, onDismiss
     </div>
   );
 };
-
-function adjustColor(hex: string, amount: number): string {
-  const num = parseInt(hex.replace('#', ''), 16);
-  const r = Math.min(255, ((num >> 16) & 0xff) + amount);
-  const g = Math.min(255, ((num >> 8) & 0xff) + amount);
-  const b = Math.min(255, (num & 0xff) + amount);
-  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
-}

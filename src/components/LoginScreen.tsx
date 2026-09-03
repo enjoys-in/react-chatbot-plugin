@@ -20,7 +20,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ config, onLogin, prima
         justifyContent: 'center',
         padding: '24px',
         overflow: 'auto',
-        background: 'linear-gradient(180deg, rgba(248, 249, 254, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%)',
       }}
     >
       <DynamicForm config={config} onSubmit={onLogin} primaryColor={primaryColor} renderFormField={renderFormField} />

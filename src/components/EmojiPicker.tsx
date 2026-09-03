@@ -86,7 +86,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onSelect, onClose, pri
               fontFamily: 'inherit',
               letterSpacing: '0.02em',
               background: idx === activeCategory
-                ? `linear-gradient(135deg, ${primaryColor}, ${primaryColor}CC)`
+                ? primaryColor
                 : 'transparent',
               color: idx === activeCategory ? '#fff' : 'rgba(0,0,0,0.4)',
               transition: 'all 0.2s ease',

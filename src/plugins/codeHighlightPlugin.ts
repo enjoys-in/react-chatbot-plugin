@@ -48,7 +48,7 @@ export function codeHighlightPlugin(options: CodeHighlightPluginOptions = {}): C
         border-radius: 6px;
         padding: 12px;
         margin: 4px 0;
-        font-family: 'Fira Code', 'JetBrains Mono', monospace;
+        font-family: 'Fira Code', monospace;
         font-size: 13px;
         line-height: 1.5;
         overflow-x: auto;

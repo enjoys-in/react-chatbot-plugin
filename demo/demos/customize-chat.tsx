@@ -34,8 +34,8 @@ const CustomBubble: React.FC<{ message: ChatMessage; styles: Record<string, Reac
                     height: '28px',
                     borderRadius: '50%',
                     background: isBot
-                        ? 'linear-gradient(135deg, #6C5CE7, #A29BFE)'
-                        : 'linear-gradient(135deg, #00b894, #55efc4)',
+                        ? '#6C5CE7'
+                        : '#00b894',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -54,7 +54,7 @@ const CustomBubble: React.FC<{ message: ChatMessage; styles: Record<string, Reac
                     borderRadius: isBot ? '16px 16px 16px 4px' : '16px 16px 4px 16px',
                     background: isBot
                         ? 'rgba(108, 92, 231, 0.08)'
-                        : 'linear-gradient(135deg, #6C5CE7, #A29BFE)',
+                        : '#6C5CE7',
                     color: isBot ? '#2D3436' : '#fff',
                     fontSize: '13px',
                     lineHeight: '1.5',
@@ -110,7 +110,7 @@ const CustomQuickReplies: React.FC<{ replies: FlowQuickReply[]; onSelect: (v: st
                         fontFamily: 'inherit',
                     }}
                     onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'linear-gradient(135deg, #6C5CE7, #A29BFE)';
+                        e.currentTarget.style.background = '#6C5CE7';
                         e.currentTarget.style.color = '#fff';
                         e.currentTarget.style.transform = 'translateY(-2px)';
                         e.currentTarget.style.boxShadow = '0 4px 12px rgba(108,92,231,0.35)';
@@ -147,7 +147,7 @@ const CustomTypingIndicator: React.FC<{ color: string }> = ({ color }) => {
                     width: '28px',
                     height: '28px',
                     borderRadius: '50%',
-                    background: `linear-gradient(135deg, ${color}, #A29BFE)`,
+                    background: `${color}`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
