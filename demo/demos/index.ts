@@ -21,6 +21,9 @@ import customizeChat from './customize-chat';
 import liveAgent from './live-agent';
 import markdownRendering from './markdown-rendering';
 import allPluginsDemo from './all-plugins-demo';
+import voiceCall from './voice-call';
+import { homeScreenDemo } from './home-screen';
+import { messengerNavDemo } from './messenger-nav';
 
 export const allDemos = [
   // Basic
@@ -41,6 +44,8 @@ export const allDemos = [
   onboardingWizard,
   keywordFallback,
   // Components
+  homeScreenDemo,
+  messengerNavDemo,
   customComponents,
   customFields,
   customizeChat,
@@ -52,6 +57,8 @@ export const allDemos = [
   markdownRendering,
   // All Plugins
   allPluginsDemo,
+  // Voice
+  voiceCall,
 ];
 
 export const categories = [

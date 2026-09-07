@@ -12,8 +12,8 @@ const PlanSelector: React.FC<StepComponentProps> = ({ data, onComplete }) => {
   ];
 
   return (
-    <div style={{ padding: '12px', background: 'rgba(108,92,231,0.05)', borderRadius: '16px', border: '1px solid rgba(108,92,231,0.12)' }}>
-      <p style={{ fontWeight: 600, marginBottom: '10px', fontSize: '14px', color: '#2D3436' }}>
+    <div style={{ padding: '12px', background: 'var(--cb-hover, rgba(9,14,21,0.06))', borderRadius: '16px', border: '1px solid var(--cb-border, rgba(9,14,21,0.08))' }}>
+      <p style={{ fontWeight: 600, marginBottom: '10px', fontSize: '14px', color: 'var(--cb-ink, #14161A)' }}>
         Hi {(data?.name as string) || 'there'}! Choose a plan:
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -23,7 +23,8 @@ const PlanSelector: React.FC<StepComponentProps> = ({ data, onComplete }) => {
             onClick={() => onComplete({ status: 'success', data: { plan: plan.id, planName: plan.name }, next: `plan_${plan.id}` })}
             style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '12px 16px', background: '#fff', border: `2px solid ${plan.color}22`,
+              padding: '12px 16px', background: 'var(--cb-bg, #FFFFFF)', color: 'var(--cb-ink, #14161A)',
+              border: `2px solid ${plan.color}22`,
               borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s', fontSize: '13px',
             }}
           >
@@ -43,8 +44,8 @@ const StarRating: React.FC<StepComponentProps> = ({ onComplete }) => {
   const [hover, setHover] = React.useState(0);
 
   return (
-    <div style={{ background: 'rgba(108,92,231,0.05)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(108,92,231,0.12)', textAlign: 'center' }}>
-      <p style={{ fontWeight: 600, marginBottom: '8px', color: '#2D3436', fontSize: '14px' }}>Rate your experience</p>
+    <div style={{ background: 'var(--cb-hover, rgba(9,14,21,0.06))', borderRadius: '16px', padding: '16px', border: '1px solid var(--cb-border, rgba(9,14,21,0.08))', textAlign: 'center' }}>
+      <p style={{ fontWeight: 600, marginBottom: '8px', color: 'var(--cb-ink, #14161A)', fontSize: '14px' }}>Rate your experience</p>
       <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '8px' }}>
         {[1, 2, 3, 4, 5].map((star) => (
           <span
@@ -58,7 +59,7 @@ const StarRating: React.FC<StepComponentProps> = ({ onComplete }) => {
           </span>
         ))}
       </div>
-      <p style={{ fontSize: '12px', color: '#999', marginBottom: '10px' }}>
+      <p style={{ fontSize: '12px', color: 'var(--cb-ink-muted, #6C6F74)', marginBottom: '10px' }}>
         {rating === 0 ? 'Click a star' : `You selected ${rating} star${rating > 1 ? 's' : ''}`}
       </p>
       <button
@@ -70,8 +71,9 @@ const StarRating: React.FC<StepComponentProps> = ({ onComplete }) => {
         })}
         style={{
           padding: '8px 24px', borderRadius: '20px', border: 'none',
-          background: rating ? '#6C5CE7' : '#ddd',
-          color: '#fff', fontWeight: 600, fontSize: '13px', cursor: rating ? 'pointer' : 'default',
+          background: rating ? 'var(--cb-primary, #000000)' : 'var(--cb-hover, rgba(9,14,21,0.06))',
+          color: rating ? 'var(--cb-primary-ink, #FFFFFF)' : 'var(--cb-ink-faint, #A6A9AD)',
+          fontWeight: 600, fontSize: '13px', cursor: rating ? 'pointer' : 'default',
         }}
       >
         Submit
@@ -90,8 +92,8 @@ const ColorPicker: React.FC<StepComponentProps> = ({ onComplete }) => {
   ];
 
   return (
-    <div style={{ background: 'rgba(108,92,231,0.05)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(108,92,231,0.12)' }}>
-      <p style={{ fontWeight: 600, marginBottom: '10px', fontSize: '14px', color: '#2D3436' }}>Pick your favorite color:</p>
+    <div style={{ background: 'var(--cb-hover, rgba(9,14,21,0.06))', borderRadius: '16px', padding: '16px', border: '1px solid var(--cb-border, rgba(9,14,21,0.08))' }}>
+      <p style={{ fontWeight: 600, marginBottom: '10px', fontSize: '14px', color: 'var(--cb-ink, #14161A)' }}>Pick your favorite color:</p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
         {colors.map((c) => (
           <button
@@ -99,12 +101,12 @@ const ColorPicker: React.FC<StepComponentProps> = ({ onComplete }) => {
             onClick={() => onComplete({ status: 'success', data: { color: c.hex, colorName: c.name } })}
             style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
-              padding: '12px 8px', background: '#fff', border: '1px solid #eee',
+              padding: '12px 8px', background: 'var(--cb-bg, #FFFFFF)', border: '1px solid var(--cb-border, rgba(9,14,21,0.08))',
               borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s',
             }}
           >
             <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: c.hex }} />
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#666' }}>{c.name}</span>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--cb-ink-muted, #6C6F74)' }}>{c.name}</span>
           </button>
         ))}
       </div>

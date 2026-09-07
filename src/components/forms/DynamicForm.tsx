@@ -115,13 +115,13 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({ config, onSubmit, prim
         WebkitBackdropFilter: 'blur(12px)',
         borderRadius: '16px',
         padding: '20px',
-        border: '1px solid rgba(0,0,0,0.06)',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+        border: '1px solid var(--cb-border, rgba(9, 14, 21, 0.08))',
+        boxShadow: '0 1px 4px rgba(9, 14, 21, 0.04)',
         animation: 'cb-slide-up 0.35s ease-out',
       }}
     >
       {config.title && (
-        <div style={{ fontWeight: 600, fontSize: '15px', marginBottom: '4px', color: '#2D3436', letterSpacing: '-0.01em' }}>
+        <div style={{ fontWeight: 600, fontSize: '15px', marginBottom: '4px', color: 'var(--cb-ink, #14161A)', letterSpacing: '-0.01em' }}>
           {config.title}
         </div>
       )}

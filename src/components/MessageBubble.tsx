@@ -1,14 +1,39 @@
 import React, { useState } from 'react';
-import type { ChatMessage, MessageAttachment } from '../types';
+import type { ChatMessage, MessageAttachment, MarkdownOptions } from '../types';
 import type { ChatStyles } from '../styles/theme';
 import { FileIcon, EditIcon, TrashIcon } from './icons';
 import { useChatContext } from '../context/ChatContext';
 import { renderMarkdown } from '../utils/markdown';
+import { motion, typography } from '../styles/theme';
 
 interface MessageBubbleProps {
   message: ChatMessage;
   styles: ChatStyles;
 }
+
+/** Small round avatar rendered to the left of bot/agent messages. */
+const BotMessageAvatar: React.FC<{ avatar: React.ReactNode }> = ({ avatar }) => (
+  <div
+    aria-hidden="true"
+    style={{
+      width: 28,
+      height: 28,
+      borderRadius: '50%',
+      overflow: 'hidden',
+      flexShrink: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: typeof avatar === 'string' ? 'transparent' : 'var(--cb-primary, #000000)',
+      color: 'var(--cb-primary-ink, #FFFFFF)',
+      fontSize: 15,
+    }}
+  >
+    {typeof avatar === 'string'
+      ? <img src={avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      : avatar}
+  </div>
+);
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, styles }) => {
   const { props: chatProps } = useChatContext();
@@ -22,13 +47,26 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, styles })
 
   const agentName = message.agentName ?? (message.metadata?.agentName as string | undefined);
 
+  // The `markdown` prop applies to every message; a per-message flag is more
+  // specific and wins where present — including `false`, which lets a plugin
+  // force markdown off for text it has rewritten (e.g. a profanity mask that
+  // would otherwise be read as a horizontal rule).
+  const perMessageMarkdown = message.metadata?.markdown as
+    | boolean
+    | MarkdownOptions
+    | undefined;
+  const markdownOpts =
+    perMessageMarkdown !== undefined ? perMessageMarkdown : chatProps.markdown;
+  const botAvatar = chatProps.botAvatar;
+  const showAvatar = (isBot || isAgent) && !isSystem && botAvatar != null;
+
   const systemStyle: React.CSSProperties = isSystem
     ? {
         background: 'transparent',
         border: 'none',
         boxShadow: 'none',
-        color: '#999',
-        fontSize: '12px',
+        color: 'var(--cb-ink-muted, #6C6F74)',
+        ...typography.meta,
         alignSelf: 'center',
         padding: '6px 12px',
         backdropFilter: 'none',
@@ -36,23 +74,25 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, styles })
       }
     : {};
 
-  return (
+  const bubble = (
     <div
       style={{
         ...bubbleStyle,
         ...systemStyle,
-        animation: 'cb-fade-in 0.3s ease-out',
+        ...(showAvatar ? { maxWidth: '100%', alignSelf: 'auto' } : {}),
+        animation: `cb-fade-in ${motion.enter}`,
       }}
+      data-cb-animate
     >
       {isAgent && agentName && (
-        <div style={{ fontSize: '11px', fontWeight: 600, opacity: 0.7, marginBottom: '4px' }}>
+        <div style={{ ...typography.meta, fontWeight: 600, opacity: 0.65, marginBottom: '6px' }}>
           {agentName}
         </div>
       )}
       {message.text && (
         <span style={{ display: 'block' }}>
-          {chatProps.markdown
-            ? renderMarkdown(message.text, chatProps.markdown === true ? {} : chatProps.markdown)
+          {markdownOpts
+            ? renderMarkdown(message.text, markdownOpts === true ? {} : markdownOpts)
             : message.text}
         </span>
       )}
@@ -79,6 +119,24 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, styles })
       {chatProps.allowMessageEdit && message.sender === 'user' && !isSystem && (
         <MessageActions message={message} />
       )}
+    </div>
+  );
+
+  if (!showAvatar) return bubble;
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        gap: '8px',
+        alignItems: 'flex-end',
+        alignSelf: 'flex-start',
+        maxWidth: '90%',
+        animation: `cb-fade-in ${motion.enter}`,
+      }}
+    >
+      <BotMessageAvatar avatar={botAvatar} />
+      {bubble}
     </div>
   );
 };
@@ -108,7 +166,19 @@ const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({ attachment, isBot
             borderRadius: '12px',
           }}
         />
-        <div style={{ fontSize: '11px', padding: '4px 0', opacity: 0.6 }}>{attachment.name}</div>
+        <div
+          title={attachment.name}
+          style={{
+            fontSize: '11px',
+            padding: '4px 0',
+            opacity: 0.6,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {attachment.label ? `${attachment.label}: ${attachment.name}` : attachment.name}
+        </div>
       </div>
     );
   }
@@ -133,8 +203,17 @@ const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({ attachment, isBot
       }}
     >
       {icons?.file ?? <FileIcon size={16} />}
-      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
-        {attachment.name}
+      <span style={{ display: 'flex', minWidth: 0, flex: 1, gap: '6px', alignItems: 'baseline' }}>
+        {attachment.label && (
+          <span style={{ opacity: 0.6, flexShrink: 0 }}>{attachment.label}:</span>
+        )}
+        {/* Truncates with an ellipsis; the title reveals the full name. */}
+        <span
+          title={attachment.name}
+          style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}
+        >
+          {attachment.name}
+        </span>
       </span>
       {attachment.size && (
         <span style={{ fontSize: '11px', opacity: 0.5, flexShrink: 0 }}>
@@ -185,9 +264,9 @@ const MessageReactions: React.FC<{ message: ChatMessage }> = ({ message }) => {
           onClick={() => handleReact(r.emoji)}
           style={{
             display: 'inline-flex', alignItems: 'center', gap: '3px',
-            padding: '2px 6px', borderRadius: '12px', border: r.reacted ? '1px solid rgba(108,92,231,0.4)' : '1px solid rgba(0,0,0,0.08)',
-            background: r.reacted ? 'rgba(108,92,231,0.1)' : 'rgba(0,0,0,0.03)',
-            cursor: 'pointer', fontSize: '12px', transition: 'all 0.15s ease',
+            padding: '2px 6px', borderRadius: '12px', border: `1px solid ${r.reacted ? 'rgba(9,14,21,0.24)' : 'rgba(9,14,21,0.1)'}`,
+            background: r.reacted ? 'rgba(9,14,21,0.08)' : 'rgba(9,14,21,0.03)',
+            cursor: 'pointer', fontSize: '12px', transition: `background-color ${motion.surface}, border-color ${motion.surface}`,
           }}
         >
           <span>{r.emoji}</span>

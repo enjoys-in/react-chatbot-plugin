@@ -14,6 +14,9 @@ export interface MessageAttachment {
   type: string;
   size?: number;
   preview?: string;
+  /** Field label this file came from, e.g. `'ID Document'`. Shown as a muted
+   *  prefix so a summary with several file fields stays unambiguous. */
+  label?: string;
 }
 
 export interface CarouselCard {

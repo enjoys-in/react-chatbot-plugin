@@ -3,21 +3,45 @@ import type { DemoConfig } from './types';
 const demo: DemoConfig = {
   id: 'slash-commands',
   title: 'Slash Commands',
-  description: 'Built-in commands: /help, /back, /cancel, /restart. Navigate flows with keyboard.',
+  description: 'Type / to open the command menu — arrows to move, Enter to run. Built-ins plus custom commands.',
   icon: '⌨️',
   category: 'basic',
+  markdown: true,
+  slashCommands: [
+    {
+      name: 'agent',
+      description: 'Talk to a human',
+      handler: (ctx) => ctx.addBotMessage('Connecting you to a human agent… 🧑‍💼'),
+    },
+    {
+      // `args` is everything after the command name.
+      name: 'echo',
+      description: 'Repeat back what you type',
+      handler: (ctx) =>
+        ctx.addBotMessage(ctx.args ? `You said: ${ctx.args}` : 'Try `/echo hello world`'),
+    },
+    {
+      name: 'status',
+      description: 'Show collected data',
+      aliases: ['data'],
+      handler: (ctx) => {
+        const keys = Object.keys(ctx.data);
+        ctx.addSystemMessage(
+          keys.length ? `Collected: ${keys.join(', ')}` : 'Nothing collected yet.',
+        );
+      },
+    },
+  ],
   flow: {
     startStep: 'intro',
     steps: [
       {
         id: 'intro',
         messages: [
-          "This demo showcases built-in slash commands! ⌨️",
-          "Try typing these commands in the input:",
-          "• **/help** — Show available commands",
-          "• **/back** — Go to the previous step",
-          "• **/cancel** — Same as /back",
-          "• **/restart** — Restart from the beginning",
+          "This demo showcases slash commands! ⌨️",
+          "Type **/** in the input — a command menu opens as you type. Use **↑ ↓** to move, **Enter** or **Tab** to run, **Esc** to dismiss.",
+          "Built-ins: **/help**, **/back**, **/cancel**, **/restart**",
+          "Custom ones for this demo: **/agent**, **/echo**, **/status**",
         ],
         next: 'step1',
       },

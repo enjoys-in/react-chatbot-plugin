@@ -1,5 +1,5 @@
-import type { ComponentType } from 'react';
-import type { FlowConfig, FormConfig, StepComponentProps, FlowActionResult, ActionContext, FormFieldRenderMap, KeywordRoute, ChatPlugin, ChatCustomizeChat, LiveAgentConfig, MarkdownOptions } from '@enjoys/react-chatbot-plugin';
+import type { ComponentType, ReactNode } from 'react';
+import type { FlowConfig, FormConfig, StepComponentProps, FlowActionResult, ActionContext, FormFieldRenderMap, KeywordRoute, ChatPlugin, ChatCustomizeChat, LiveAgentConfig, MarkdownOptions, HomeScreenConfig, NavigationConfig, SlashCommand } from '@enjoys/react-chatbot-plugin';
 
 export interface DemoConfig {
   id: string;
@@ -23,4 +23,8 @@ export interface DemoConfig {
   customizeChat?: ChatCustomizeChat;
   liveAgent?: LiveAgentConfig;
   markdown?: boolean | MarkdownOptions;
+  homeScreen?: HomeScreenConfig;
+  navigation?: NavigationConfig;
+  botAvatar?: ReactNode | string;
+  slashCommands?: SlashCommand[];
 }

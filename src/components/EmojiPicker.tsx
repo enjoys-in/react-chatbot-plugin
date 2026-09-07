@@ -129,7 +129,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onSelect, onClose, pri
               justifyContent: 'center',
               transition: 'all 0.15s ease',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(108, 92, 231, 0.08)')}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(9, 14, 21, 0.06)')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
           >
             {emoji}

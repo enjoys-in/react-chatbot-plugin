@@ -6,11 +6,15 @@ export { ChatHeader } from './components/ChatHeader';
 export { ChatInput } from './components/ChatInput';
 export { ChatWindow } from './components/ChatWindow';
 export { Launcher } from './components/Launcher';
+export { LauncherNotification } from './components/LauncherNotification';
 export { MessageBubble } from './components/MessageBubble';
 export { MessageList } from './components/MessageList';
 export { QuickReplies } from './components/QuickReplies';
 export { TypingIndicator } from './components/TypingIndicator';
 export { WelcomeScreen } from './components/WelcomeScreen';
+export { HomeScreen } from './components/HomeScreen';
+export { BottomNav } from './components/BottomNav';
+export { SlashCommandMenu } from './components/SlashCommandMenu';
 export { LoginScreen } from './components/LoginScreen';
 export { Branding } from './components/Branding';
 export { EmojiPicker } from './components/EmojiPicker';
@@ -37,6 +41,7 @@ export { DynamicForm, TextField, SelectField, RadioField, CheckboxField, FileUpl
 export { FlowEngine } from './engine/FlowEngine';
 export { PluginManager } from './core/PluginManager';
 export { LiveAgentAdapter } from './core/LiveAgentAdapter';
+export { BUILT_IN_COMMANDS, resolveCommands, parseCommand, filterCommands, commandMenuQuery } from './core/commands';
 export { createEventBus } from './core/EventBus';
 export type { EventBus, EventHandler } from './core/EventBus';
 export { createHeadlessBot } from './core/HeadlessBot';
@@ -96,22 +101,41 @@ export {
   paymentPlugin,
   bookingPlugin,
   locationPlugin,
+  voiceCallPlugin,
 } from './plugins';
+export type { VoiceCallPluginOptions } from './plugins';
 
 // ─── Hooks ───────────────────────────────────────────────────────
 export { useChat } from './hooks/useChat';
 export { useLiveAgent } from './hooks/useLiveAgent';
+export { useColorScheme } from './hooks/useColorScheme';
 
 // ─── Context ─────────────────────────────────────────────────────
 export { ChatContext, useChatContext } from './context/ChatContext';
 
 // ─── Theme Utilities ─────────────────────────────────────────────
-export { resolveTheme, buildStyles, buildCSSVariables } from './styles/theme';
+export {
+  resolveTheme,
+  buildStyles,
+  buildCSSVariables,
+  neutrals,
+  headerInk,
+  contrastInk,
+  inkLayers,
+  motion,
+  typography,
+  resolveColorMode,
+  prefersDarkScheme,
+  onColorSchemeChange,
+} from './styles/theme';
 
 // ─── Utilities ───────────────────────────────────────────────────
 export { renderMarkdown } from './utils/markdown';
+export { formatFieldValue, filesFromValue, truncateMiddle } from './utils/helpers';
 
 // ─── Types ───────────────────────────────────────────────────────
+/** Resolved inline style map handed to slot components (e.g. `messageBubble`). */
+export type { ChatStyles } from './styles/theme';
 export type {
   ChatBotProps,
   ChatCallbacks,
@@ -123,6 +147,7 @@ export type {
   FlowActionResult,
   ActionContext,
   ChatTheme,
+  ChatColorMode,
   ChatStyle,
   ChatMessage,
   MessageSender,
@@ -146,6 +171,18 @@ export type {
   WelcomeScreenSlotProps,
   LoginScreenSlotProps,
   LauncherSlotProps,
+  HomeScreenConfig,
+  HomeScreenAction,
+  HomeScreenSection,
+  HomeScreenContext,
+  HomeScreenCta,
+  HomeScreenSlotProps,
+  NavTab,
+  NavigationConfig,
+  SlashCommand,
+  SlashCommandContext,
+  LauncherNotificationConfig,
+  LauncherNotificationSlotProps,
   FormConfig,
   FormFieldConfig,
   FormFieldType,

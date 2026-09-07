@@ -1,8 +1,21 @@
 import type { ChatPlugin } from '../types/plugin';
+import type { MarkdownOptions } from '../types/config';
 
 /**
- * Markdown Plugin — transforms markdown syntax in bot messages to HTML
- * Lightweight built-in renderer, no external dependencies.
+ * Markdown Plugin — renders markdown in bot messages.
+ *
+ * This does **not** rewrite the message text. It flags the message so the
+ * bubble renders it with the built-in markdown-to-JSX renderer, which produces
+ * real React elements.
+ *
+ * It used to replace the text with an HTML string (`<strong>`, `<br>`, `<ul>`),
+ * but nothing rendered that as HTML — bubbles render text as text — so the tags
+ * appeared literally on screen. Emitting React nodes instead also keeps the
+ * renderer free of `dangerouslySetInnerHTML`, so message text can never inject
+ * markup.
+ *
+ * Equivalent to setting the `markdown` prop, but scoped to bot messages. The
+ * prop wins where both are set.
  */
 export function markdownPlugin(options?: {
   enableBold?: boolean;
@@ -10,70 +23,31 @@ export function markdownPlugin(options?: {
   enableCode?: boolean;
   enableLinks?: boolean;
   enableLists?: boolean;
+  enableStrikethrough?: boolean;
+  enableHeadings?: boolean;
+  /** @deprecated Line breaks are always preserved. */
   enableLineBreaks?: boolean;
 }): ChatPlugin {
-  const cfg = {
+  const markdown: MarkdownOptions = {
     bold: options?.enableBold ?? true,
     italic: options?.enableItalic ?? true,
     code: options?.enableCode ?? true,
     links: options?.enableLinks ?? true,
     lists: options?.enableLists ?? true,
-    lineBreaks: options?.enableLineBreaks ?? true,
-  };
-
-  const renderMarkdown = (text: string): string => {
-    let result = text;
-
-    // Code blocks (``` ```)
-    if (cfg.code) {
-      result = result.replace(/```([^`]+)```/g, '<pre><code>$1</code></pre>');
-      result = result.replace(/`([^`]+)`/g, '<code>$1</code>');
-    }
-
-    // Bold (**text** or __text__)
-    if (cfg.bold) {
-      result = result.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-      result = result.replace(/__([^_]+)__/g, '<strong>$1</strong>');
-    }
-
-    // Italic (*text* or _text_)
-    if (cfg.italic) {
-      result = result.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-      result = result.replace(/(?<!\w)_([^_]+)_(?!\w)/g, '<em>$1</em>');
-    }
-
-    // Links [text](url)
-    if (cfg.links) {
-      result = result.replace(
-        /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
-        '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
-      );
-    }
-
-    // Unordered lists
-    if (cfg.lists) {
-      result = result.replace(/^[•\-\*]\s+(.+)$/gm, '<li>$1</li>');
-      result = result.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
-    }
-
-    // Line breaks
-    if (cfg.lineBreaks) {
-      result = result.replace(/\n/g, '<br>');
-    }
-
-    return result;
+    strikethrough: options?.enableStrikethrough ?? true,
+    headings: options?.enableHeadings ?? true,
   };
 
   return {
     name: 'markdown',
 
     onMessage(message) {
-      if (message.sender === 'bot' && message.text) {
-        const rendered = renderMarkdown(message.text);
-        if (rendered !== message.text) {
-          return { ...message, text: rendered };
-        }
-      }
+      if (message.sender !== 'bot' || !message.text) return;
+      if (message.metadata?.markdown) return;
+      return {
+        ...message,
+        metadata: { ...message.metadata, markdown },
+      };
     },
   };
 }

@@ -1,6 +1,7 @@
 export {
   SendIcon,
   ChatBubbleIcon,
+  ChevronDownIcon,
   CloseIcon,
   MinimizeIcon,
   EmojiIcon,

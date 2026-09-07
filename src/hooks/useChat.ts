@@ -1,19 +1,13 @@
 import { useCallback, useRef, useEffect } from 'react';
 import { useChatContext } from '../context/ChatContext';
 import { FlowEngine } from '../engine/FlowEngine';
-import { uid, delay } from '../utils/helpers';
-import type { ChatMessage } from '../types';
+import { uid, delay, filesFromValue, formatFieldValue } from '../utils/helpers';
+import type { ChatMessage, MessageAttachment } from '../types';
 import type { FlowActionResult, ActionContext, KeywordRoute } from '../types/config';
 import type { FlowStepInput, FlowMiddleware } from '../types/flow';
 import { useLiveAgent } from './useLiveAgent';
-
-/** Slash commands the user can type */
-const COMMANDS: Record<string, string> = {
-  '/help': 'Show available commands',
-  '/cancel': 'Cancel current step and go back',
-  '/back': 'Go back to the previous step',
-  '/restart': 'Restart the conversation from the beginning',
-};
+import { parseCommand, resolveCommands } from '../core/commands';
+import type { SlashCommandContext } from '../types/command';
 
 /** Common greeting words for auto-detection */
 const GREETING_PATTERNS = ['hi', 'hello', 'hey', 'howdy', 'hola', 'greetings', 'good morning', 'good afternoon', 'good evening', 'sup', 'yo', 'hii', 'hiii'];
@@ -150,6 +144,8 @@ export function useChat() {
 
   // Use a ref so processFlowStep can call itself recursively without stale closure
   const processFlowStepRef = useRef<(stepId: string) => Promise<void>>(async () => {});
+  // `sendMessage` is defined further down; commands reach it through this ref.
+  const sendMessageRef = useRef<(text: string) => Promise<void>>(async () => {});
   processFlowStepRef.current = async (stepId: string) => {
     const engine = flowRef.current;
     if (!engine) return;
@@ -285,7 +281,13 @@ export function useChat() {
   }
 
   const processFlowStep = useCallback(
-    (stepId: string) => processFlowStepRef.current(stepId),
+    (stepId: string) => {
+      // Stepping the flow explicitly counts as starting it, so the auto-start
+      // effect doesn't also inject the root step on top (e.g. a home-screen
+      // action that jumps straight to a step).
+      flowStartedRef.current = true;
+      return processFlowStepRef.current(stepId);
+    },
     [],
   );
 
@@ -323,28 +325,49 @@ export function useChat() {
   /** Handle slash commands. Returns true if the text was a command. */
   const handleCommandRef = useRef<(text: string) => boolean>(() => false);
   handleCommandRef.current = (text: string): boolean => {
-    const cmd = text.trim().toLowerCase();
-    if (!cmd.startsWith('/')) return false;
+    const parsed = parseCommand(text);
+    if (!parsed) return false;
 
-    switch (cmd) {
-      case '/help': {
-        const lines = Object.entries(COMMANDS)
-          .map(([k, v]) => `**${k}** — ${v}`)
+    const { name, args } = parsed;
+    const commands = resolveCommands(propsRef.current.slashCommands);
+    const match = commands.find((c) => c.name === name);
+
+    // A custom handler wins, including for a name that shadows a built-in.
+    if (match?.handler) {
+      const ctx: SlashCommandContext = {
+        addBotMessage,
+        addSystemMessage,
+        sendMessage: (t) => void sendMessageRef.current(t),
+        goToStep: (stepId) => void processFlowStep(stepId),
+        goBack,
+        restart: restartSession,
+        data: flowRef.current?.getData() ?? {},
+        args,
+      };
+      void match.handler(ctx);
+      return true;
+    }
+
+    switch (name) {
+      case 'help': {
+        const lines = commands
+          .filter((c) => !c.hidden)
+          .map((c) => `**/${c.name}**${c.description ? ` — ${c.description}` : ''}`)
           .join('\n');
         addSystemMessage(`Available commands:\n${lines}`);
         return true;
       }
-      case '/cancel':
-      case '/back': {
+      case 'cancel':
+      case 'back': {
         goBack();
         return true;
       }
-      case '/restart': {
+      case 'restart': {
         restartSession();
         return true;
       }
       default:
-        addSystemMessage(`Unknown command: ${cmd}. Type /help for available commands.`);
+        addSystemMessage(`Unknown command: /${name}. Type /help for available commands.`);
         return true;
     }
   };
@@ -538,6 +561,7 @@ export function useChat() {
     },
     [dispatch, addBotMessage, processFlowStep, pluginManager],
   );
+  sendMessageRef.current = sendMessage;
 
   const startFlow = useCallback(() => {
     const engine = flowRef.current;
@@ -619,21 +643,40 @@ export function useChat() {
         }
       }
 
-      // Summary message with friendly labels
-      const summaryLines = Object.entries(data)
-        .filter(([, v]) => v !== undefined && v !== '')
-        .map(([k, v]) => {
-          const meta = fieldMeta.get(k);
-          const displayKey = meta?.label ?? k;
-          const raw = String(v);
-          const displayVal = meta?.optionMap?.get(raw) ?? raw;
-          return `${displayKey}: ${displayVal}`;
-        })
-        .join('\n');
+      // Summary message with friendly labels. Uploaded files become
+      // attachments rather than text, so their names truncate with an
+      // ellipsis and reveal in full on hover.
+      const attachments: MessageAttachment[] = [];
+      const summaryLines: string[] = [];
+
+      for (const [k, v] of Object.entries(data)) {
+        if (v === undefined || v === '') continue;
+        const meta = fieldMeta.get(k);
+        const displayKey = meta?.label ?? k;
+
+        const files = filesFromValue(v);
+        if (files.length > 0) {
+          for (const file of files) {
+            attachments.push({
+              name: file.name,
+              url: URL.createObjectURL(file),
+              type: file.type,
+              size: file.size,
+              label: displayKey,
+            });
+          }
+          continue;
+        }
+
+        const displayVal = formatFieldValue(v, meta?.optionMap);
+        if (displayVal !== '') summaryLines.push(`${displayKey}: ${displayVal}`);
+      }
+
       const msg: ChatMessage = {
         id: uid(),
         sender: 'user',
-        text: summaryLines,
+        text: summaryLines.join('\n'),
+        ...(attachments.length > 0 ? { attachments } : {}),
         formData: data,
         timestamp: Date.now(),
       };

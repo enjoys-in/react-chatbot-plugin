@@ -89,3 +89,7 @@ export { pollPlugin } from './pollPlugin';
 export { paymentPlugin } from './paymentPlugin';
 export { bookingPlugin } from './bookingPlugin';
 export { locationPlugin } from './locationPlugin';
+
+// ─── Voice & Calling ────────────────────────────────────────────
+export { voiceCallPlugin } from './voiceCallPlugin';
+export type { VoiceCallPluginOptions } from './voiceCallPlugin';

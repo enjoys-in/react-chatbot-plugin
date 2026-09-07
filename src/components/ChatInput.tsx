@@ -1,7 +1,11 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import type { CSSProperties } from 'react';
 import type { FileUploadConfig } from '../types/config';
 import { SendIcon, EmojiIcon, MicIcon } from './icons';
+import { contrastInk, motion, neutrals, typography } from '../styles/theme';
+import { SlashCommandMenu } from './SlashCommandMenu';
+import { commandMenuQuery, filterCommands, resolveCommands } from '../core/commands';
+import type { SlashCommand } from '../types/command';
 import { EmojiPicker } from './EmojiPicker';
 import { FileUploadButton, FilePreviewList } from './FileUpload';
 import { useChatContext } from '../context/ChatContext';
@@ -35,6 +39,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [showEmoji, setShowEmoji] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [isListening, setIsListening] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [menuIndex, setMenuIndex] = useState(0);
+  // Dismissed with Escape; typing a fresh `/` re-opens it.
+  const [menuDismissed, setMenuDismissed] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<unknown>(null);
 
@@ -73,16 +81,71 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     setIsListening(true);
   }, [voiceEnabled, voiceCfg, isListening]);
 
+  // ── Slash-command menu ─────────────────────────────────────────
+  // Opens on a bare `/…` at the start of an empty message and closes as soon
+  // as arguments are typed, so it never sits over a real message.
+  const commands = useMemo(
+    () => resolveCommands(chatProps.slashCommands),
+    [chatProps.slashCommands],
+  );
+  const menuQuery = commandMenuQuery(text);
+  const menuMatches = useMemo(
+    () => (menuQuery === null ? [] : filterCommands(commands, menuQuery)),
+    [commands, menuQuery],
+  );
+  const menuOpen =
+    chatProps.enableSlashCommandMenu !== false
+    && !disabled
+    && !menuDismissed
+    && menuQuery !== null
+    && menuMatches.length > 0;
+
   const handleSend = useCallback(() => {
     const trimmed = text.trim();
     if (!trimmed && attachedFiles.length === 0) return;
     onSend(trimmed, attachedFiles.length > 0 ? attachedFiles : undefined);
     setText('');
     setAttachedFiles([]);
+    if (inputRef.current) inputRef.current.style.height = 'auto';
     inputRef.current?.focus();
   }, [text, attachedFiles, onSend]);
 
+  /** Chosen from the menu — send it as `/name`, which `sendMessage` already
+   *  routes to the command handler, so there's no second execution path. */
+  const runCommand = useCallback(
+    (cmd: SlashCommand) => {
+      setText('');
+      setMenuDismissed(false);
+      setMenuIndex(0);
+      if (inputRef.current) inputRef.current.style.height = 'auto';
+      onSend(`/${cmd.name}`);
+      inputRef.current?.focus();
+    },
+    [onSend],
+  );
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // While the menu is open it owns the arrows, Enter, Tab and Escape.
+    if (menuOpen) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const delta = e.key === 'ArrowDown' ? 1 : -1;
+        setMenuIndex((i) => (i + delta + menuMatches.length) % menuMatches.length);
+        return;
+      }
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault();
+        const cmd = menuMatches[menuIndex];
+        if (cmd) runCommand(cmd);
+        return;
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setMenuDismissed(true);
+        return;
+      }
+    }
+
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -91,8 +154,20 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   // Typing indicator — debounce typing events
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /** Grow with the content up to a ceiling, then scroll inside. */
+  const autoGrow = (el: HTMLTextAreaElement | null) => {
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 96)}px`;
+  };
+
   const handleTextChange = (val: string) => {
     setText(val);
+    autoGrow(inputRef.current);
+    setMenuIndex(0);
+    // A new `/…` query undoes an earlier Escape.
+    if (commandMenuQuery(val) === null) setMenuDismissed(false);
     if (chatProps.showUserTyping && chatProps.callbacks?.onUserTyping) {
       chatProps.callbacks.onUserTyping(true);
       if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
@@ -115,6 +190,23 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   const hasContent = text.trim() || attachedFiles.length > 0;
+  const n = neutrals(isDark);
+
+  /** Tool buttons share one resting/hover treatment. */
+  const toolStyle = (on?: boolean): CSSProperties => ({
+    width: '30px',
+    height: '30px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 0,
+    border: 'none',
+    borderRadius: '8px',
+    background: on ? n.hover : 'transparent',
+    color: on ? n.ink : n.inkMuted,
+    cursor: 'pointer',
+    transition: `background-color ${motion.surface}, color ${motion.surface}`,
+  });
 
   return (
     <div style={{ position: 'relative', ...styleOverride }}>
@@ -136,39 +228,74 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         />
       )}
 
+      {/* Slash-command autocomplete, above the composer */}
+      {menuOpen && (
+        <SlashCommandMenu
+          commands={menuMatches}
+          activeIndex={Math.min(menuIndex, menuMatches.length - 1)}
+          isDark={isDark}
+          onSelect={runCommand}
+          onActiveIndexChange={setMenuIndex}
+        />
+      )}
+
+      {/* Composer card: text on top, tools beneath */}
       <div
         style={{
-          display: 'flex',
-          gap: '8px',
-          alignItems: 'flex-end',
-          background: isDark ? 'rgba(40, 40, 65, 0.5)' : 'rgba(245, 247, 252, 0.7)',
           borderRadius: '16px',
-          border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}`,
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          padding: '6px 6px 6px 12px',
+          border: `1px solid ${n.hairline}`,
+          background: n.surfaceRaised,
+          boxShadow: focused
+            ? `0 0 0 2px ${n.hover}, 0 2px 8px rgba(9, 14, 21, 0.04)`
+            : '0 1px 4px rgba(9, 14, 21, 0.04)',
+          transition: `box-shadow ${motion.control}`,
+          overflow: 'hidden',
         }}
       >
-        {/* Action buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2px', flexShrink: 0, paddingBottom: '2px' }}>
+        <textarea
+          ref={inputRef}
+          value={text}
+          onChange={(e) => handleTextChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          placeholder={placeholder}
+          disabled={disabled}
+          rows={1}
+          role="combobox"
+          aria-expanded={menuOpen}
+          aria-controls={menuOpen ? 'cb-command-menu' : undefined}
+          aria-autocomplete="list"
+          aria-activedescendant={
+            menuOpen ? `cb-command-${menuMatches[menuIndex]?.name ?? ''}` : undefined
+          }
+          style={{
+            width: '100%',
+            display: 'block',
+            border: 'none',
+            outline: 'none',
+            resize: 'none',
+            background: 'transparent',
+            padding: '12px 16px 0',
+            fontFamily: 'inherit',
+            ...typography.input,
+            maxHeight: '96px',
+            overflowY: 'auto',
+            color: n.ink,
+            boxSizing: 'border-box',
+          }}
+        />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '4px 8px 8px 12px' }}>
           {enableEmoji && (
             <button
               type="button"
               onClick={() => setShowEmoji(!showEmoji)}
               aria-label="Emoji"
               title="Emoji"
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '6px',
-                display: 'flex',
-                color: showEmoji ? primaryColor : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.3)'),
-                borderRadius: '8px',
-                transition: 'all 0.2s ease',
-              }}
+              style={toolStyle(showEmoji)}
             >
-              {icons?.emoji ?? <EmojiIcon size={20} />}
+              {icons?.emoji ?? <EmojiIcon size={19} />}
             </button>
           )}
 
@@ -189,74 +316,40 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               aria-label={isListening ? 'Stop listening' : 'Voice input'}
               title={isListening ? 'Stop listening' : 'Voice input'}
               style={{
-                background: isListening ? primaryColor : 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '6px',
-                display: 'flex',
-                color: isListening ? '#fff' : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.3)'),
-                borderRadius: '8px',
-                transition: 'all 0.2s ease',
-                animation: isListening ? 'cb-pulse 1.5s infinite' : 'none',
+                ...toolStyle(isListening),
+                ...(isListening
+                  ? { background: '#DF2020', color: '#FAFAFA', animation: 'cb-pulse 1.5s infinite' }
+                  : {}),
               }}
             >
-              {icons?.mic ?? <MicIcon size={18} />}
+              {icons?.mic ?? <MicIcon size={19} />}
             </button>
           )}
+
+          <button
+            onClick={handleSend}
+            disabled={disabled || !hasContent}
+            aria-label="Send message"
+            style={{
+              marginLeft: 'auto',
+              width: '32px',
+              height: '32px',
+              flex: '0 0 auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 0,
+              border: 'none',
+              borderRadius: '50%',
+              background: hasContent ? primaryColor : n.inset,
+              color: hasContent ? contrastInk(primaryColor, isDark ? '#14161A' : '#FFFFFF') : n.inkFaint,
+              cursor: hasContent ? 'pointer' : 'default',
+              transition: `background-color ${motion.control}, color ${motion.control}, box-shadow ${motion.control}`,
+            }}
+          >
+            {icons?.send ?? <SendIcon size={16} />}
+          </button>
         </div>
-
-        {/* Text Input */}
-        <textarea
-          ref={inputRef}
-          value={text}
-          onChange={(e) => handleTextChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          disabled={disabled}
-          rows={1}
-          style={{
-            flex: 1,
-            padding: '8px 2px',
-            border: 'none',
-            borderRadius: '12px',
-            outline: 'none',
-            resize: 'none',
-            fontFamily: 'inherit',
-            fontSize: '14px',
-            lineHeight: '1.45',
-            maxHeight: '100px',
-            overflowY: 'auto',
-            backgroundColor: 'transparent',
-            color: isDark ? '#E0E0E0' : '#2D3436',
-            letterSpacing: '0.01em',
-          }}
-        />
-
-        {/* Send Button */}
-        <button
-          onClick={handleSend}
-          disabled={disabled || !hasContent}
-          aria-label="Send message"
-          style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '12px',
-            background: hasContent
-              ? primaryColor
-              : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'),
-            color: hasContent ? '#fff' : (isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)'),
-            border: 'none',
-            cursor: hasContent ? 'pointer' : 'default',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-            boxShadow: hasContent ? `0 4px 12px ${primaryColor}44` : 'none',
-          }}
-        >
-          {icons?.send ?? <SendIcon size={16} />}
-        </button>
       </div>
     </div>
   );

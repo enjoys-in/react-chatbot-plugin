@@ -6,6 +6,9 @@ import type { FormConfig, FormFieldRenderMap } from './form';
 import type { ChatPlugin } from './plugin';
 import type { ChatStyles } from '../styles/theme';
 import type { LiveAgentConfig } from './liveAgent';
+import type { HomeScreenConfig, HomeScreenSlotProps } from './home';
+import type { NavigationConfig } from './navigation';
+import type { SlashCommand } from './command';
 
 // ─── Markdown Options ────────────────────────────────────────────
 
@@ -112,6 +115,8 @@ export interface ChatRenderContext {
 // ─── Events / Callbacks ─────────────────────────────────────────
 
 export interface ChatCallbacks {
+  /** Fired when a home-screen action row is chosen, with its `id`. */
+  onHomeAction?: (actionId: string) => void;
   onOpen?: () => void;
   onClose?: () => void;
   onMessageSend?: (message: ChatMessage) => void;
@@ -139,6 +144,24 @@ export interface ChatBotProps {
   style?: ChatStyle;
   flow?: FlowConfig;
   loginForm?: FormConfig;
+  /**
+   * Default screen shown when the widget opens: a greeting, a list of
+   * icon actions, and any components you supply.
+   *
+   * Takes precedence over `customizeChat.welcomeScreen` when both are set.
+   * Replace the whole screen via `customizeChat.homeScreen.component`.
+   */
+  homeScreen?: HomeScreenConfig;
+  /**
+   * Extra `/commands` on top of the four built-ins. A command with the same
+   * `name` as a built-in replaces it.
+   */
+  slashCommands?: SlashCommand[];
+  /**
+   * Show the autocomplete menu when the visitor types `/` (default `true`).
+   * Commands still work when typed in full with this off.
+   */
+  enableSlashCommandMenu?: boolean;
   callbacks?: ChatCallbacks;
   plugins?: ChatPlugin[];
   initialMessages?: ChatMessage[];
@@ -150,6 +173,8 @@ export interface ChatBotProps {
   defaultOpen?: boolean;
   className?: string;
   zIndex?: number;
+  /** Avatar shown next to bot/agent messages — an image URL or a custom node. */
+  botAvatar?: ReactNode | string;
   /** Enable emoji picker */
   enableEmoji?: boolean;
   /** Enable message reactions (👍👎 on bot/agent messages).
@@ -190,6 +215,8 @@ export interface ChatBotProps {
   icons?: Partial<ChatIconMap>;
   /** Live agent configuration — WebSocket or Socket.IO real-time chat with human agents */
   liveAgent?: LiveAgentConfig;
+  /** Persistent bottom tab bar — turns the widget into a Home / Messages / custom-tab shell */
+  navigation?: NavigationConfig;
   /** Middleware pipeline — functions that intercept/transform messages before processing */
   middleware?: FlowMiddleware[];
   /** Headless mode — hides all UI, exposes only the engine & plugin system via ref */
@@ -250,8 +277,8 @@ export interface HeaderSlotProps {
   logoWidth?: string;
   /** Chat render context — current state, toggleChat, restartSession, sendMessage */
   ctx: ChatRenderContext;
-  /** Custom header element — replaces the default header when provided */
-  component?: ReactNode;
+  /** Custom header — a ready element, or a render function that receives the live slot props */
+  component?: ReactNode | ((props: Omit<HeaderSlotProps, 'component'>) => ReactNode);
 }
 
 /** Props passed to a custom input slot component */
@@ -265,8 +292,8 @@ export interface InputSlotProps {
   onFileUpload?: (files: File[]) => void | Promise<void>;
   /** Chat render context — current state, toggleChat, restartSession, sendMessage */
   ctx: ChatRenderContext;
-  /** Custom input element — replaces the default input when provided */
-  component?: ReactNode;
+  /** Custom input — a ready element, or a render function that receives the live slot props */
+  component?: ReactNode | ((props: Omit<InputSlotProps, 'component'>) => ReactNode);
 }
 
 /** Props passed to a custom branding slot component */
@@ -309,6 +336,60 @@ export interface LauncherSlotProps {
   component?: ReactNode;
 }
 
+// ─── Launcher Notification (proactive popup) ─────────────────────
+
+/** Config for the proactive bubble that pops up above the launcher after a delay. */
+export interface LauncherNotificationConfig {
+  /** Enable the proactive popup (default: true when a config is provided). */
+  enabled?: boolean;
+  /** Delay in ms before the popup appears (default: 3000). */
+  delay?: number;
+  /** Bold heading line, e.g. "Hi there 👋". */
+  heading?: ReactNode;
+  /** Main body text of the popup. */
+  message?: ReactNode;
+  /** Avatar — an image URL or a custom node. Falls back to a default mark. */
+  avatar?: ReactNode | string;
+  /** Sender name shown in the meta line, e.g. "Fin". */
+  sender?: string;
+  /** Timestamp text in the meta line (default: "Just now"). */
+  timestamp?: string;
+  /** Show the dismiss (×) button (default: true). */
+  showClose?: boolean;
+  /** Open the chat when the popup body is clicked (default: true). */
+  openOnClick?: boolean;
+  /** Once dismissed, do not show again for the session (default: true). */
+  showOnce?: boolean;
+  /** Background color override for the popup card. */
+  backgroundColor?: string;
+  /** Text color override for the popup card. */
+  textColor?: string;
+  /** Max width of the popup card (default: 340px). */
+  maxWidth?: string;
+  /** Inline style overrides merged onto the popup card. */
+  style?: import('react').CSSProperties;
+  /** Called when the popup becomes visible. */
+  onShow?: () => void;
+  /** Called when the popup body is clicked. */
+  onClick?: () => void;
+  /** Called when the popup is dismissed. */
+  onDismiss?: () => void;
+}
+
+/** Props passed to a custom launcher-notification slot component */
+export interface LauncherNotificationSlotProps {
+  config: LauncherNotificationConfig;
+  /** Open the chat window. */
+  onClick: () => void;
+  /** Dismiss the popup. */
+  onDismiss: () => void;
+  isDark: boolean;
+  primaryColor: string;
+  position: 'bottom-right' | 'bottom-left';
+  /** Custom popup — a ready element, or a render function that receives the live slot props. */
+  component?: ReactNode | ((props: Omit<LauncherNotificationSlotProps, 'component'>) => ReactNode);
+}
+
 /**
  * Strict slot-to-props mapping. Defines every allowed key and its exact props interface.
  * No extra keys allowed — TypeScript will error on unknown slot names.
@@ -323,6 +404,8 @@ export interface ChatCustomizeSlotMap {
   welcomeScreen: WelcomeScreenSlotProps;
   loginScreen: LoginScreenSlotProps;
   launcher: LauncherSlotProps;
+  launcherNotification: LauncherNotificationSlotProps;
+  homeScreen: HomeScreenSlotProps;
 }
 
 /**

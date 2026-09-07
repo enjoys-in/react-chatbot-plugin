@@ -90,7 +90,12 @@ export const initialState = (props: ChatBotProps): ChatState => ({
   isOpen: props.defaultOpen ?? false,
   messages: props.initialMessages ?? [],
   isTyping: false,
-  showWelcome: !!props.customizeChat?.welcomeScreen?.content,
+  // Home takes precedence over welcomeScreen; either one means the widget
+  // opens on a first screen rather than straight into the conversation.
+  showWelcome:
+    (props.homeScreen?.enabled !== false && !!props.homeScreen)
+    || !!props.customizeChat?.homeScreen?.component
+    || !!props.customizeChat?.welcomeScreen?.content,
   currentStepId: null,
   collectedData: {},
   isLoggedIn: !props.loginForm,

@@ -1,5 +1,6 @@
 import React from 'react';
 import type { FlowQuickReply } from '../types';
+import { motion, typography } from '../styles/theme';
 
 interface QuickRepliesProps {
   replies: FlowQuickReply[];
@@ -7,17 +8,19 @@ interface QuickRepliesProps {
   primaryColor: string;
 }
 
+/** Outlined pills that fill on hover — the suggestion, not the answer, so they
+ *  stay quieter than a sent message. */
 export const QuickReplies: React.FC<QuickRepliesProps> = ({ replies, onSelect, primaryColor }) => {
   return (
     <div
+      data-cb-animate
       style={{
         display: 'flex',
         flexWrap: 'wrap',
         gap: '8px',
         alignSelf: 'flex-start',
         maxWidth: '90%',
-        animation: 'cb-slide-up 0.35s ease-out',
-        padding: '4px 0',
+        animation: `cb-slide-up ${motion.enter}`,
       }}
     >
       {replies.map((reply) => (
@@ -25,31 +28,26 @@ export const QuickReplies: React.FC<QuickRepliesProps> = ({ replies, onSelect, p
           key={reply.value}
           onClick={() => onSelect(reply.value, reply.label)}
           style={{
-            padding: '8px 18px',
-            borderRadius: '22px',
-            border: `1.5px solid ${primaryColor}`,
-            backgroundColor: 'rgba(108, 92, 231, 0.06)',
-            color: primaryColor,
+            padding: '9px 16px',
+            borderRadius: '10px',
+            border: '1px solid var(--cb-border, rgba(9, 14, 21, 0.14))',
+            backgroundColor: 'transparent',
+            color: 'var(--cb-ink, #14161A)',
             cursor: 'pointer',
-            fontSize: '13px',
+            ...typography.body,
             fontWeight: 500,
             fontFamily: 'inherit',
-            transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-            backdropFilter: 'blur(4px)',
-            WebkitBackdropFilter: 'blur(4px)',
-            letterSpacing: '0.01em',
+            transition: `background-color ${motion.control}, color ${motion.control}, border-color ${motion.control}`,
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = primaryColor;
-            e.currentTarget.style.color = '#fff';
-            e.currentTarget.style.transform = 'translateY(-1px)';
-            e.currentTarget.style.boxShadow = `0 4px 14px ${primaryColor}44`;
+            e.currentTarget.style.borderColor = primaryColor;
+            e.currentTarget.style.color = 'var(--cb-user-bubble-text, #FAFAFA)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(108, 92, 231, 0.06)';
-            e.currentTarget.style.color = primaryColor;
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = 'none';
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.borderColor = 'var(--cb-border, rgba(9, 14, 21, 0.14))';
+            e.currentTarget.style.color = 'var(--cb-ink, #14161A)';
           }}
         >
           {reply.label}

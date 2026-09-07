@@ -1,17 +1,17 @@
 import React from 'react';
-import type { ChatMessage, FlowQuickReply } from '@enjoys/react-chatbot-plugin';
+import type { ChatMessage, ChatStyles, FlowQuickReply } from '@enjoys/react-chatbot-plugin';
 import type { DemoConfig } from './types';
 
 // ─── Custom Bubble — adds avatars + timestamps ──────────────────
 
-const CustomBubble: React.FC<{ message: ChatMessage; styles: Record<string, React.CSSProperties> }> = ({ message }) => {
+const CustomBubble: React.FC<{ message: ChatMessage; styles: ChatStyles }> = ({ message }) => {
     const isBot = message.sender === 'bot';
     const isSystem = message.sender === 'system';
     if (!message.text) return null;
 
     if (isSystem) {
         return (
-            <div style={{ textAlign: 'center', fontSize: '11px', color: '#999', padding: '4px 0' }}>
+            <div style={{ textAlign: 'center', fontSize: '11px', color: 'var(--cb-ink-muted, #6C6F74)', padding: '4px 0' }}>
                 {message.text}
             </div>
         );
@@ -55,7 +55,7 @@ const CustomBubble: React.FC<{ message: ChatMessage; styles: Record<string, Reac
                     background: isBot
                         ? 'rgba(108, 92, 231, 0.08)'
                         : '#6C5CE7',
-                    color: isBot ? '#2D3436' : '#fff',
+                    color: isBot ? 'var(--cb-ink, #14161A)' : '#fff',
                     fontSize: '13px',
                     lineHeight: '1.5',
                     border: isBot ? '1px solid rgba(108,92,231,0.12)' : 'none',

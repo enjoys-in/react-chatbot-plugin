@@ -1,5 +1,8 @@
 import type { CSSProperties } from 'react';
 
+/** A concrete colour mode, after `'auto'` has been resolved. */
+export type ChatColorMode = 'light' | 'dark';
+
 export interface ChatTheme {
   primaryColor?: string;
   headerBg?: string;
@@ -13,7 +16,12 @@ export interface ChatTheme {
   borderRadius?: string;
   windowWidth?: string;
   windowHeight?: string;
-  mode?: 'light' | 'dark';
+  /**
+   * Colour mode. `'auto'` follows the visitor's OS/browser setting via
+   * `prefers-color-scheme` and switches live when they change it.
+   * Defaults to `'light'`.
+   */
+  mode?: ChatColorMode | 'auto';
 }
 
 export interface ChatStyle {

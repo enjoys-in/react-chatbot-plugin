@@ -25,7 +25,7 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
       {field.label && (
         <label style={{ display: 'block', marginBottom: '4px', fontSize: '13px', fontWeight: 500 }}>
           {field.label}
-          {field.required && <span style={{ color: '#E53E3E', marginLeft: '2px' }}>*</span>}
+          {field.required && <span style={{ color: '#DF2020', marginLeft: '2px' }}>*</span>}
         </label>
       )}
       <input
@@ -39,26 +39,34 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
+        // Full names on hover; the button itself keeps to one line.
+        title={fileNames || undefined}
         style={{
-          padding: '8px 16px',
-          border: `1px dashed ${error ? '#E53E3E' : '#D1D5DB'}`,
-          borderRadius: '8px',
-          backgroundColor: '#FAFAFA',
+          display: 'block',
+          padding: '10px 14px',
+          border: `1px dashed ${error ? '#DF2020' : 'var(--cb-border, rgba(9, 14, 21, 0.14))'}`,
+          borderRadius: '12px',
+          backgroundColor: 'var(--cb-bubble-bg, #F5F5F5)',
           cursor: 'pointer',
-          fontSize: '13px',
-          color: '#555',
+          fontFamily: 'inherit',
+          fontSize: '14px',
+          color: fileNames ? 'var(--cb-ink, #14161A)' : 'var(--cb-ink-muted, #6C6F74)',
           width: '100%',
           textAlign: 'left',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          boxSizing: 'border-box',
         }}
       >
-        {fileNames || field.placeholder || 'Choose file(s)...'}
+        {fileNames || field.placeholder || 'Choose file(s)…'}
       </button>
       {fileNames && (
-        <div style={{ fontSize: '12px', color: primaryColor, marginTop: '4px' }}>
+        <div style={{ fontSize: '12px', color: 'var(--cb-ink-muted, #6C6F74)', marginTop: '6px' }}>
           {Array.from(value!).length} file(s) selected
         </div>
       )}
-      {error && <div style={{ color: '#E53E3E', fontSize: '12px', marginTop: '2px' }}>{error}</div>}
+      {error && <div style={{ color: '#DF2020', fontSize: '12px', marginTop: '4px' }}>{error}</div>}
     </div>
   );
 };

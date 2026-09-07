@@ -150,16 +150,18 @@ const FilePreviewChip: React.FC<FilePreviewChipProps> = ({ file, onRemove, prima
         {isImage ? (icons?.image ?? <ImageIcon size={14} />) : (icons?.file ?? <FileIcon size={14} />)}
       </span>
       <span
+        title={file.name}
         style={{
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
-          color: '#555',
+          minWidth: 0,
+          color: 'var(--cb-ink, #14161A)',
         }}
       >
         {file.name}
       </span>
-      <span style={{ color: '#999', fontSize: '11px', flexShrink: 0 }}>
+      <span style={{ color: 'var(--cb-ink-muted, #6C6F74)', fontSize: '11px', flexShrink: 0 }}>
         {formatSize(file.size)}
       </span>
       <button

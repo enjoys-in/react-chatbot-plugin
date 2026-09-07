@@ -4,7 +4,7 @@ import type { MarkdownOptions } from '../types/config';
 /**
  * Lightweight markdown-to-JSX renderer. No external dependencies.
  * Supports: bold, italic, code (inline + block), links, lists,
- * strikethrough, headings, and line breaks.
+ * strikethrough, headings, horizontal rules, and line breaks.
  */
 export function renderMarkdown(
   text: string,
@@ -81,6 +81,24 @@ function renderBlock(
       }
     }
 
+    // Horizontal rule — ***, ---, ___ alone on a line. Checked before lists
+    // and inline parsing, both of which would otherwise leave stray asterisks.
+    if (/^\s*([*\-_])\s*(?:\1\s*){2,}$/.test(line)) {
+      flushList();
+      result.push(
+        <hr
+          key={key}
+          style={{
+            border: 'none',
+            borderTop: '1px solid currentColor',
+            opacity: 0.18,
+            margin: '10px 0',
+          }}
+        />,
+      );
+      return;
+    }
+
     // List items
     if (cfg.lists && /^[\-\*•]\s+/.test(line)) {
       const content = line.replace(/^[\-\*•]\s+/, '');
@@ -127,7 +145,10 @@ function renderInline(text: string, cfg: Required<MarkdownOptions>): React.React
   const patterns: string[] = [];
 
   if (cfg.code) patterns.push('`([^`]+)`');
-  if (cfg.bold) patterns.push('\\*\\*([^*]+)\\*\\*', '__([^_]+)__');
+  // Non-greedy and permitting inner delimiters, so `**bold with *em* inside**`
+  // matches as bold. The optional third closer handles `***both***` and
+  // `**bold and *em***`, where one run closes both.
+  if (cfg.bold) patterns.push('\\*\\*([\\s\\S]+?)\\*\\*\\*?', '__([\\s\\S]+?)___?');
   if (cfg.strikethrough) patterns.push('~~([^~]+)~~');
   if (cfg.italic) patterns.push('\\*([^*]+)\\*', '(?<!\\w)_([^_]+)_(?!\\w)');
   if (cfg.links) patterns.push('\\[([^\\]]+)\\]\\((https?:\\/\\/[^)]+)\\)');
@@ -155,8 +176,28 @@ function renderInline(text: string, cfg: Required<MarkdownOptions>): React.React
         </code>,
       );
     } else if (cfg.bold && (full.startsWith('**') || full.startsWith('__'))) {
-      const inner = full.startsWith('**') ? full.slice(2, -2) : full.slice(2, -2);
-      parts.push(<strong key={key++}>{renderInline(inner, { ...cfg, bold: false })}</strong>);
+      const star = full.startsWith('**');
+      const closeLen = (star ? /\*\*\*?$/ : /___?$/).exec(full)![0].length;
+      const inner = full.slice(2, full.length - closeLen);
+      const noBold = { ...cfg, bold: false };
+      let content: React.ReactNode;
+
+      if (closeLen === 3) {
+        // The extra delimiter closes an emphasis opened inside the bold run.
+        const open = inner.indexOf(star ? '*' : '_');
+        content = open >= 0
+          ? (
+              <>
+                {renderInline(inner.slice(0, open), noBold)}
+                <em>{renderInline(inner.slice(open + 1), { ...noBold, italic: false })}</em>
+              </>
+            )
+          : <em>{renderInline(inner, { ...noBold, italic: false })}</em>;
+      } else {
+        content = renderInline(inner, noBold);
+      }
+
+      parts.push(<strong key={key++}>{content}</strong>);
     } else if (cfg.strikethrough && full.startsWith('~~')) {
       parts.push(<del key={key++}>{renderInline(full.slice(2, -2), { ...cfg, strikethrough: false })}</del>);
     } else if (cfg.italic && (full.startsWith('*') || full.startsWith('_'))) {

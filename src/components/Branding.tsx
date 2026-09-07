@@ -1,12 +1,13 @@
 import React from 'react';
 import type { BrandingConfig } from '../types/config';
+import { typography } from '../styles/theme';
 
 interface BrandingProps {
   config: BrandingConfig;
   primaryColor: string;
 }
 
-export const Branding: React.FC<BrandingProps> = ({ config, primaryColor }) => {
+export const Branding: React.FC<BrandingProps> = ({ config }) => {
   if (config.showBranding === false) return null;
 
   const text = config.poweredBy ?? 'React ChatBot';
@@ -14,16 +15,12 @@ export const Branding: React.FC<BrandingProps> = ({ config, primaryColor }) => {
   return (
     <div
       style={{
-        padding: '8px 16px',
+        padding: '0 16px 12px',
         textAlign: 'center',
-        fontSize: '11px',
-        color: 'rgba(0,0,0,0.35)',
-        background: 'rgba(250, 250, 255, 0.7)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-        borderTop: '1px solid rgba(0,0,0,0.04)',
+        ...typography.footnote,
+        color: 'var(--cb-ink-muted, #6C6F74)',
+        background: 'var(--cb-bg, #FFFFFF)',
         flexShrink: 0,
-        letterSpacing: '0.02em',
       }}
     >
       Powered by{' '}
@@ -33,16 +30,16 @@ export const Branding: React.FC<BrandingProps> = ({ config, primaryColor }) => {
           target="_blank"
           rel="noopener noreferrer"
           style={{
-            color: primaryColor,
-            textDecoration: 'none',
-            fontWeight: 600,
+            color: 'inherit',
+            textDecoration: 'underline',
+            fontWeight: 500,
             transition: 'opacity 0.2s ease',
           }}
         >
           {text}
         </a>
       ) : (
-        <span style={{ color: primaryColor, fontWeight: 600 }}>{text}</span>
+        <span style={{ fontWeight: 500 }}>{text}</span>
       )}
     </div>
   );

@@ -11,11 +11,21 @@ export function validationPlugin(options?: {
   sanitize?: boolean;
   blockProfanity?: boolean;
   profanityList?: string[];
+  /**
+   * Replacement for a matched word (default `'@#$%'`). The masked message is
+   * rendered without markdown, so an asterisk mask like `'****'` shows as
+   * asterisks rather than turning into a horizontal rule.
+   */
+  mask?: string;
+  /** Mask just the matched words (default) or the whole message. */
+  maskScope?: 'word' | 'message';
   onValidationFail?: (text: string, error: string) => void;
 }): ChatPlugin {
   const validators = options?.validators ?? {};
   const sanitize = options?.sanitize ?? true;
   const profanityList = options?.profanityList ?? [];
+  const mask = options?.mask ?? '@#$%';
+  const maskScope = options?.maskScope ?? 'word';
 
   const sanitizeHtml = (text: string): string => {
     return text.replace(/[<>&"']/g, (c) => {
@@ -33,6 +43,19 @@ export function validationPlugin(options?: {
     return null;
   };
 
+  /** Replace matched words with the mask, keeping the rest of the message so
+   *  the bubble still reads as something the visitor said. */
+  const maskProfanity = (text: string): string => {
+    if (maskScope === 'message') return mask;
+    let masked = text;
+    for (const word of profanityList) {
+      if (!word) continue;
+      const pattern = new RegExp(word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+      masked = masked.replace(pattern, mask);
+    }
+    return masked;
+  };
+
   return {
     name: 'validation',
 
@@ -44,7 +67,13 @@ export function validationPlugin(options?: {
       if (profanityError) {
         options?.onValidationFail?.(message.text, profanityError);
         ctx.emit('validation:fail', { text: message.text, error: profanityError });
-        return { ...message, text: '***' };
+        return {
+          ...message,
+          text: maskProfanity(message.text),
+          // Render the mask literally — otherwise `***` or `****` would be
+          // parsed as a horizontal rule and the bubble would look empty.
+          metadata: { ...message.metadata, markdown: false, masked: true },
+        };
       }
 
       // Custom validators
