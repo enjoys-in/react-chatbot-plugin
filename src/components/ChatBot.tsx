@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect, useRef, useCallback, useState, useMemo } from 'react';
-import type { ChatBotProps } from '../types';
+import type { ChatBotProps, StepComponentProps } from '../types';
 import { ChatContext, chatReducer, initialState } from '../context/ChatContext';
 import { resolveTheme, buildStyles, buildCSSVariables, motion } from '../styles/theme';
 import { Launcher } from './Launcher';
@@ -103,8 +103,12 @@ function ensureGlobalStyles() {
   globalStyleInjected = true;
 }
 
-export const ChatBot: React.FC<ChatBotProps> = (props) => {
-  const [state, dispatch] = useReducer(chatReducer, props, initialState);
+export function ChatBot<
+  TC extends Record<string, React.ComponentType<StepComponentProps>> = Record<string, React.ComponentType<StepComponentProps>>,
+>(props: ChatBotProps<TC>) {
+  // Internally the generic component-key typing isn't needed; treat props as the base shape.
+  const baseProps = props as unknown as ChatBotProps;
+  const [state, dispatch] = useReducer(chatReducer, baseProps, initialState);
 
   // With mode:'auto' this follows the OS setting and updates live. Pinning the
   // resolved mode here means every child resolves the same way this render.
@@ -270,7 +274,7 @@ export const ChatBot: React.FC<ChatBotProps> = (props) => {
   if (props.headless) return null;
 
   return (
-    <ChatContext.Provider value={{ state, dispatch, props: contextProps, pluginManager: pluginManagerRef.current }}>
+    <ChatContext.Provider value={{ state, dispatch, props: contextProps as unknown as ChatBotProps, pluginManager: pluginManagerRef.current }}>
       <div style={{ ...styles.root, ...cssVars as React.CSSProperties }} className={props.className}>
         <ChatWindow styles={styles} position={position} zIndex={props.zIndex} hidden={!state.isOpen && !closing} />
         {notifEnabled && showNotif && !state.isOpen && (() => {
@@ -304,4 +308,4 @@ export const ChatBot: React.FC<ChatBotProps> = (props) => {
       </div>
     </ChatContext.Provider>
   );
-};
+}
