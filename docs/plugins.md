@@ -1,6 +1,6 @@
 # Plugins
 
-Extend the chatbot with 30 built-in plugins — analytics, AI, webhooks, persistence, i18n, and more.
+Extend the chatbot with 53 built-in plugins — analytics, AI, webhooks, persistence, i18n, and more.
 
 ## Quick Start
 
@@ -27,11 +27,19 @@ import { ChatBot, analyticsPlugin, persistencePlugin } from '@enjoys/react-chatb
 | **Intelligence** | aiPlugin, intentPlugin, validationPlugin, markdownPlugin, mediaPlugin, i18nPlugin |
 | **UX** | typingPlugin, autoReplyPlugin, soundPlugin, pushPlugin, themePlugin, componentPlugin |
 | **Security** | authPlugin, rateLimitPlugin |
-| **Agent** | agentPlugin, transferPlugin |
+| **Agent** | agentPlugin, transferPlugin, liveAgentPlugin, whisperPlugin |
 | **Marketing** | leadPlugin, campaignPlugin |
-| **Scheduling** | schedulerPlugin, reminderPlugin |
+| **Scheduling** | schedulerPlugin, reminderPlugin, messageSchedulePlugin |
 | **File** | uploadPlugin |
 | **Dev** | debugPlugin, devtoolsPlugin |
+| **Conversation** | tagsPlugin, ratingPlugin, offlinePlugin, proactivePlugin, personaPlugin, pinPlugin, priorityPlugin |
+| **Content** | summaryPlugin, knowledgeBasePlugin, translationPlugin, transcriptExportPlugin, codeHighlightPlugin |
+| **Interactive** | pollPlugin, paymentPlugin, bookingPlugin, locationPlugin |
+| **Engagement** | confettiPlugin, notificationBadgePlugin, themeTogglePlugin |
+| **Voice** | voiceCallPlugin |
+
+**53 plugins** in total. Every one is a plain function returning a `ChatPlugin`,
+so you can read any of them in `src/plugins/` as a template for your own.
 
 ---
 
@@ -174,6 +182,8 @@ validationPlugin({
   profanityList: ['badword1', 'badword2'],
   sanitize: true,
   blockProfanity: true,
+  mask: '@#$%',        // replacement (default)
+  maskScope: 'word',   // 'word' (default) or 'message'
   validators: {
     maxLength: (text) => text.length > 500 ? 'Message too long (max 500 chars)' : null,
   },
@@ -181,14 +191,54 @@ validationPlugin({
 })
 ```
 
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `profanityList` | `string[]` | `[]` | Words to match, case-insensitively, as literal substrings |
+| `blockProfanity` | `boolean` | `false` | Enable the profanity filter |
+| `mask` | `string` | `'@#$%'` | Replacement for a matched word |
+| `maskScope` | `'word' \| 'message'` | `'word'` | Mask matched words, or the entire message |
+| `sanitize` | `boolean` | `true` | Escape HTML in user text |
+| `validators` | `Record<string, (text) => string \| null>` | `{}` | Custom rules; return an error string to fail |
+
+Matched words are replaced in place, so the message still reads as something
+the visitor said:
+
+```
+you are a badword honestly   →   you are a @#$% honestly
+```
+
+The masked message is rendered **without markdown**, so an asterisk mask such
+as `'****'` displays as asterisks instead of being parsed as a horizontal rule.
+Masked messages carry `metadata.masked === true` if you need to style or filter
+them.
+
 ### markdownPlugin
 
-Lightweight markdown-to-HTML conversion for bot messages.
+Renders markdown in bot messages, as real React elements.
 
 ```tsx
-markdownPlugin()
-// Supports: **bold**, *italic*, `code`, [links](url), - lists
+markdownPlugin({
+  enableBold: true,
+  enableItalic: true,
+  enableCode: true,
+  enableLinks: true,
+  enableLists: true,
+  enableStrikethrough: true,
+  enableHeadings: true,
+})
+// **bold**  *italic*  `code`  ```block```  [links](url)
+// - lists   ~~strike~~   # headings   *** rules
 ```
+
+The plugin does not modify `message.text` — it flags the message so the bubble
+renders it with the built-in markdown-to-JSX renderer. Plugins running after it
+still see the original markdown.
+
+Equivalent to the [`markdown` prop](./theming.md), but scoped to bot messages.
+The prop wins where both are set, so don't pass `markdown` **and** expect the
+plugin's per-option config to apply.
+
+> `enableLineBreaks` is deprecated and ignored — line breaks are always kept.
 
 ### mediaPlugin
 
@@ -355,6 +405,34 @@ transferPlugin({
 
 ---
 
+### liveAgentPlugin
+
+Plugin form of the [`liveAgent` prop](./live-agent.md) — use it when you'd
+rather configure the handoff alongside your other plugins. Takes the same
+`LiveAgentConfig` (adapter, events, queue and typing wiring).
+
+```ts
+import { io } from 'socket.io-client';
+
+liveAgentPlugin({ socket: io('https://support.example.com') })
+```
+
+---
+
+### whisperPlugin
+
+Supervisor notes attached to a conversation that only agents see — the visitor
+never receives them.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `visibleTo` | `string` | `'agent'` | Role allowed to see whispers |
+| `viewerRole` | `'agent' \| 'supervisor' \| 'user'` | — | Who is viewing right now |
+| `onWhisper` | `(message: ChatMessage) => void` | — | Fires when a whisper is sent |
+| `webhookUrl` | `string` | — | Forward whispers to your backend |
+
+---
+
 ## Marketing Plugins
 
 ### leadPlugin
@@ -415,6 +493,20 @@ reminderPlugin({
 
 ---
 
+### messageSchedulePlugin
+
+Queues messages to fire at a future timestamp, optionally surviving a reload.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `checkInterval` | `number` | `1000` | Polling interval in ms |
+| `maxScheduled` | `number` | `20` | Cap on queued messages |
+| `persist` | `boolean` | `false` | Keep the queue in `localStorage` |
+| `storageKey` | `string` | — | Storage key when persisting |
+| `onFire` | `(msg: ScheduledMessage) => void` | — | Fires as each message sends |
+
+---
+
 ## File Plugin
 
 ### uploadPlugin
@@ -456,6 +548,333 @@ Visual overlay panel toggled by keyboard shortcut.
 devtoolsPlugin({
   position: 'bottom-right',
   shortcutKey: 'F2',
+})
+```
+
+---
+
+## Conversation Plugins
+
+### tagsPlugin
+
+Tags a conversation by topic. Tags live in metadata, so they're available for
+routing and analytics.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `availableTags` | `string[]` | `[]` | Tags that can be assigned |
+| `storageKey` | `string` | — | Persist tags under this key |
+| `onTagAdded` | `(tag: string, messageId?: string) => void` | — | Fires on add |
+| `onTagRemoved` | `(tag: string) => void` | — | Fires on removal |
+
+---
+
+### ratingPlugin
+
+End-of-conversation satisfaction survey.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `scale` | `number` | `5` | Rating scale |
+| `prompt` | `string` | — | Prompt shown to the visitor |
+| `triggers` | `('flowEnd' \| 'agentDisconnect' \| 'custom')[]` | `['flowEnd']` | When to ask |
+| `onRate` | `(rating: number, feedback?: string) => void` | — | Fires on submit |
+| `endpoint` / `headers` | `string` / `Record<string, string>` | — | POST the rating to your API |
+
+---
+
+### offlinePlugin
+
+Queues what the visitor sends while the device is offline and flushes it on
+reconnect.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `storageKey` | `string` | `'cb_offline_queue'` | Queue storage key |
+| `showOfflineIndicator` | `boolean` | `false` | Show an offline notice |
+| `onFlush` | `(count: number) => void` | — | Fires with how many were sent |
+
+---
+
+### proactivePlugin
+
+Opens the conversation based on what the visitor does — idle time, scroll depth,
+exit intent, page load, or your own event.
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `rules` | `ProactiveRule[]` | **Required.** The triggers to watch |
+| `onTrigger` | `(rule: ProactiveRule) => void` | Fires when a rule matches |
+
+```ts
+proactivePlugin({
+  rules: [
+    { trigger: 'exitIntent', message: 'Before you go — need a hand?' },
+    { trigger: 'idle', message: 'Still there?', delay: 30000, maxShows: 1 },
+    { trigger: 'scroll', message: 'Questions about pricing?', flowStep: 'pricing' },
+  ],
+})
+```
+
+A rule takes `trigger`, `message`, and optionally `delay` (ms), `maxShows`
+(default `1`) and `flowStep` to jump the flow instead of just talking.
+
+---
+
+### personaPlugin
+
+Switches the bot's identity — name, avatar, greeting, accent colour and flow —
+inside one widget.
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `personas` | `BotPersona[]` | **Required.** `{ id, name, avatar?, greeting?, theme?, flowId? }` |
+| `defaultPersona` | `string` | Persona active on load |
+| `storageKey` | `string` | Remember the last choice |
+| `onSwitch` | `(persona: BotPersona) => void` | Fires on switch |
+
+---
+
+### pinPlugin
+
+Pins important messages so they stay reachable.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `maxPins` | `number` | `10` | Cap on pinned messages |
+| `persist` | `boolean` | `false` | Keep pins in `localStorage` |
+| `storageKey` | `string` | — | Storage key when persisting |
+| `onPin` / `onUnpin` | `(messageId: string) => void` | — | Pin state changed |
+
+---
+
+### priorityPlugin
+
+Marks a conversation's urgency and attaches free-form labels, for routing to
+the right queue.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `defaultPriority` | `ConversationPriority` | `'medium'` | Starting priority |
+| `maxLabels` | `number` | `5` | Cap on labels |
+| `persist` / `storageKey` | `boolean` / `string` | `false` | Persist across reloads |
+| `onPriorityChange` | `(priority: ConversationPriority) => void` | — | Priority changed |
+| `onLabelsChange` | `(labels: string[]) => void` | — | Labels changed |
+| `webhookUrl` | `string` | — | Forward changes to your backend |
+
+---
+
+## Content Plugins
+
+### summaryPlugin
+
+Recaps the conversation — via your AI endpoint, or locally by extracting key
+points when no endpoint is reachable.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `endpoint` | `string` | — | POST `{ messages }` for a summary |
+| `headers` | `Record<string, string>` | — | Request headers |
+| `localFallback` | `boolean` | `true` | Summarise locally if the call fails |
+| `maxMessages` | `number` | `50` | Messages sent for summarising |
+| `onSummary` | `(summary: string) => void` | — | Fires with the result |
+
+---
+
+### knowledgeBasePlugin
+
+Answers from your FAQ or docs inline — fuzzy-matching local articles, a remote
+search endpoint, or both.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `articles` | `KBArticle[]` | `[]` | Local articles: `{ id, title, content, tags?, url? }` |
+| `endpoint` | `string` | — | Remote search (GET `?q=`) |
+| `autoSearch` | `boolean` | — | Search every unhandled message |
+| `threshold` | `number` | — | Minimum match score to answer |
+| `maxResults` | `number` | — | Cap on surfaced articles |
+| `onResult` | `(articles: KBArticle[]) => void` | — | Fires with matches |
+
+---
+
+### translationPlugin
+
+Translates messages in either direction through your translation API.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `endpoint` | `string` | — | **Required.** POST `{ text, from, to }` |
+| `headers` | `Record<string, string>` | — | Request headers (API key) |
+| `sourceLang` | `string` | `'auto'` | Source language |
+| `targetLang` | `string` | `'en'` | Target language |
+| `translateIncoming` / `translateOutgoing` | `boolean` | — | Which direction to translate |
+| `showOriginal` | `boolean` | — | Keep the original text alongside |
+| `onTranslate` | `(original, translated, lang) => void` | — | Fires per translation |
+
+---
+
+### transcriptExportPlugin
+
+Downloads the conversation as text, JSON, CSV or HTML.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `format` | `TranscriptFormat` | `'text'` | Output format |
+| `filename` | `string` | `'chat-transcript'` | Filename prefix |
+| `includeTimestamps` | `boolean` | `true` | Include message times |
+| `header` | `string` | — | Text prepended to the export |
+| `onExport` | `(content: string, format: TranscriptFormat) => void` | — | Fires with the content |
+
+---
+
+### codeHighlightPlugin
+
+Renders fenced code blocks as syntax-highlighted panels with a copy button.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `theme` | `'dark' \| 'light'` | `'dark'` | Highlight theme |
+| `copyButton` | `boolean` | `true` | Show the copy button |
+| `maxHeight` | `number` | `300` | Max block height in px |
+| `languages` | `string[]` | — | Languages to auto-detect |
+
+---
+
+## Interactive Plugins
+
+### pollPlugin
+
+Inline polls with voting and a result bar.
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `onVote` | `(pollId: string, value: string) => void` | Fires per vote |
+| `onClose` | `(result: PollResult) => void` | Fires when the poll closes |
+| `webhookUrl` | `string` | Forward votes to your backend |
+
+---
+
+### paymentPlugin
+
+Collects a payment in the conversation via Stripe, Razorpay or your own gateway.
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `gateway` | `'stripe' \| 'razorpay' \| 'custom'` | **Required.** Which gateway |
+| `endpoint` | `string` | **Required.** Your server endpoint |
+| `stripeKey` / `razorpayKey` | `string` | Publishable key for the chosen gateway |
+| `headers` | `Record<string, string>` | Request headers |
+| `onSuccess` | `(result: PaymentResult) => void` | Fires on success |
+| `onError` | `(error: string) => void` | Fires on failure |
+| `successStep` | `string` | Flow step to route to once paid |
+
+> Keep secret keys on your server — the plugin only ever needs the publishable key.
+
+---
+
+### bookingPlugin
+
+Calendar slot booking with confirmation.
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `slotsEndpoint` | `string` | **Required.** GET `?date=YYYY-MM-DD` for availability |
+| `bookEndpoint` | `string` | **Required.** POST to reserve a slot |
+| `headers` | `Record<string, string>` | Request headers |
+| `onBooked` | `(confirmation: BookingConfirmation) => void` | Fires once booked |
+| `onCancelled` | `(bookingId: string) => void` | Fires on cancellation |
+| `successStep` | `string` | Flow step to route to after booking |
+| `slotsMessage` | `(slots: TimeSlot[]) => string` | Custom slot-list message |
+
+---
+
+### locationPlugin
+
+Shares the visitor's GPS position as a map link.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `mapProvider` | `'google' \| 'openstreetmap' \| 'apple'` | `'google'` | Link provider |
+| `highAccuracy` | `boolean` | `false` | Request high-accuracy GPS |
+| `timeout` | `number` | `10000` | Lookup timeout in ms |
+| `onLocation` | `(lat: number, lng: number) => void` | — | Fires with coordinates |
+| `messageFormat` | `(lat, lng, url) => string` | — | Custom message text |
+
+---
+
+## Engagement Plugins
+
+### confettiPlugin
+
+Celebration burst on flow completion or any event you name.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `triggers` | `string[]` | `['flowEnd']` | Events that fire it |
+| `duration` | `number` | `3000` | Duration in ms |
+| `particleCount` | `number` | `50` | Particle count |
+| `colors` | `string[]` | — | Custom colours |
+| `onFire` | `() => void` | — | Fires with the burst |
+
+---
+
+### notificationBadgePlugin
+
+Unread count on the launcher, optionally with sound, a browser notification and
+a tab-title count.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `playSound` | `boolean` | `false` | Play a sound on arrival |
+| `soundUrl` | `string` | — | Sound to play |
+| `browserNotification` | `boolean` | `false` | Show an OS notification |
+| `updateTitle` | `boolean` | `false` | Put the count in `document.title` |
+| `originalTitle` | `string` | — | Title to restore when read |
+
+> The widget already shows an unread badge on its launcher; this plugin adds the
+> out-of-page signals (sound, OS notification, tab title).
+
+---
+
+### themeTogglePlugin
+
+In-chat light/dark switch that remembers the choice.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `defaultMode` | `'light' \| 'dark'` | `'light'` | Starting mode |
+| `persist` | `boolean` | `false` | Remember across reloads |
+| `storageKey` | `string` | — | Storage key when persisting |
+| `onToggle` | `(mode: 'light' \| 'dark') => void` | — | Fires on toggle |
+
+> For following the OS instead of asking, use `theme={{ mode: 'auto' }}` — see
+> [Theming](./theming.md).
+
+---
+
+## Voice Plugin
+
+### voiceCallPlugin
+
+Starts a real browser voice call from the chat, via `@enjoys/voice-widget`
+(an optional peer dependency).
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `publicKey` | `string` | Publishable key (`pk_…`) bound to your origins |
+| `apiBase` | `string` | Voice API origin |
+| `accentColor` | `string` | Accent forwarded to the widget |
+| `title` | `string` | Panel heading |
+| `triggerValue` | `string` | Quick-reply value that starts a call |
+| `announce` | `boolean` | Post a system message when the call starts |
+| `onState` | `(state: string) => void` | Call state changes |
+| `onError` | `(error: Error) => void` | Call errors |
+
+```ts
+voiceCallPlugin({
+  publicKey: 'pk_live_…',
+  title: 'Talk to Support',
+  triggerValue: 'start_call',
 })
 ```
 

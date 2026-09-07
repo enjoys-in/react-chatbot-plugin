@@ -9,11 +9,11 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/npm/v/@enjoys/react-chatbot-plugin?color=6C5CE7&style=for-the-badge" alt="npm version" />
-  <img src="https://img.shields.io/npm/dm/@enjoys/react-chatbot-plugin?color=A29BFE&style=for-the-badge" alt="npm downloads" />
-  <img src="https://img.shields.io/bundlephobia/minzip/@enjoys/react-chatbot-plugin?color=00b894&style=for-the-badge" alt="bundle size" />
-  <img src="https://img.shields.io/npm/l/@enjoys/react-chatbot-plugin?color=fd79a8&style=for-the-badge" alt="license" />
-  <img src="https://img.shields.io/github/stars/enjoys-in/react-chatbot-plugin?color=fdcb6e&style=for-the-badge" alt="stars" />
+  <img src="https://img.shields.io/npm/v/@enjoys/react-chatbot-plugin?color=14161A&style=for-the-badge" alt="npm version" />
+  <img src="https://img.shields.io/npm/dm/@enjoys/react-chatbot-plugin?color=14161A&style=for-the-badge" alt="npm downloads" />
+  <img src="https://img.shields.io/bundlephobia/minzip/@enjoys/react-chatbot-plugin?color=14161A&style=for-the-badge" alt="bundle size" />
+  <img src="https://img.shields.io/npm/l/@enjoys/react-chatbot-plugin?color=14161A&style=for-the-badge" alt="license" />
+  <img src="https://img.shields.io/github/stars/enjoys-in/react-chatbot-plugin?color=14161A&style=for-the-badge" alt="stars" />
 </p>
 
 <h1 align="center">@enjoys/react-chatbot-plugin</h1>
@@ -44,14 +44,16 @@
 - **Async actions** — Run API calls on step entry with real-time loading/progress/error states
 - **Custom step components** — Render your own React widgets inside flow steps
 - **Dynamic routing** — Route to different steps based on API results, status codes, or custom logic
-- **Plugin architecture** — 35+ built-in plugins: analytics, AI, webhooks, persistence, i18n, CRM, rate limiting, live agent, tags, rating, offline, proactive, persona, and more
-- **Slash commands** — `/help`, `/back`, `/cancel`, `/restart` built-in
-- **`customizeChat` slot map** — All UI customization in one prop: component overrides (bubble, quick replies, typing indicator, header, input, launcher, branding, welcome/login screen) + config (header, branding, welcome screen content)
+- **Plugin architecture** — 53 built-in plugins: analytics, AI, webhooks, persistence, i18n, CRM, rate limiting, live agent, tags, rating, offline, proactive, persona, and more
+- **Slash commands** — Type `/` for an autocomplete menu; `/help`, `/back`, `/cancel`, `/restart` built in, plus your own via `slashCommands`
+- **`customizeChat` slot map** — All UI customization in one prop: 11 component overrides (bubble, quick replies, typing indicator, header, input, launcher, launcher notification, branding, home screen, welcome/login screen) + config (header, branding, welcome screen content)
 - **Custom header/input** — Swap the header or input with your own React components
 - **Forms** — Text, select, radio, checkbox, file upload, with validation
 - **Custom form fields** — Replace any form field type with your own React component
-- **Theming** — Light/dark mode, CSS variables, glassmorphism design
-- **File uploads** — Drag & drop, preview, size/count limits
+- **Home screen** — Default screen with icon actions and a component shell you drop your own React components into
+- **Messenger shell** — `navigation` adds a bottom tab bar (Home, Messages and your own tabs) with badges, an active indicator and per-tab components
+- **Theming** — Light/dark/**auto** colour mode (follows the OS), CSS variables, derived-contrast ink, shared type-scale and motion tokens
+- **File uploads** — Drag & drop, preview, size/count limits; long names truncate with the full name on hover
 - **Emoji picker** — Built-in emoji selector
 - **Welcome & login screens** — Optional onboarding flow
 - **Branding** — Customizable footer and header
@@ -92,6 +94,8 @@
 - **Inline Polls** — Create polls with voting and result visualization
 - **Payment Widget** — Stripe/Razorpay/custom payment collection inline
 - **Appointment Booking** — Calendar-based slot booking with confirmation
+- **Voice Calling (WebRTC)** — Start a real browser call from the chat via `voiceCallPlugin` (powered by `@enjoys/voice-widget`)
+- **Proactive Launcher Notification** — A fully-customizable bubble that pops up above the launcher after a delay
 
 ---
 
@@ -99,6 +103,13 @@
 
 | Version | Features | Type | Description |
 |---------|----------|------|-------------|
+| **v1.27.3** | Profanity Mask Fixes | Fix | Blocked messages no longer render empty; masks only the matched words, configurable via `mask` |
+| **v1.27.2** | Markdown Rendering Fixes | Fix | `markdownPlugin` no longer prints raw HTML tags; nested emphasis and horizontal rules fixed |
+| **v1.27.1** | File Upload Fixes | Fix | File names in form summaries (was `[object FileList]`), ellipsis + hover-full for long names |
+| **v1.27.0** | Slash Command Menu | Prop | Type `/` for an autocomplete palette; `slashCommands` for custom commands with args |
+| **v1.26.0** | Home Screen, Auto Colour Mode, UI Redesign | Prop + Theme | `homeScreen` with icon actions & component shells, `mode: 'auto'`, restyled UI with measured type scale and motion tokens |
+| **v1.25.0** | Proactive Launcher Notification | Slot | `customizeChat.launcherNotification` — delayed, fully-customizable popup above the launcher |
+| **v1.24.0** | Voice Calling (WebRTC) | Plugin | `voiceCallPlugin` — real browser calls via `@enjoys/voice-widget` |
 | **v1.23.0** | Badge, Poll, Payment, Booking, Location | Plugin | Unread badge, inline polls, payment gateway, calendar booking, GPS sharing |
 | **v1.22.0** | Summary, KB, Translation, Export, Code | Plugin | AI summary, FAQ search, auto-translate, transcript download, syntax highlight |
 | **v1.21.0** | Pin, Theme Toggle, Confetti, Priority, Whisper, Schedule | Plugin | Pin messages, dark/light toggle, celebrations, priority labels, agent whisper, delayed send |
@@ -180,29 +191,35 @@ Full documentation is available in the [`docs/`](./docs/) folder:
 |---|-------|-------------|
 | 1 | [Getting Started](./docs/getting-started.md) | Installation, quick start, minimal example |
 | 2 | [Basic Flows](./docs/basic-flows.md) | Steps, messages, quick replies, delays |
-| 3 | [Forms & Validation](./docs/forms.md) | All 15 field types, validation rules, login forms |
+| 3 | [Forms & Validation](./docs/forms.md) | All 18 field types, validation rules, login forms |
 | 4 | [Conditional Branching](./docs/conditional-branching.md) | If/else routing based on collected data |
 | 5 | [Async Actions](./docs/async-actions.md) | API calls, progress messages, error handling |
 | 6 | [Custom Components](./docs/custom-components.md) | React widgets inside flow steps |
 | 7 | [Dynamic Routing](./docs/dynamic-routing.md) | Route based on API response status |
-| 8 | [Theming & Styling](./docs/theming.md) | Colors, CSS variables, dark mode |
-| 9 | [Plugins](./docs/plugins.md) | 30 built-in & custom plugins |
-| 10 | [Slash Commands](./docs/slash-commands.md) | /help, /back, /restart, /cancel |
+| 8 | [Theming & Styling](./docs/theming.md) | Colours, CSS variables, auto/dark mode, type scale, motion tokens |
+| 9 | [Plugins](./docs/plugins.md) | 53 built-in & custom plugins |
+| 10 | [Slash Commands](./docs/slash-commands.md) | `/` autocomplete menu, built-ins, custom commands with args |
 | 11 | [File Upload](./docs/file-upload.md) | Drag & drop, restrictions, previews |
 | 12 | [Custom Header & Input](./docs/custom-header-input.md) | Replace header/input with React components |
 | 13 | [Advanced Patterns](./docs/advanced-patterns.md) | E-commerce bot, onboarding wizard, full examples |
 | 14 | [Keywords & Fallback](./docs/keywords-fallback.md) | Keyword routes, greeting detection, fallback, typing delay |
 | 15 | [API Reference](./docs/api-reference.md) | All types, props, and exports |
 | 16 | [Live Agent](./docs/live-agent.md) | WebSocket / Socket.IO real-time agent chat |
+| 17 | [Home Screen](./docs/home-screen.md) | Default screen: icon actions, component shells, custom slot |
+| 18 | [Navigation](./docs/navigation.md) | Bottom tab bar, badges, per-tab components |
+| 19 | [Changelog](./docs/changelog.md) | Version history and release notes |
 
 ## Props
 
 | Prop | Type | Description |
 |------|------|-------------|
 | `flow` | `FlowConfig` | JSON conversation flow |
-| `theme` | `ChatTheme` | Colors, fonts, border radius, light/dark mode |
+| `theme` | `ChatTheme` | Colours, fonts, border radius, `mode: 'light' \| 'dark' \| 'auto'` |
 | `style` | `ChatStyle` | CSS overrides for launcher, window, header, etc. |
 | `loginForm` | `FormConfig` | Pre-chat login/identification form |
+| `homeScreen` | `HomeScreenConfig` | Default screen: greeting, icon actions, your own components |
+| `slashCommands` | `SlashCommand[]` | Custom `/commands` on top of the built-ins |
+| `enableSlashCommandMenu` | `boolean` | Autocomplete menu when typing `/` (default `true`) |
 | `callbacks` | `ChatCallbacks` | Event handlers (onOpen, onClose, onMessageSend, etc.) |
 | `plugins` | `ChatPlugin[]` | Array of plugins |
 | `initialMessages` | `ChatMessage[]` | Pre-populated messages |
@@ -238,12 +255,13 @@ Each key is a partial of its slot props — provide config, content, or a custom
 
 | Key | Slot Props | Configurable Fields |
 |-----|-----------|---------------------|
-| `header` | `HeaderSlotProps` | `config: HeaderConfig`, `component` |
-| `input` | `InputSlotProps` | `component` |
+| `header` | `HeaderSlotProps` | `config: HeaderConfig`, `component` (element **or render fn** — receives `onClose`, `ctx`) |
+| `input` | `InputSlotProps` | `component` (element **or render fn** — receives `onSend`, `ctx`) |
 | `branding` | `BrandingSlotProps` | `config: BrandingConfig`, `component` |
 | `welcomeScreen` | `WelcomeScreenSlotProps` | `content: ReactNode`, `component` |
 | `loginScreen` | `LoginScreenSlotProps` | `config: FormConfig`, `component` |
 | `launcher` | `LauncherSlotProps` | `component` |
+| `launcherNotification` | `LauncherNotificationSlotProps` | `config: LauncherNotificationConfig`, `component` (element **or render fn**) |
 | `messageBubble` | `MessageBubbleSlotProps` | `component: ComponentType` |
 | `quickReplies` | `QuickRepliesSlotProps` | `component: ComponentType` |
 | `typingIndicator` | `TypingIndicatorSlotProps` | `component: ComponentType` |
@@ -326,21 +344,179 @@ import { liveAgentPlugin } from '@enjoys/react-chatbot-plugin';
 | `onAgentLeft` | `(agent) => void` | — | Agent left callback |
 | `onQueueUpdate` | `(pos, wait?) => void` | — | Queue position callback |
 
+### `voiceCallPlugin` — In-Chat Voice Calling (WebRTC)
+
+Let a visitor start a **real browser WebRTC call** from inside the chat. The plugin bridges the optional [`@enjoys/voice-widget`](https://www.npmjs.com/package/@enjoys/voice-widget) package (SIP-over-WebSocket under the hood) and is driven entirely by chat events — no floating call button of its own.
+
+**Install the optional peer dependency:**
+
+```bash
+bun add @enjoys/voice-widget
+```
+
+**Usage:**
+
+```tsx
+import { ChatBot, voiceCallPlugin } from '@enjoys/react-chatbot-plugin';
+
+<ChatBot
+  flow={{
+    startStep: 'greeting',
+    steps: [{
+      id: 'greeting',
+      message: 'Need to talk to us?',
+      // Selecting this quick reply starts the call (value === triggerValue)
+      quickReplies: [{ label: '📞 Call us', value: '__voice_call__' }],
+    }],
+  }}
+  plugins={[
+    voiceCallPlugin({
+      publicKey: 'pk_live_xxxxxxxx',        // your publishable key
+      apiBase: 'https://voice.yourdomain.com', // ORIGIN only
+      title: 'Talk to Support',
+      triggerValue: '__voice_call__',
+    }),
+  ]}
+/>;
+```
+
+**Trigger a call from anywhere** (e.g. a custom header/composer button) by emitting an event on the plugin manager — read it via `useChatContext()`:
+
+```tsx
+const { pluginManager } = useChatContext();
+pluginManager?.emitEvent('voice:call');   // start a call
+pluginManager?.emitEvent('voice:hangup'); // end it
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `publicKey` | `string` | — | Publishable key (`pk_…`) bound to your allowed origins |
+| `apiBase` | `string` | — | Voice API **origin only** (e.g. `https://voice.acme.com`) |
+| `accentColor` | `string` | — | Accent color forwarded to the widget |
+| `title` | `string` | — | Call panel heading |
+| `triggerValue` | `string` | `'__voice_call__'` | Quick-reply value that starts a call |
+| `announce` | `boolean` | `true` | Post a bot message for each call stage |
+| `onState` | `(state) => void` | — | Widget state transitions |
+| `onError` | `(error) => void` | — | Validation / call errors |
+
+> The mic permission prompt is requested **only when a call actually starts** (lazy init). The key's allowed origins must include the site you embed on.
+
+### `customizeChat.launcherNotification` — Proactive Popup
+
+A fully-customizable bubble that pops up **above the launcher** after a delay — like Intercom's proactive message. Clicking it opens the chat; it's dismissible and can render a completely custom component.
+
+```tsx
+<ChatBot
+  flow={flow}
+  customizeChat={{
+    launcherNotification: {
+      config: {
+        delay: 3000,                 // ms before it appears (default 3000)
+        heading: 'Hi there 👋',
+        message: 'How can we help today?',
+        sender: 'Support',
+        timestamp: 'Just now',
+        showClose: true,
+        openOnClick: true,
+        onShow: () => console.log('popup shown'),
+      },
+      // Or fully custom: component: (p) => <MyPopup {...p} />
+    },
+  }}
+/>;
+```
+
+| Config Field | Type | Default | Description |
+|--------------|------|---------|-------------|
+| `enabled` | `boolean` | `true` | Turn the popup on/off |
+| `delay` | `number` | `3000` | Delay (ms) before it appears |
+| `heading` | `ReactNode` | — | Bold first line |
+| `message` | `ReactNode` | — | Body text |
+| `avatar` | `ReactNode \| string` | dot-grid mark | Image URL or custom node |
+| `sender` | `string` | — | Name in the meta line |
+| `timestamp` | `string` | `'Just now'` | Meta timestamp |
+| `showClose` | `boolean` | `true` | Show the × dismiss button |
+| `openOnClick` | `boolean` | `true` | Open the chat when clicked |
+| `showOnce` | `boolean` | `true` | Don't reshow after dismiss (this session) |
+| `backgroundColor` / `textColor` | `string` | theme | Color overrides |
+| `maxWidth` | `string` | `340px` | Card max width |
+| `style` | `CSSProperties` | — | Inline style overrides |
+| `onShow` / `onClick` / `onDismiss` | `() => void` | — | Lifecycle callbacks |
+
+### `homeScreen` — Default Screen
+
+The screen the widget opens on. Icon rows route into the flow, and `sections`
+let you drop your own components into a card shell that matches them.
+
+```tsx
+<ChatBot
+  flow={flow}
+  theme={{ mode: 'auto' }}
+  homeScreen={{
+    greeting: 'Hi there 👋',
+    tagline: 'How can we help?',
+    actions: [
+      { id: 'chat',  label: 'Start a conversation', icon: <ChatIcon />,  message: 'Hello!' },
+      { id: 'call',  label: 'Call us',              icon: <PhoneIcon />, href: 'tel:+15550123' },
+      { id: 'order', label: 'Track an order',       icon: <BoxIcon />,   stepId: 'order' },
+    ],
+    sections: [
+      // Wrapped in a card matching the action list
+      { id: 'status', title: 'System status', component: StatusPanel },
+      // Bare — your component owns the whole box
+      { id: 'promo', component: <PromoBanner />, shell: false, placement: 'above' },
+    ],
+    cta: { label: 'Ask a question' },
+  }}
+  callbacks={{ onHomeAction: (id) => analytics.track('home_action', { id }) }}
+/>
+```
+
+A row routes via `onSelect`, `message`, `stepId`, or `href` (rendered as a real
+`<a target="_blank">`), in that order of precedence. Pass a **component** to a
+section and it receives `HomeScreenContext` — `openChat`, `sendMessage`,
+`goToStep`, `data`, `close` — as its props, so hooks work normally inside it.
+
+`homeScreen` takes precedence over `customizeChat.welcomeScreen`, which keeps
+working. Replace the screen entirely with `customizeChat.homeScreen.component`.
+
+Full reference: [docs/home-screen.md](./docs/home-screen.md).
+
+### `theme.mode: 'auto'` — Follow the OS
+
+```tsx
+<ChatBot theme={{ mode: 'auto' }} />
+```
+
+Reads `prefers-color-scheme` and switches live when the visitor changes it —
+no reload. SSR-safe: renders light on the server, corrects on hydration.
+`'auto'` is collapsed to a concrete mode before it reaches your components, so
+`theme.mode === 'dark'` checks keep working.
+
+Need it yourself in a custom slot:
+
+```tsx
+import { useColorScheme } from '@enjoys/react-chatbot-plugin';
+const mode = useColorScheme('auto');   // 'light' | 'dark'
+```
+
 ## Exported Components
 
 All internal components are exported for advanced use cases:
 
-**UI:** `ChatBot`, `ChatHeader`, `ChatInput`, `ChatWindow`, `Launcher`, `MessageBubble`, `MessageList`, `QuickReplies`, `TypingIndicator`, `WelcomeScreen`, `LoginScreen`, `Branding`, `EmojiPicker`, `FileUploadButton`, `FilePreviewList`, `DynamicForm`
+**UI:** `ChatBot`, `ChatHeader`, `ChatInput`, `ChatWindow`, `Launcher`, `MessageBubble`, `MessageList`, `QuickReplies`, `TypingIndicator`, `HomeScreen`, `SlashCommandMenu`, `WelcomeScreen`, `LoginScreen`, `Branding`, `EmojiPicker`, `FileUploadButton`, `FilePreviewList`, `DynamicForm`
 
 **Forms:** `TextField`, `SelectField`, `RadioField`, `CheckboxField`, `FileUploadField`
 
-**Icons:** `SendIcon`, `ChatBubbleIcon`, `CloseIcon`, `MinimizeIcon`, `EmojiIcon`, `AttachmentIcon`, `FileIcon`, `ImageIcon`, `RemoveIcon`, `RestartIcon`, `SearchIcon`, `MicIcon`, `StarIcon`, `EditIcon`, `TrashIcon`
+**Icons:** `SendIcon`, `ChatBubbleIcon`, `ChevronDownIcon`, `CloseIcon`, `MinimizeIcon`, `EmojiIcon`, `AttachmentIcon`, `FileIcon`, `ImageIcon`, `RemoveIcon`, `RestartIcon`, `SearchIcon`, `MicIcon`, `StarIcon`, `EditIcon`, `TrashIcon`
 
-**Engine & Core:** `FlowEngine`, `PluginManager`, `createEventBus`, `createHeadlessBot`, `LiveAgentAdapter`, `useChat`, `useLiveAgent`, `ChatContext`, `useChatContext`
+**Engine & Core:** `FlowEngine`, `PluginManager`, `BUILT_IN_COMMANDS`, `resolveCommands`, `parseCommand`, `filterCommands`, `commandMenuQuery`, `createEventBus`, `createHeadlessBot`, `LiveAgentAdapter`, `useChat`, `useLiveAgent`, `useColorScheme`, `ChatContext`, `useChatContext`
 
-**Theme utilities:** `resolveTheme`, `buildStyles`, `buildCSSVariables`, `renderMarkdown`
+**Utilities:** `renderMarkdown`, `formatFieldValue`, `filesFromValue`, `truncateMiddle`
 
-**Built-in plugins (51):** `analyticsPlugin`, `webhookPlugin`, `persistencePlugin`, `loggerPlugin`, `crmPlugin`, `emailPlugin`, `syncPlugin`, `aiPlugin`, `intentPlugin`, `typingPlugin`, `autoReplyPlugin`, `validationPlugin`, `uploadPlugin`, `authPlugin`, `rateLimitPlugin`, `pushPlugin`, `soundPlugin`, `agentPlugin`, `transferPlugin`, `themePlugin`, `componentPlugin`, `leadPlugin`, `campaignPlugin`, `schedulerPlugin`, `reminderPlugin`, `i18nPlugin`, `debugPlugin`, `devtoolsPlugin`, `mediaPlugin`, `markdownPlugin`, `liveAgentPlugin`, `tagsPlugin`, `ratingPlugin`, `offlinePlugin`, `proactivePlugin`, `personaPlugin`, `pinPlugin`, `themeTogglePlugin`, `confettiPlugin`, `priorityPlugin`, `whisperPlugin`, `messageSchedulePlugin`, `notificationBadgePlugin`, `summaryPlugin`, `knowledgeBasePlugin`, `translationPlugin`, `transcriptExportPlugin`, `codeHighlightPlugin`, `pollPlugin`, `paymentPlugin`, `bookingPlugin`, `locationPlugin`
+**Theme utilities:** `resolveTheme`, `buildStyles`, `buildCSSVariables`, `typography`, `motion`, `neutrals`, `headerInk`, `contrastInk`, `inkLayers`, `resolveColorMode`, `prefersDarkScheme`, `onColorSchemeChange`
+
+**Built-in plugins (52):** `analyticsPlugin`, `webhookPlugin`, `persistencePlugin`, `loggerPlugin`, `crmPlugin`, `emailPlugin`, `syncPlugin`, `aiPlugin`, `intentPlugin`, `typingPlugin`, `autoReplyPlugin`, `validationPlugin`, `uploadPlugin`, `authPlugin`, `rateLimitPlugin`, `pushPlugin`, `soundPlugin`, `agentPlugin`, `transferPlugin`, `themePlugin`, `componentPlugin`, `leadPlugin`, `campaignPlugin`, `schedulerPlugin`, `reminderPlugin`, `i18nPlugin`, `debugPlugin`, `devtoolsPlugin`, `mediaPlugin`, `markdownPlugin`, `liveAgentPlugin`, `tagsPlugin`, `ratingPlugin`, `offlinePlugin`, `proactivePlugin`, `personaPlugin`, `pinPlugin`, `themeTogglePlugin`, `confettiPlugin`, `priorityPlugin`, `whisperPlugin`, `messageSchedulePlugin`, `notificationBadgePlugin`, `summaryPlugin`, `knowledgeBasePlugin`, `translationPlugin`, `transcriptExportPlugin`, `codeHighlightPlugin`, `pollPlugin`, `paymentPlugin`, `bookingPlugin`, `locationPlugin`, `voiceCallPlugin`
 
 ## Development
 
@@ -348,7 +524,7 @@ All internal components are exported for advanced use cases:
 # Install dependencies
 bun install
 
-# Run demo (17 interactive demos)
+# Run demo (23 interactive demos)
 bun run dev
 
 # Build library

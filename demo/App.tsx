@@ -4,7 +4,8 @@ import {
   HandWaving, LinkSimple, ArrowsSplit, Keyboard, ListChecks, Lock, Paperclip,
   CheckCircle, ArrowsClockwise, MapTrifold, XCircle, ShoppingCart, MagicWand, Key,
   PuzzlePiece, Palette, SlidersHorizontal, Plug, Headset, MarkdownLogo, Trophy,
-  Package, NotePencil, Lightning, SquaresFour, Heart, GithubLogo,
+  Package, NotePencil, Lightning, SquaresFour, Heart, GithubLogo, Phone, House,
+  ChatsCircle, CaretRight,
   type Icon, type IconProps,
 } from '@phosphor-icons/react';
 import { allDemos, categories } from './demos';
@@ -34,6 +35,9 @@ const demoIcons: Record<string, Icon> = {
   'live-agent': Headset,
   'markdown-rendering': MarkdownLogo,
   'all-plugins-demo': Trophy,
+  'voice-call': Phone,
+  'home-screen': House,
+  'messenger-nav': ChatsCircle,
 };
 
 const categoryIcons: Record<string, Icon> = {
@@ -64,11 +68,12 @@ const NpmIcon: React.FC<{ size?: number }> = ({ size = 13 }) => (
 
 const DemoCard: React.FC<{ demo: DemoConfig; onClick: () => void }> = ({ demo, onClick }) => (
   <button onClick={onClick} className="demo-card">
-    <span className="demo-card__icon"><DemoIcon id={demo.id} size={24} color="#FFFFFF" weight="regular" /></span>
+    <span className="demo-card__icon"><DemoIcon id={demo.id} size={20} weight="regular" /></span>
     <div className="demo-card__body">
       <h3 className="demo-card__title">{demo.title}</h3>
       <p className="demo-card__desc">{demo.description}</p>
     </div>
+    <span className="demo-card__arrow"><CaretRight size={16} weight="bold" /></span>
   </button>
 );
 
@@ -95,13 +100,13 @@ export const App: React.FC = () => {
     <div className="app">
       {/* Header */}
       <header className="app-header">
-        <div className="dot-grid" />
         {activeDemo ? (
           <div className="app-header__inner app-header__inner--detail">
             <button onClick={goBack} className="back-btn">← Back</button>
             <div>
               <h1 className="app-header__title">
-                <DemoIcon id={activeDemo.id} size={26} color="#3FCF8E" weight="duotone" style={{ verticalAlign: '-4px', marginRight: 4 }} /> {activeDemo.title}
+                <DemoIcon id={activeDemo.id} size={22} weight="regular" />
+                {activeDemo.title}
               </h1>
               <p className="app-header__subtitle">{activeDemo.description}</p>
             </div>
@@ -109,15 +114,32 @@ export const App: React.FC = () => {
         ) : (
           <div className="app-header__inner app-header__inner--hero">
             <div className="hero-badge">
-              <GithubLogo size={14} weight="fill" style={{ verticalAlign: '-2px', marginRight: 2 }} />
-              Open Source
+              <GithubLogo size={14} weight="fill" />
+              v{__PKG_VERSION__} · MIT
             </div>
             <h1 className="app-header__title">
               Conversational Chatbots,<br />Built for React
             </h1>
             <p className="app-header__subtitle">
-              A drop-in, plugin-based chat widget for React. JSON-driven flows, 30+ plugins, and full UI control. Explore {allDemos.length} live demos below.
+              Drop-in support chat driven by JSON flows — async actions, forms and conditional
+              branching, with {__PLUGIN_COUNT__} plugins and {__SLOT_COUNT__} override slots for
+              every piece of the UI. Flat, monochrome design that follows the OS in light, dark
+              or auto. Explore {allDemos.length} live demos below.
             </p>
+            <div className="hero-chips">
+              {[
+                'JSON flows',
+                'Async actions',
+                `${__FIELD_TYPE_COUNT__} field types`,
+                'customizeChat',
+                'Light/dark/auto',
+                'Live agent',
+                'Voice calls',
+                'Slash commands',
+              ].map((cap) => (
+                <span key={cap} className="chip">{cap}</span>
+              ))}
+            </div>
             <div className="hero-install">
               <span className="prompt"><NpmIcon size={22} /></span>
               <span>npm i</span>
@@ -125,20 +147,20 @@ export const App: React.FC = () => {
             </div>
             <div className="hero-stats">
               <div>
-                <div className="hero-stat__value"><span className="accent">~73</span>KB</div>
-                <div className="hero-stat__label">Bundle</div>
+                <div className="hero-stat__value">{__PLUGIN_COUNT__}</div>
+                <div className="hero-stat__label">Plugins</div>
               </div>
               <div>
-                <div className="hero-stat__value"><span className="accent">9</span></div>
-                <div className="hero-stat__label">UI Slots</div>
+                <div className="hero-stat__value">{__SLOT_COUNT__}</div>
+                <div className="hero-stat__label">UI slots</div>
               </div>
               <div>
-                <div className="hero-stat__value"><span className="accent">{allDemos.length}</span></div>
+                <div className="hero-stat__value">{allDemos.length}</div>
                 <div className="hero-stat__label">Demos</div>
               </div>
               <div>
-                <div className="hero-stat__value"><span className="accent">30</span></div>
-                <div className="hero-stat__label">Plugins</div>
+                <div className="hero-stat__value">{__DOC_COUNT__}</div>
+                <div className="hero-stat__label">Doc guides</div>
               </div>
             </div>
           </div>
@@ -151,7 +173,7 @@ export const App: React.FC = () => {
           {/* Category Filter */}
           <div className="filter-bar">
             <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>
-                <SquaresFour size={14} weight="bold" style={{ marginRight: 6, verticalAlign: '-2px' }} /> All
+                <SquaresFour size={14} weight="regular" /> All
             </button>
             {categories.map((cat) => (
               <button
@@ -159,7 +181,7 @@ export const App: React.FC = () => {
                 className={`filter-btn ${filter === cat.id ? 'active' : ''}`}
                 onClick={() => setFilter(cat.id)}
               >
-                <CategoryIcon id={cat.id} size={14} weight="bold" style={{ marginRight: 6, verticalAlign: '-2px' }} /> {cat.label}
+                <CategoryIcon id={cat.id} size={14} weight="regular" /> {cat.label}
               </button>
             ))}
           </div>
@@ -180,13 +202,13 @@ export const App: React.FC = () => {
             <p>Open the <strong>chat widget</strong> in the bottom-right corner to interact with this demo.</p>
             <div className="active-info__meta">
               <span className="badge">{activeDemo.category}</span>
-              {activeDemo.actionHandlers && <span className="badge badge--purple">async actions</span>}
-              {activeDemo.components && <span className="badge badge--teal">custom components</span>}
-              {activeDemo.loginForm && <span className="badge badge--orange">login form</span>}
-              {activeDemo.fileUpload?.enabled && <span className="badge badge--pink">file upload</span>}
-              {activeDemo.renderFormField && <span className="badge badge--teal">custom fields</span>}
-              {activeDemo.customizeChat && <span className="badge badge--pink">customizeChat</span>}
-              {activeDemo.plugins && <span className="badge badge--purple">plugins</span>}
+              {activeDemo.actionHandlers && <span className="badge">async actions</span>}
+              {activeDemo.components && <span className="badge">custom components</span>}
+              {activeDemo.loginForm && <span className="badge">login form</span>}
+              {activeDemo.fileUpload?.enabled && <span className="badge">file upload</span>}
+              {activeDemo.renderFormField && <span className="badge">custom fields</span>}
+              {activeDemo.customizeChat && <span className="badge">customizeChat</span>}
+              {activeDemo.plugins && <span className="badge">plugins</span>}
             </div>
           </div>
         </main>
@@ -194,7 +216,7 @@ export const App: React.FC = () => {
 
       {/* Footer */}
       <footer className="demo-footer">
-        Made with <Heart size={13} weight="fill" color="#fd79a8" style={{ verticalAlign: '-2px' }} /> by <a href="https://github.com/enjoys-in" target="_blank" rel="noopener noreferrer">Enjoys</a> · <a href="https://www.npmjs.com/package/@enjoys/react-chatbot-plugin" target="_blank" rel="noopener noreferrer"><NpmIcon /> npm</a> · <a href="https://github.com/enjoys-in/react-chatbot-plugin" target="_blank" rel="noopener noreferrer"><GithubLogo size={13} weight="fill" style={{ verticalAlign: '-2px', marginRight: 4 }} /> GitHub</a>
+        Made with <Heart size={13} weight="fill" style={{ verticalAlign: '-2px' }} /> by <a href="https://github.com/enjoys-in" target="_blank" rel="noopener noreferrer">Enjoys</a> · <a href="https://www.npmjs.com/package/@enjoys/react-chatbot-plugin" target="_blank" rel="noopener noreferrer"><NpmIcon /> npm</a> · <a href="https://github.com/enjoys-in/react-chatbot-plugin" target="_blank" rel="noopener noreferrer"><GithubLogo size={13} weight="fill" style={{ verticalAlign: '-2px', marginRight: 4 }} /> GitHub</a>
       </footer>
 
       {/* ChatBot — only rendered when a demo is selected */}
@@ -203,17 +225,17 @@ export const App: React.FC = () => {
           key={chatKey}
           flow={activeDemo.flow}
           loginForm={activeDemo.loginForm}
+          homeScreen={activeDemo.homeScreen}
+          navigation={activeDemo.navigation}
+          slashCommands={activeDemo.slashCommands}
+          botAvatar={activeDemo.botAvatar}
+          theme={{ mode: 'auto' }}
           components={activeDemo.components}
           actionHandlers={activeDemo.actionHandlers}
           fallbackMessage={activeDemo.fallbackMessage}
           keywords={activeDemo.keywords}
           greetingResponse={activeDemo.greetingResponse}
           typingDelay={activeDemo.typingDelay}
-          theme={{
-            primaryColor: '#3FCF8E',
-            headerBg: '#3FCF8E',
-            borderRadius: '20px',
-          }}
           inputPlaceholder="Type a message or /help..."
           position="bottom-right"
           enableEmoji={activeDemo.enableEmoji ?? true}

@@ -2,6 +2,287 @@
 
 All notable changes to `@enjoys/react-chatbot-plugin` are documented here.
 
+> Entries below cover v1.0–v1.8 and v1.26–v1.27.3. For the versions in between, see the
+> [Release History table](../README.md#release-history) in the README.
+
+---
+
+## Unreleased
+
+### Features
+
+- **`navigation` prop — the messenger shell.** A persistent bottom tab bar turns
+  the widget into a multi-screen panel instead of a single thread
+  - `tabs[]` — `id`, `label`, `icon`, `activeIcon`, `badge` (a number for a
+    count, `true` for a dot) and `component`
+  - `'home'` and `'messages'` are built in and render the home screen and the
+    conversation; any other id renders your `component`, which receives
+    `HomeScreenContext` as props when passed as a component rather than an element
+  - `defaultTab`, `onTabChange`, `enabled`
+  - Appearance overrides that each default to a theme value, so the bar follows
+    light/dark/auto on its own: `activeColor`, `inactiveColor`,
+    `activeBackground`, `indicator`, `background`
+  - The bar hides inside a conversation — a header back button returns to the
+    last non-Messages tab — and the composer renders only on `messages`, so
+    other tabs get the full height
+  - Landing on `messages` (including via `defaultTab`) starts the flow; a
+    `loginForm` still blocks every tab until the visitor logs in
+- **New demo**: Messenger Shell — four tabs with badges, a custom active colour
+  and two custom tab panels
+- **New guide**: [Navigation](./navigation.md)
+
+### Types
+
+- `NavigationConfig`, `NavTab`; new export: `BottomNav`
+
+### Docs
+
+- Every one of the 53 plugins is now documented in [Plugins](./plugins.md) — the
+  reference covered 30, and 23 (including `voiceCallPlugin`, `paymentPlugin`,
+  `bookingPlugin`, `pollPlugin` and the conversation plugins) had no entry
+- [API Reference](./api-reference.md) covers all 193 barrel exports; 53 were
+  missing, among them `BottomNav`, `LauncherNotification`, `useColorScheme`,
+  `useLiveAgent`, `createHeadlessBot`, `createEventBus` and `renderMarkdown`
+- Corrected counts that had drifted across the README, the docs index, the demo
+  hero and the banner: 53 plugins (was "30"/"35+"), 11 `customizeChat` slots
+  (was 9), 18 form field types (was 15), 24 demos (was 17/23)
+- The demo hero's figures and the page's structured-data version are now derived
+  from the library source at build time, so they can't drift again — the JSON-LD
+  had been pinned at v1.5.1
+
+---
+
+## v1.27.3 — Profanity Mask Fixes
+
+### Fixes
+
+- **A blocked message rendered as an empty bubble.** `validationPlugin` masked
+  the text to `'***'`, which v1.27.2's new horizontal-rule support then parsed
+  as an `<hr>` — so the visitor's message disappeared into a divider line. A
+  masked message is now rendered without markdown, so the mask always shows as
+  written. This applies whatever `mask` is configured, including `'****'`
+- **The whole message was replaced, losing the context.** Only the matched words
+  are masked now, so the bubble still reads as something the visitor said:
+
+  ```diff
+  - you are a badword honestly  →  ***
+  + you are a badword honestly  →  you are a @#$% honestly
+  ```
+
+- Words containing regex metacharacters (`c++`, `a.b`) are escaped before
+  matching, so they can't corrupt the pattern or match more than intended
+
+### Features
+
+- **`mask`** — the replacement string, default `'@#$%'`
+- **`maskScope`** — `'word'` (default) masks matched words; `'message'` replaces
+  the whole message, the old behaviour
+- Masked messages carry `metadata.masked === true` for styling or filtering
+
+### Behaviour
+
+- An explicit per-message `metadata.markdown` now takes precedence over the
+  `markdown` prop. Previously the prop always won, which left a plugin unable to
+  turn markdown *off* for text it had rewritten. A more specific setting
+  beating a global one is also the less surprising rule
+
+---
+
+## v1.27.2 — Markdown Rendering Fixes
+
+### Fixes
+
+- **`markdownPlugin` printed raw HTML tags into the chat.** It rewrote
+  `message.text` into an HTML string, but bubbles render text as text — nothing
+  parsed it as HTML — so the markup appeared literally:
+
+  ```diff
+  - 🤖 Echo: "cool"<br><br><em>Try sending 5 messages quickly!</em>
+  + 🤖 Echo: "cool"
+  +
+  +   Try sending 5 messages quickly!      (rendered italic)
+  ```
+
+  The plugin now flags the message instead, and the bubble renders it with the
+  built-in markdown-to-JSX renderer, producing real React elements. This also
+  keeps the renderer free of `dangerouslySetInnerHTML`, so message text can
+  never inject markup.
+
+  It was doubly broken alongside the `markdown` prop: the plugin consumed the
+  markdown into HTML first, leaving the prop's renderer nothing to do.
+
+- **Nested emphasis was mangled.** Bold's pattern forbade an inner `*`, so
+  italic matched across the boundary:
+
+  ```diff
+  - **bold and *nested italic***  →  *<em>bold and </em>nested italic***
+  + **bold and *nested italic***  →  <strong>bold and <em>nested italic</em></strong>
+  ```
+
+  Bold is now non-greedy and permits inner delimiters, and a third closing
+  delimiter closes an emphasis opened inside the run. `***both***` renders as
+  bold + italic.
+
+- **Horizontal rules rendered as literal `***`.** `***`, `---` and `___` alone
+  on a line now render an `<hr>`. Checked before list parsing, which would
+  otherwise leave stray asterisks.
+
+- Two demos wrote `#` headings while passing `markdown: true`, which leaves
+  `headings` at its default `false`, so `## Pricing Plans` showed literally.
+  They pass `markdown: { headings: true }` now.
+
+### Behaviour
+
+- `markdownPlugin` no longer changes `message.text`. Plugins running after it
+  now see the original markdown rather than HTML. Its new
+  `enableStrikethrough` and `enableHeadings` options map to the renderer;
+  `enableLineBreaks` is deprecated and ignored (line breaks are always kept)
+- `MessageBubble` renders markdown when either the `markdown` prop or a
+  per-message `metadata.markdown` flag is set. The prop wins where both apply
+
+---
+
+## v1.27.1 — File Upload Fixes
+
+### Fixes
+
+- **A submitted file field rendered as `[object FileList]`.** The form summary
+  built each line with `String(value)`, which has no useful output for a
+  `FileList`. Uploaded files now appear as attachment rows carrying the real
+  file name, labelled with the field they came from:
+
+  ```diff
+  - Type: ID Document
+  - Upload File: [object FileList]
+  + Type: ID Document
+  + 📄 Upload File: scan-of-my-nation…   13B
+  ```
+
+- **Long file names are truncated with an ellipsis and reveal in full on hover**
+  (`title`), in all three places a name is shown: the summary attachment row,
+  the composer's file chips, and the form's file picker button. The picker
+  button previously let a long name overflow its box
+- **`String(value)` also mishandled other field types.** Multi-select and
+  checkbox arrays lost their option labels and joined without spaces
+  (`"a,b"` rather than `"Apples, Bananas"`), and booleans read as `"true"`.
+  A shared `formatFieldValue` now handles files, arrays, booleans and dates
+- The file picker button and file chips still used the pre-redesign palette
+  (`#FAFAFA`, `#555`, `#999`, `#D1D5DB`) and now read from the theme tokens
+
+### Types
+
+- `MessageAttachment.label` — the field label a file came from, shown as a muted
+  prefix so a summary with several file fields stays unambiguous
+
+### Exports
+
+- `formatFieldValue`, `filesFromValue`, `truncateMiddle`
+
+---
+
+## v1.27.0 — Slash Command Menu
+
+### Features
+
+- **Autocomplete menu for `/commands`.** Typing `/` at the start of an empty
+  message opens a list above the composer that filters as you type
+  - `↑`/`↓` move, `Enter`/`Tab` runs, `Esc` dismisses, click runs
+  - Matches are ranked: name prefix, then alias, then substring
+  - Closes as soon as you type a space, so it never covers a real message
+  - Selecting sends `/name` through the normal pipeline — the same path as
+    typing it by hand, so there is no second execution route to keep in sync
+  - Disable with `enableSlashCommandMenu={false}`; commands still work typed in full
+  - Wired as a `combobox` with `aria-expanded`/`aria-activedescendant`, and the
+    highlighted row is scrolled into view during keyboard navigation
+- **`slashCommands` prop** — custom commands with `name`, `description`, `icon`,
+  `aliases`, `hidden` and a `handler`
+  - `handler` receives `SlashCommandContext`: `addBotMessage`, `addSystemMessage`,
+    `sendMessage`, `goToStep`, `goBack`, `restart`, `data`, and `args`
+  - `args` is the text after the command name — `/echo hi there` gives `'hi there'`
+  - A custom command whose `name` matches a built-in replaces it, so `/help`
+    can be overridden
+- **`/help` now lists custom commands**, not just the four built-ins
+- **`SlashCommandMenu` component** and the registry helpers
+  (`BUILT_IN_COMMANDS`, `resolveCommands`, `parseCommand`, `commandMenuQuery`,
+  `filterCommands`) are exported, so a custom `input` slot can render its own menu
+
+### Fixes
+
+- Commands were matched by exact string against the whole input, so any command
+  with arguments fell through to "Unknown command". They are parsed into a name
+  and `args` now
+- The Slash Commands demo wrote its messages with `**bold**` but never enabled
+  `markdown`, so the asterisks rendered literally
+
+### Types
+
+- `SlashCommand`, `SlashCommandContext`
+- `ChatBotProps.slashCommands`, `ChatBotProps.enableSlashCommandMenu`
+
+### Demos
+
+- Slash Commands demo now has three custom commands — `/agent`, `/echo`
+  (argument handling) and `/status` (reads collected data, with a `data` alias)
+
+---
+
+## v1.26.0 — Home Screen, Auto Colour Mode & UI Redesign
+
+### Features
+
+- **`homeScreen` prop** — the default screen shown when the widget opens
+  - `actions[]` — icon rows, each with `label`, `description`, `icon`, `iconBackground`, `accessory`, `disabled`
+  - A row routes via `onSelect`, `message`, `stepId`, or `href` (rendered as a real `<a target="_blank">`)
+  - `sections[]` — **component shell**: drop your own component into a card that matches the action list, or `shell: false` to render it bare; `placement: 'above' | 'below'`
+  - Pass a component (not an element) and it receives `HomeScreenContext` as props, so hooks work normally inside it
+  - `greeting`, `tagline`, `avatar`, `cta`, `masthead`, `enabled`
+  - Takes precedence over `customizeChat.welcomeScreen`, which keeps working
+- **`customizeChat.homeScreen`** — replace the whole screen; receives `{ config, ctx }`
+- **`callbacks.onHomeAction`** — fires with an action's `id` when a row is chosen
+- **`theme.mode: 'auto'`** — follows the visitor's `prefers-color-scheme` and switches live mid-session, no reload. SSR-safe: renders light on the server and corrects on hydration
+- **`useColorScheme(mode)`** hook, plus `prefersDarkScheme()`, `onColorSchemeChange(fn)` and `resolveColorMode(mode)` for non-React code
+
+### UI redesign
+
+Restyled the existing components rather than adding parallel ones. Values were
+read from a live Messenger's computed styles, not estimated.
+
+- **Typography** — `typography` tokens with absolute line heights (`title` 14/600/15.4, `body` 14/400/19.6, `meta` 12/400/12, …). Default font stack is now the platform UI face (`system-ui`, …); the bundled Inter webfont import is gone, removing a network round-trip and the flash of unstyled text
+- **Motion** — `motion` tokens on one decelerating curve, `cubic-bezier(0.23, 1, 0.32, 1)`: `panel` 320ms, `enter` 200ms, `surface` 150ms, `control` 200ms, `icon` 300ms
+- **Window now animates out**, not just in — driven by the `isOpen` transition, so it plays however the chat was closed
+- **Launcher** — 48px, docked 20px from the corner; its two marks crossfade with a quarter turn instead of hard-swapping. The infinite pulse is gone
+- **Composer** — card layout: autogrowing textarea above a tool row with a round send button
+- Bubbles use a uniform 20px radius; header, quick replies, branding, typing indicator and form fields all moved onto shared neutral tokens
+- Respects `prefers-reduced-motion: reduce` — animated elements carry `data-cb-animate` and collapse to near-zero duration
+- Unread badge on the launcher, counting messages that arrive while it's closed
+
+### Fixes
+
+- **Header ink is derived, not assumed.** Setting a coloured `headerBg` without `headerText` used to keep the mode's ink — a mid-tone brand colour could land at 1.99:1. Both candidates are now scored with the WCAG formula and the better one wins
+- **Dark mode launcher was invisible** — a black icon on a black circle, because the accent stayed dark. The accent inverts in dark mode and launcher/send/monogram ink derive from it
+- **Launcher notification had no entrance animation.** It referenced a `cb-notif-in` keyframe that was never defined, so the animation silently did nothing
+- **Launcher notification ink ignored a custom `backgroundColor`**, staying keyed to `isDark`. A dark brand colour in light mode gave 1.00:1 — invisible text. All layers now derive from the surface via `inkLayers()`
+- Notification borders were 0.05–0.06 alpha (1.19:1, effectively absent) and light-mode muted text was 3.95:1, under the 4.5 floor
+- **Closing via the header ✕ skipped the exit animation**, since it toggles through `useChat()` and never reached the root handler
+- **A `stepId` home action injected the flow's start step on top of the target step.** Stepping the flow explicitly now marks it started
+- **The widget inherited the host page's text colour** — anything using `color: inherit`, including user-supplied section components, picked up `body { color }`. `styles.root` now anchors the cascade
+- A home-screen slot component was invoked as a plain function instead of rendered, which breaks the hooks contract. It goes through `createElement` now
+- Pinned home-screen CTA covered the end of the scrolling content
+
+### Types
+
+- `HomeScreenConfig`, `HomeScreenAction`, `HomeScreenSection`, `HomeScreenCta`, `HomeScreenContext`, `HomeScreenSlotProps`
+- `ChatColorMode`; `ChatTheme.mode` accepts `'auto'`
+- **`ChatStyles` is now exported** — slot components receive it as `styles`, but it was impossible to import and annotate
+- New exports: `typography`, `motion`, `neutrals`, `headerInk`, `contrastInk`, `inkLayers`, `HomeScreen`
+
+### Demos
+
+- **New demo**: Home Screen — five icon actions, a custom accessory, a shelled section using `useState`, and a bare `shell: false` section
+- Demo app now follows the OS colour scheme (`mode: 'auto'`) and no longer pins a hardcoded green theme, so it shows the real defaults
+- Fixed type errors in the Markdown Rendering demo, which used a `conditions[]` step API that does not exist — quick replies carry `next` directly — and was missing `startStep`
+- Fixed the Customize Chat demo's bubble slot typing
+
 ---
 
 ## v1.8.0 — Live Agent (WebSocket / Socket.IO)

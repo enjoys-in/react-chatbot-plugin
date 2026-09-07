@@ -15,6 +15,10 @@ All exported types, components, and utilities.
 | `MessageList` | Scrollable message list |
 | `QuickReplies` | Quick reply buttons |
 | `TypingIndicator` | Typing animation |
+| `HomeScreen` | Default screen: icon actions + component shells |
+| `BottomNav` | Bottom tab bar for the multi-screen shell |
+| `LauncherNotification` | Proactive bubble above the launcher |
+| `SlashCommandMenu` | `/command` autocomplete list |
 | `WelcomeScreen` | Welcome overlay |
 | `LoginScreen` | Pre-chat login form |
 | `Branding` | "Powered by" footer |
@@ -52,14 +56,28 @@ All exported types, components, and utilities.
 | `useChat` | Main chat logic hook |
 | `ChatContext` | React context |
 | `useChatContext` | Context hook |
+| `useColorScheme` | Resolve `'auto'` against the OS and re-render on change |
+| `useLiveAgent` | Live-agent connection state and actions |
+| `createHeadlessBot` | Run the engine and plugins with no UI |
+| `createEventBus` | Standalone pub/sub bus |
+| `renderMarkdown` | Render the supported markdown subset to React nodes |
 
 ## Theme Utilities
 
 | Export | Description |
 |--------|-------------|
-| `resolveTheme` | Merge user theme with defaults |
+| `resolveTheme` | Merge user theme with defaults; collapses `mode: 'auto'` |
 | `buildStyles` | Generate component styles from theme |
 | `buildCSSVariables` | Generate CSS variables from theme |
+| `typography` | Type-scale tokens (`title`, `body`, `meta`, …) |
+| `motion` | Motion tokens (`panel`, `enter`, `surface`, `control`, `icon`) |
+| `neutrals` | Ink, hairline and surface values for a mode |
+| `headerInk` | Subtitle/icon/hover ink for the header surface |
+| `contrastInk` | Highest-contrast ink for a given background |
+| `inkLayers` | Full ink set (primary/muted/border/plate) for any surface |
+| `resolveColorMode` | Collapse `'auto'` to `'light' \| 'dark'` |
+| `prefersDarkScheme` | Read `prefers-color-scheme` (SSR-safe) |
+| `onColorSchemeChange` | Subscribe to scheme changes; returns unsubscribe |
 
 ## Plugins
 
@@ -95,6 +113,31 @@ All exported types, components, and utilities.
 | `uploadPlugin` | File upload to external storage |
 | `debugPlugin` | Debug state on `window.__chatbotDebug` |
 | `devtoolsPlugin` | Visual overlay panel (F2) |
+| `liveAgentPlugin` | Plugin form of the `liveAgent` prop |
+| `whisperPlugin` | Agent-only supervisor notes |
+| `messageSchedulePlugin` | Send messages at a future timestamp |
+| `tagsPlugin` | Tag conversations by topic |
+| `ratingPlugin` | End-of-chat satisfaction survey |
+| `offlinePlugin` | Queue messages offline, flush on reconnect |
+| `proactivePlugin` | Trigger on idle, scroll, exit intent, page load |
+| `personaPlugin` | Switch bot identity, avatar, greeting and flow |
+| `pinPlugin` | Pin important messages |
+| `priorityPlugin` | Conversation urgency and labels |
+| `summaryPlugin` | AI or local conversation recap |
+| `knowledgeBasePlugin` | Inline FAQ/doc search |
+| `translationPlugin` | Real-time message translation |
+| `transcriptExportPlugin` | Download transcript as text/JSON/CSV/HTML |
+| `codeHighlightPlugin` | Syntax-highlighted code blocks with copy |
+| `pollPlugin` | Inline polls with results |
+| `paymentPlugin` | Stripe/Razorpay/custom payment inline |
+| `bookingPlugin` | Calendar slot booking |
+| `locationPlugin` | Share GPS position as a map link |
+| `confettiPlugin` | Celebration burst on an event |
+| `notificationBadgePlugin` | Unread count, sound, OS notification, tab title |
+| `themeTogglePlugin` | In-chat light/dark switch |
+| `voiceCallPlugin` | Real browser voice call via `@enjoys/voice-widget` |
+
+See [Plugins](./plugins.md) for each plugin's options.
 
 ## Types
 
@@ -108,6 +151,9 @@ interface ChatBotProps {
   theme?: ChatTheme;
   style?: ChatStyle;
   loginForm?: FormConfig;
+  homeScreen?: HomeScreenConfig;
+  slashCommands?: SlashCommand[];
+  enableSlashCommandMenu?: boolean;
   callbacks?: ChatCallbacks;
   plugins?: ChatPlugin[];
   initialMessages?: ChatMessage[];
@@ -146,6 +192,7 @@ interface ChatCustomizeSlotMap {
   header: HeaderSlotProps;         // config, component, ctx
   input: InputSlotProps;           // component, ctx
   branding: BrandingSlotProps;     // config, component
+  homeScreen: HomeScreenSlotProps;       // config, ctx, component
   welcomeScreen: WelcomeScreenSlotProps; // content, component
   loginScreen: LoginScreenSlotProps;     // config, component
   launcher: LauncherSlotProps;     // component
@@ -283,6 +330,7 @@ interface ChatCallbacks {
   onError?: (error: Error) => void;
   onEvent?: (event: string, payload?: unknown) => void;
   onUnhandledMessage?: (text: string, context: { currentStepId: string | null }) => void;
+  onHomeAction?: (actionId: string) => void;
 }
 ```
 
@@ -297,6 +345,171 @@ interface ChatRenderContext {
   toggleChat: () => void;
   restartSession: () => void;
   sendMessage: (text: string) => void;
+}
+```
+
+### HomeScreenConfig
+
+```ts
+interface HomeScreenConfig {
+  enabled?: boolean;              // default true
+  greeting?: ReactNode;
+  tagline?: ReactNode;
+  avatar?: string;
+  actions?: HomeScreenAction[];
+  sections?: HomeScreenSection[];
+  cta?: HomeScreenCta | null;     // null removes the button
+  masthead?: boolean;             // paint the greeting with theme.headerBg
+}
+```
+
+### HomeScreenAction
+
+```ts
+interface HomeScreenAction {
+  id: string;
+  label: string;
+  description?: string;
+  icon?: ReactNode;
+  iconBackground?: string;
+  accessory?: ReactNode | null;   // null removes the chevron
+  disabled?: boolean;
+  // Behaviour, in order of precedence:
+  onSelect?: (ctx: HomeScreenContext) => void;
+  message?: string;               // send as the visitor
+  stepId?: string;                // jump the flow to this step
+  href?: string;                  // render an <a target="_blank">
+}
+```
+
+### HomeScreenSection
+
+```ts
+interface HomeScreenSection {
+  id: string;
+  title?: string;
+  /** Element, or a component that receives HomeScreenContext as props. */
+  component: ReactNode | ComponentType<HomeScreenContext>;
+  shell?: boolean;                // default true — wrap in a card
+  placement?: 'above' | 'below';  // default 'below'
+}
+```
+
+### HomeScreenContext
+
+```ts
+interface HomeScreenContext {
+  openChat: () => void;
+  sendMessage: (text: string) => void;
+  goToStep: (stepId: string) => void;
+  data: Record<string, unknown>;
+  close: () => void;
+}
+```
+
+### NavigationConfig
+
+```ts
+interface NavigationConfig {
+  tabs: NavTab[];
+  enabled?: boolean;                      // default true
+  defaultTab?: string;                    // default: first tab, else 'home'
+  onTabChange?: (tabId: string) => void;
+  // Appearance — each falls back to a theme value
+  activeColor?: string;                   // default theme.primaryColor
+  inactiveColor?: string;                 // default muted ink
+  activeBackground?: string;              // default subtle hover plate
+  indicator?: boolean;                    // default false
+  background?: string;                    // default theme surface
+}
+```
+
+### NavTab
+
+```ts
+interface NavTab {
+  id: string;                             // 'home' and 'messages' are built in
+  label: string;
+  icon?: ReactNode;
+  activeIcon?: ReactNode;                 // defaults to `icon`
+  badge?: number | boolean;               // number = count, true = dot
+  component?: ReactNode | ComponentType<HomeScreenContext>;
+}
+```
+
+See [Navigation](./navigation.md) for the shell's behaviour.
+
+### MessageAttachment
+
+```ts
+interface MessageAttachment {
+  name: string;
+  url: string;
+  type: string;
+  size?: number;
+  preview?: string;
+  /** Field label this file came from, e.g. 'ID Document'. */
+  label?: string;
+}
+```
+
+### Value helpers
+
+| Export | Description |
+|--------|-------------|
+| `formatFieldValue(value, optionMap?)` | Readable text for a collected value — handles `FileList`, arrays (with option labels), booleans, dates |
+| `filesFromValue(value)` | `File[]` from a `FileList`, `File`, or `File[]`; empty otherwise |
+| `truncateMiddle(text, max?)` | Shorten from the middle, keeping the extension |
+
+### SlashCommand
+
+```ts
+interface SlashCommand {
+  name: string;                 // without the leading slash
+  description?: string;
+  icon?: ReactNode;
+  aliases?: string[];           // extra filter terms
+  hidden?: boolean;             // typeable but not listed
+  handler?: (ctx: SlashCommandContext) => void | Promise<void>;
+}
+```
+
+A custom command whose `name` matches a built-in replaces it.
+
+### SlashCommandContext
+
+```ts
+interface SlashCommandContext {
+  addBotMessage: (text: string) => void;
+  addSystemMessage: (text: string) => void;
+  sendMessage: (text: string) => void;
+  goToStep: (stepId: string) => void;
+  goBack: () => void;
+  restart: () => void;
+  data: Record<string, unknown>;
+  args: string;                 // text after the command name
+}
+```
+
+### Command helpers
+
+| Export | Description |
+|--------|-------------|
+| `BUILT_IN_COMMANDS` | The four built-ins as `SlashCommand[]` |
+| `resolveCommands(custom?)` | Built-ins merged with custom (custom wins on name) |
+| `parseCommand(text)` | `'/echo hi'` → `{ name: 'echo', args: 'hi' }`, else `null` |
+| `commandMenuQuery(text)` | Menu query for the current value, or `null` when closed |
+| `filterCommands(commands, query)` | Ranked matches: name prefix, alias, then substring |
+
+### ChatTheme (mode)
+
+```ts
+type ChatColorMode = 'light' | 'dark';
+
+interface ChatTheme {
+  // …
+  /** 'auto' follows prefers-color-scheme and switches live. */
+  mode?: ChatColorMode | 'auto';
 }
 ```
 
@@ -459,3 +672,29 @@ interface FormFieldValidation {
   message?: string;
 }
 ```
+
+---
+
+## Other exported types
+
+| Type | Description |
+|------|-------------|
+| `ChatStyles` | The resolved style map slot components receive as `styles` |
+| `ChatColorMode` | `'light' \| 'dark'` — what `'auto'` collapses to |
+| `ChatIconMap` | Icon overrides for the `icons` prop |
+| `HeaderConfig` | `customizeChat.header.config` shape |
+| `BrandingConfig` | `customizeChat.branding.config` shape |
+| `LauncherNotificationConfig` | Proactive launcher bubble config |
+| `LauncherNotificationSlotProps` | Props for a custom launcher-notification slot |
+| `LiveAgentConfig` | Live agent adapter, events and queue wiring |
+| `LiveAgentAdapter` | Transport contract for a custom live-agent backend |
+| `LiveAgentEvents` / `ResolvedLiveAgentEvents` | Event-name map, and the same with defaults applied |
+| `DEFAULT_LIVE_AGENT_EVENTS` | The default event names |
+| `AgentInfo` | Connected agent's identity |
+| `MessageSender` | `'bot' \| 'user' \| 'agent' \| 'system'` |
+| `MarkdownOptions` | Which markdown features are enabled |
+| `FlowMiddleware` | Message interceptor for the `middleware` prop |
+| `FormFieldRenderProps` | Base props shared by every field renderer |
+| `EventBus` / `EventHandler` | `createEventBus()` return type and handler signature |
+| `HeadlessBot` / `HeadlessBotOptions` | `createHeadlessBot()` return type and options |
+| `VoiceCallPluginOptions` | `voiceCallPlugin()` options |

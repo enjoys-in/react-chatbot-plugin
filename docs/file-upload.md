@@ -65,3 +65,46 @@ Forms can include file upload fields:
 ## Demo
 
 See the **File Upload** demo for an interactive example with type restrictions and form-based upload.
+
+## File names in the summary
+
+When a form with a file field is submitted, each uploaded file appears as an
+attachment row on the summary message rather than as text, labelled with the
+field it came from:
+
+```
+Type: ID Document
+📄 Upload File: scan-of-my-nation…   13B
+```
+
+Long names truncate with an ellipsis and show in full on hover — in the summary
+row, the composer's file chips, and the form's file picker button.
+
+The raw values are still on the message as `formData`, and the files themselves
+are on `message.attachments`:
+
+```ts
+interface MessageAttachment {
+  name: string;
+  url: string;      // object URL
+  type: string;
+  size?: number;
+  label?: string;   // e.g. 'ID Document'
+}
+```
+
+### Formatting values yourself
+
+`formatFieldValue` is exported if you build your own summary. It handles the
+cases `String(value)` gets wrong — `FileList`, arrays (with option labels),
+booleans and dates:
+
+```ts
+import { formatFieldValue, filesFromValue, truncateMiddle } from '@enjoys/react-chatbot-plugin';
+
+formatFieldValue(fileList);                       // 'passport.pdf'
+formatFieldValue(['a','b'], optionMap);           // 'Apples, Bananas'
+formatFieldValue(true);                           // 'Yes'
+filesFromValue(value);                            // File[] — FileList | File | File[]
+truncateMiddle('a-very-long-scan.pdf', 20);       // 'a-very-long-s….pdf'
+```

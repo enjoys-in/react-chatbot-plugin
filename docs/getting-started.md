@@ -72,14 +72,16 @@ This renders a chat launcher in the bottom-right corner. Click it to open the ch
 | Feature | Description |
 |---------|-------------|
 | Flow engine | JSON-driven conversation steps |
-| Forms | 15+ field types with validation |
+| Forms | 18 field types with validation |
 | Quick replies | Clickable option buttons |
 | Async actions | API calls with progress updates |
 | Custom components | React widgets in steps |
 | Dynamic routing | Route based on API results |
-| Slash commands | /help, /back, /restart |
-| Theming | Light/dark, CSS variables |
-| Plugins | 30 built-in plugins (analytics, AI, i18n, CRM, etc.) |
+| Slash commands | `/` autocomplete palette; `/help`, `/back`, `/cancel`, `/restart` built in |
+| Home screen | Opening screen with icon actions and your own components |
+| Navigation | Bottom tab bar shell: Home, Messages and your own tabs |
+| Theming | Light/dark/auto colour mode, CSS variables |
+| Plugins | 53 built-in plugins (analytics, AI, i18n, CRM, etc.) |
 | File upload | Drag & drop with preview |
 
 ## Next Steps
