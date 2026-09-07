@@ -12,7 +12,7 @@ export interface FlowStepInput {
   transform?: 'lowercase' | 'uppercase' | 'trim' | 'email';
 }
 
-export interface FlowStep {
+export interface FlowStep<C extends string = string> {
   id: string;
   message?: string;
   messages?: string[];
@@ -23,7 +23,7 @@ export interface FlowStep {
   action?: string;
   condition?: FlowCondition;
   /** Key into ChatBotProps.components — renders a custom React component in this step */
-  component?: string;
+  component?: C;
   /** Free-text input configuration — validates user input before advancing */
   input?: FlowStepInput;
   /** Async action to run when this step is entered (API calls, verification, etc.) */
@@ -31,7 +31,7 @@ export interface FlowStep {
   /** Only show this step when condition is met (conditional rendering) */
   visibleIf?: FlowCondition;
   /** Sub-flow composition — inline another flow's steps */
-  subFlow?: FlowConfig;
+  subFlow?: FlowConfig<C>;
   /** Step to go to after sub-flow completes */
   onSubFlowComplete?: string;
 }
@@ -69,7 +69,7 @@ export interface FlowCondition {
   else: string;
 }
 
-export interface FlowConfig {
+export interface FlowConfig<C extends string = string> {
   startStep: string;
-  steps: FlowStep[];
+  steps: FlowStep<C>[];
 }

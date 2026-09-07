@@ -139,10 +139,13 @@ export interface ChatCallbacks {
 
 // ─── Main Props ──────────────────────────────────────────────────
 
-export interface ChatBotProps {
+export interface ChatBotProps<
+  TC extends Record<string, ComponentType<StepComponentProps>> = Record<string, ComponentType<StepComponentProps>>,
+> {
   theme?: ChatTheme;
   style?: ChatStyle;
-  flow?: FlowConfig;
+  /** JSON conversation flow. When `components` is passed, `step.component` autocompletes to its keys. */
+  flow?: FlowConfig<Extract<keyof TC, string>>;
   loginForm?: FormConfig;
   /**
    * Default screen shown when the widget opens: a greeting, a list of
@@ -196,7 +199,7 @@ export interface ChatBotProps {
   /** File upload configuration */
   fileUpload?: FileUploadConfig;
   /** Map of custom components that can be rendered in flow steps (key = step.component) */
-  components?: Record<string, ComponentType<StepComponentProps>>;
+  components?: TC;
   /** Map of async action handlers (key = step.asyncAction.handler) */
   actionHandlers?: Record<string, (data: Record<string, unknown>, ctx: ActionContext) => Promise<FlowActionResult>>;
   /** Override built-in form field renderers per field type. Each renderer receives strongly-typed props + the default element. */
